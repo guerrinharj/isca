@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,15 +7,105 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+/* Poppins (Google Fonts) — peso regular a bold */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* TWK Burns Ultra — títulos (arquivo local) */
+@font-face {
+    font-family: "TWKBurnsUltra";
+    src: url("/fonts/TWKBurns-Ultra.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Cores como CSS variables (facilita theming) */
+:root {
+    --isca-verde: #104730;
+    --isca-laranja: #ff7e45;
+    --isca-azul: #3b429f;
+    --isca-verde-claro: #73a580;
+    --isca-preto: #1e1e1e;
+    --isca-creme: #ffeecf;
+
+    --bg: var(--isca-preto);
+    --fg: var(--isca-creme);
+    --accent: var(--isca-laranja);
+}
+
+/* Reset suave + base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Poppins, ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+/* Títulos com TWK + tracking levemente negativo */
+h1, h2, h3, .heading, .kv {
+    font-family: "TWKBurnsUltra", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+/* Links e foco acessível */
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+:focus-visible {
+    outline: 2px solid var(--isca-azul);
+    outline-offset: 2px;
+}
+
+/* Botões utilitários (podem virar componentes) */
+.btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-medium shadow-soft transition;
+    background: var(--isca-verde);
+    color: var(--isca-creme);
+}
+.btn:hover {
+    filter: brightness(1.05);
+}
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Cards */
+.card {
+    @apply rounded-2xl shadow-soft p-6;
+    background: #151515;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
 }
