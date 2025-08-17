@@ -1,16 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
+export function createClientService() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY! // <- service_role
+    return createClient(url, key, { auth: { persistSession: false } })
+}
+
 export function createClientAnon() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    return createClient(url, key)
-}
-
-export function createClientService() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-    return createClient(url, key, {
-        auth: { persistSession: false },
-        global: { headers: { 'X-Client-Info': 'isca-api' } },
-    })
+    return createClient(url, key, { auth: { persistSession: false } })
 }
