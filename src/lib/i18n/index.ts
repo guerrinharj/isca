@@ -1,35 +1,28 @@
-import { isLocale, type Locale, defaultLocale } from './locales'
+import { isLocale, defaultLocale, type Locale } from './locales'
 
-export type Messages = Awaited<ReturnType<typeof getMessages>>
+// Os dois arquivos têm o mesmo shape; usamos o de PT como referência de tipo.
+export type Messages = typeof import('./messages/pt').default
 
-const cache = new Map<string, any>()
+const cache = new Map<Locale, Messages>()
 
-export async function getMessages(locale: string) {
-    const key = isLocale(locale) ? locale : defaultLocale
-    if (cache.has(key)) {
-        return cache.get(key)
-    }
-    const dict =
+export async function getMessages(locale: string): Promise<Messages> {
+    const key: Locale = isLocale(locale) ? locale : defaultLocale
+
+    const cached = cache.get(key)
+    if (cached) return cached
+
+    const dict: Messages =
         key === 'pt'
             ? (await import('./messages/pt')).default
             : (await import('./messages/en')).default
+
     cache.set(key, dict)
     return dict
 }
 
-/** Helpers opcionais de formatação local */
-export function formatCurrency(value: number, locale: Locale = 'pt', currency: 'BRL' | 'USD' = 'BRL') {
+export function formatCurrencyBRL(value: number, locale: Locale = 'pt'): string {
     return new Intl.NumberFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
         style: 'currency',
-        currency,
-        maximumFractionDigits: 2,
+        currency: 'BRL',
     }).format(value)
-}
-
-export function formatDateTime(date: Date | string, locale: Locale = 'pt') {
-    const d = typeof date === 'string' ? new Date(date) : date
-    return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(d)
 }

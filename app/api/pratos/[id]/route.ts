@@ -1,21 +1,28 @@
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 
-type Params = { params: { id: string } }
-
-export async function GET(_: Request, { params }: Params) {
-    const prato = await prisma.prato.findUnique({ where: { id: params.id } })
+export async function GET(
+    _req: Request,
+    context: { params: Promise<{ id: string }> }
+) {
+    const { id } = await context.params
+    const prato = await prisma.prato.findUnique({ where: { id } })
     if (!prato) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ prato })
 }
 
-export async function PUT(req: Request, { params }: Params) {
+export async function PUT(
+    req: Request,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
         await requireAdmin()
+        const { id } = await context.params
         const body = await req.json()
         const prato = await prisma.prato.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 nome: body.nome,
                 preco: body.preco,
@@ -26,27 +33,31 @@ export async function PUT(req: Request, { params }: Params) {
             },
         })
         return NextResponse.json({ prato })
-    } catch (err: any) {
-        if (err?.message === 'UNAUTHORIZED') {
+    } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        if (err?.code === 'P2025') {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
             return NextResponse.json({ error: 'Not found' }, { status: 404 })
         }
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
 
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(
+    _req: Request,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
         await requireAdmin()
-        await prisma.prato.delete({ where: { id: params.id } })
-        return NextResponse.json({ ok: true })
-    } catch (err: any) {
-        if (err?.message === 'UNAUTHORIZED') {
+        const { id } = await context.params
+        await prisma.prato.delete({ where: { id } })
+        return new Response(null, { status: 204 })
+    } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        if (err?.code === 'P2025') {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
             return NextResponse.json({ error: 'Not found' }, { status: 404 })
         }
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
