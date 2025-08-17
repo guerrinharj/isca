@@ -1,4 +1,3 @@
-// app/api/auth/login/route.ts
 import { NextResponse } from 'next/server'
 import { verifyPassword, SESSION_COOKIE } from '@/lib/auth'
 import { createClientService } from '@/lib/supabase'
@@ -33,7 +32,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
-        // 3) create session (explicitly set createdAt)
+        // 3) create session (explicit id + timestamps)
+        const id = crypto.randomUUID()                  // <-- add id
         const token = crypto.randomBytes(32).toString('hex')
         const now = new Date()
         const expiresAt = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30) // +30d
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
             .from('sessions')
             .insert([
                 {
+                    id,                               // <-- include id
                     userId: user.id,
                     token,
                     ip,
