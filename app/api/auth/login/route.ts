@@ -4,15 +4,11 @@ import { verifyPassword, SESSION_COOKIE } from '@/lib/auth'
 import { createClientService } from '@/lib/supabase'
 import crypto from 'crypto'
 
-type Body = {
-    email?: string
-    password?: string
-}
+type Body = { email?: string; password?: string }
 
 export async function POST(req: Request) {
     try {
         const { email, password } = (await req.json()) as Body
-
         if (!email || !password) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
@@ -20,6 +16,7 @@ export async function POST(req: Request) {
         const supabase = createClientService()
         const normalizedEmail = String(email).toLowerCase().trim()
 
+        // 1) find user
         const { data: user, error: findErr } = await supabase
             .from('users')
             .select('id, name, email, password, role')
@@ -30,14 +27,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
-
-        const ok = await verifyPassword(password, user.password as string)
+        // 2) verify password
+        const ok = await verifyPassword(password, user.password)
         if (!ok) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
+        // 3) create session (explicitly set createdAt)
         const token = crypto.randomBytes(32).toString('hex')
-        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 dias
+        const now = new Date()
+        const expiresAt = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30) // +30d
 
         const ip =
             req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
@@ -45,29 +44,35 @@ export async function POST(req: Request) {
             null
         const userAgent = req.headers.get('user-agent') ?? null
 
-        const { error: insertErr } = await supabase.from('sessions').insert([
-            {
-                user_id: user.id,
-                token,
-                ip,
-                userAgent,
-                expires_at: expiresAt.toISOString(),
-            },
-        ])
+        const { error: insertErr } = await supabase
+            .from('sessions')
+            .insert([
+                {
+                    userId: user.id,
+                    token,
+                    ip,
+                    userAgent,
+                    createdAt: now.toISOString(),
+                    expiresAt: expiresAt.toISOString(),
+                },
+            ])
 
         if (insertErr) {
-            // Log detalhado no server; resposta com detalhe ajuda a depurar
-            console.error('SESSION_INSERT_ERROR', insertErr)
             return NextResponse.json(
                 { error: 'Internal error', detail: insertErr.message },
                 { status: 500 }
             )
         }
 
-        // 4) Responder e setar cookie httpOnly
+        // 4) cookie + response
         const res = NextResponse.json({
             ok: true,
-            user: { id: user.id, name: user.name, email: user.email, role: user.role },
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
         })
 
         res.cookies.set(SESSION_COOKIE, token, {
@@ -79,19 +84,7 @@ export async function POST(req: Request) {
         })
 
         return res
-    } catch (err: unknown) {
-        // Expor detalhes só durante depuração
-        const message =
-            err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error'
-        console.error('LOGIN_ERROR', err)
-        return NextResponse.json(
-            {
-                error: 'Internal error',
-                detail: message,
-                // Remova o stack em produção se preferir
-                stack: process.env.NODE_ENV === 'development' && err instanceof Error ? err.stack : undefined,
-            },
-            { status: 500 }
-        )
+    } catch (err) {
+        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
