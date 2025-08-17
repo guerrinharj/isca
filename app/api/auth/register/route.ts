@@ -11,8 +11,12 @@ export async function POST(req: Request) {
         const { name = '', email = '', password = '' } = (await req.json()) as RegisterBody
         const n = name.trim()
         const e = email.trim().toLowerCase()
-        if (!n || !e || !password) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
-        if (!isValidEmail(e)) return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+        if (!n || !e || !password) {
+            return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+        }
+        if (!isValidEmail(e)) {
+            return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+        }
 
         const supabase = createClientService()
 
@@ -21,23 +25,40 @@ export async function POST(req: Request) {
             .select('id')
             .eq('email', e)
             .maybeSingle()
-        if (findErr) return NextResponse.json({ error: `Find failed: ${findErr.message}` }, { status: 500 })
-        if (existing) return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
+        if (findErr) {
+            return NextResponse.json({ error: `Find failed: ${findErr.message}` }, { status: 500 })
+        }
+        if (existing) {
+            return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
+        }
 
         const passwordHash = await hashPassword(password)
 
         const id = crypto.randomUUID()
+        const now = new Date().toISOString()
 
         const { data: user, error: insertErr } = await supabase
             .from('users')
-            .insert([{ id, name: n, email: e, password: passwordHash, role: 'USER' }])
+            .insert([
+                {
+                    id,
+                    name: n,
+                    email: e,
+                    password: passwordHash,
+                    role: 'USER',
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            ])
             .select('id, name, email, role')
             .single()
 
-        if (insertErr) return NextResponse.json({ error: `Insert failed: ${insertErr.message}` }, { status: 500 })
+        if (insertErr) {
+            return NextResponse.json({ error: `Insert failed: ${insertErr.message}` }, { status: 500 })
+        }
 
         return NextResponse.json({ user }, { status: 201 })
-    } catch (err) {
+    } catch {
         return NextResponse.json({ error: 'Internal error (unhandled)' }, { status: 500 })
     }
 }
