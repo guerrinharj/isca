@@ -1,6 +1,7 @@
-import { prisma } from '@/lib/prisma'
-import { hashPassword } from '@/lib/auth'
+// app/api/auth/register/route.ts
 import { NextResponse } from 'next/server'
+import { createClientService } from '@/lib/supabase'
+import { hashPassword } from '@/lib/auth'
 
 type RegisterBody = {
     name?: string
@@ -26,25 +27,48 @@ export async function POST(req: Request) {
         if (!isValidEmail(email)) {
             return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
         }
-        // Nunca permitir elevar role por API pública — admin vem do seed
-        // (ignorar qualquer "role" enviado)
-        const exists = await prisma.user.findUnique({ where: { email } })
-        if (exists) {
+
+        const supabase = createClientService()
+
+        // Existe?
+        const { data: existing, error: findErr } = await supabase
+            .from('users') // tabela renomeada
+            .select('id')
+            .eq('email', email)
+            .maybeSingle()
+
+        if (findErr) {
+            console.error('REGISTER_FIND_ERROR', findErr)
+            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        }
+        if (existing) {
             return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
         }
 
+        // Cria
         const passwordHash = await hashPassword(password)
-        const user = await prisma.user.create({
-            data: { name, email, password: passwordHash, role: 'USER' },
-            select: { id: true, name: true, email: true, role: true, createdAt: true },
-        })
+
+        const { data: user, error: insertErr } = await supabase
+            .from('users')
+            .insert([
+                {
+                    name,
+                    email,
+                    password: passwordHash,
+                    role: 'USER',
+                },
+            ])
+            .select('id, name, email, role, createdAt') // <-- camelCase certo
+            .single()
+
+        if (insertErr) {
+            console.error('REGISTER_INSERT_ERROR', insertErr)
+            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        }
 
         return NextResponse.json({ user }, { status: 201 })
-    } catch {
-        // Prisma unique constraint race (fallback)
-        // Se quiser tratar estritamente:
-        // import { Prisma } from '@prisma/client'
-        // if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {...}
+    } catch (err) {
+        console.error('REGISTER_UNHANDLED', err)
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
