@@ -1,40 +1,62 @@
-import { prisma } from '@/lib/prisma'
-import { requireAdmin } from '@/lib/auth'
+// app/api/reservas/route.ts
 import { NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
+import { createClientService } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/auth'
+
+type PostBody = {
+    nome?: string
+    data?: string
+    email?: string
+    telefone?: string
+    quantity?: number
+}
+
+function isISODateValid(value: string) {
+    const d = new Date(value)
+    return !Number.isNaN(d.getTime())
+}
 
 export async function POST(req: Request) {
     try {
-        const body = (await req.json()) as {
-            nome?: string
-            data?: string
-            email?: string
-            telefone?: string
-            quantity?: number
-        }
+        const body = (await req.json()) as PostBody
+        const nome = (body.nome ?? '').trim()
+        const email = (body.email ?? '').trim().toLowerCase()
+        const telefone = (body.telefone ?? '').trim()
+        const quantity = body.quantity
 
-        const { nome, data, email, telefone, quantity } = body
-        if (!nome || !data || !email || !telefone || typeof quantity !== 'number') {
+        if (!nome || !email || !telefone || typeof quantity !== 'number' || !body.data) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
-
-        const when = new Date(data)
-        if (Number.isNaN(when.getTime())) {
+        if (!isISODateValid(body.data)) {
             return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
         }
 
-        const reserva = await prisma.reserva.create({
-            data: {
-                nome,
-                data: when,
-                email,
-                telefone,
-                quantity,
-            },
-        })
+        const when = new Date(body.data).toISOString()
+        const supabase = createClientService()
+
+        const { data: reserva, error } = await supabase
+            .from('Reserva')
+            .insert([
+                {
+                    nome,
+                    email,
+                    telefone,
+                    quantity,
+                    data: when,
+                    is_confirmed: false,
+                },
+            ])
+            .select('*')
+            .single()
+
+        if (error) {
+            console.error('RESERVA_POST_ERROR', error)
+            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        }
 
         return NextResponse.json({ reserva }, { status: 201 })
-    } catch {
+    } catch (err) {
+        console.error('RESERVA_POST_UNHANDLED', err)
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
@@ -48,37 +70,34 @@ export async function GET(req: Request) {
         const to = url.searchParams.get('to')
         const confirmed = url.searchParams.get('confirmed')
 
-        const where: Prisma.ReservaWhereInput = {}
+        const supabase = createClientService()
+        let query = supabase.from('Reserva').select('*')
 
-        if (from || to) {
-            const range: Prisma.DateTimeFilter = {}
-            if (from) {
-                const d = new Date(from)
-                if (!Number.isNaN(d.getTime())) range.gte = d
-            }
-            if (to) {
-                const d = new Date(to)
-                if (!Number.isNaN(d.getTime())) range.lte = d
-            }
-            if (Object.keys(range).length) where.data = range
+        if (from && isISODateValid(from)) {
+            query = query.gte('data', new Date(from).toISOString())
+        }
+        if (to && isISODateValid(to)) {
+            query = query.lte('data', new Date(to).toISOString())
+        }
+        if (confirmed === 'true') {
+            query = query.eq('is_confirmed', true)
+        } else if (confirmed === 'false') {
+            query = query.eq('is_confirmed', false)
         }
 
-        if (confirmed === 'true') where.is_confirmed = true
-        if (confirmed === 'false') where.is_confirmed = false
+        const { data: reservas, error } = await query.order('data', { ascending: true })
 
-        const reservas = await prisma.reserva.findMany({
-            where,
-            orderBy: { data: 'asc' },
-        })
+        if (error) {
+            console.error('RESERVA_GET_ERROR', error)
+            return NextResponse.json({ error: 'Database error' }, { status: 500 })
+        }
 
         return NextResponse.json({ reservas })
-    } catch (err: unknown) {
+    } catch (err) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return NextResponse.json({ error: 'Database error' }, { status: 500 })
-        }
+        console.error('RESERVA_GET_UNHANDLED', err)
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
