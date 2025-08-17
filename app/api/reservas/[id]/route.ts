@@ -1,44 +1,29 @@
 // app/api/reservas/[id]/route.ts
 import { NextResponse } from 'next/server'
-import { createClientService } from '@/lib/supabase'
+import { Prisma } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 
-type Ctx = { params: Promise<{ id: string }> }
+type RouteContext = { params: Promise<{ id: string }> }
 
-// GET /api/reservas/:id  (admin)
-export async function GET(_req: Request, context: Ctx) {
+export async function GET(_req: Request, context: RouteContext) {
     try {
         await requireAdmin()
         const { id } = await context.params
-        const supabase = createClientService()
-
-        const { data: reserva, error } = await supabase
-            .from('Reserva')
-            .select('*')
-            .eq('id', id)
-            .single()
-
-        if (error) {
-            // PGRST116 = No rows found
-            if ((error as any).code === 'PGRST116') {
-                return NextResponse.json({ error: 'Not found' }, { status: 404 })
-            }
-            console.error('RESERVA_GET_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        const reserva = await prisma.reserva.findUnique({ where: { id } })
+        if (!reserva) {
+            return NextResponse.json({ error: 'Not found' }, { status: 404 })
         }
-
         return NextResponse.json({ reserva })
-    } catch (err) {
+    } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        console.error('RESERVA_GET_UNHANDLED', err)
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
 
-// PUT /api/reservas/:id  (admin)
-export async function PUT(req: Request, context: Ctx) {
+export async function PUT(req: Request, context: RouteContext) {
     try {
         await requireAdmin()
         const { id } = await context.params
@@ -51,79 +36,54 @@ export async function PUT(req: Request, context: Ctx) {
             data: string
         }>
 
-        // Monta objeto de updates somente com campos válidos
-        const updates: Record<string, unknown> = {}
-        if (typeof body.nome === 'string') updates.nome = body.nome
-        if (typeof body.email === 'string') updates.email = body.email
-        if (typeof body.telefone === 'string') updates.telefone = body.telefone
-        if (typeof body.quantity === 'number' && Number.isFinite(body.quantity)) {
-            updates.quantity = body.quantity
-        }
-        if (typeof body.is_confirmed === 'boolean') updates.is_confirmed = body.is_confirmed
+        const data: {
+            nome?: string
+            email?: string
+            telefone?: string
+            quantity?: number
+            is_confirmed?: boolean
+            data?: Date
+        } = {}
+
+        if (typeof body.nome === 'string') data.nome = body.nome
+        if (typeof body.email === 'string') data.email = body.email
+        if (typeof body.telefone === 'string') data.telefone = body.telefone
+        if (typeof body.quantity === 'number' && Number.isFinite(body.quantity)) data.quantity = body.quantity
+        if (typeof body.is_confirmed === 'boolean') data.is_confirmed = body.is_confirmed
         if (typeof body.data === 'string') {
             const when = new Date(body.data)
             if (Number.isNaN(when.getTime())) {
                 return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
             }
-            updates.data = when.toISOString()
+            data.data = when
         }
 
-        if (Object.keys(updates).length === 0) {
-            return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
-        }
-
-        const supabase = createClientService()
-        const { data: reserva, error } = await supabase
-            .from('Reserva')
-            .update(updates)
-            .eq('id', id)
-            .select('*')
-            .single()
-
-        if (error) {
-            if ((error as any).code === 'PGRST116') {
-                return NextResponse.json({ error: 'Not found' }, { status: 404 })
-            }
-            console.error('RESERVA_PUT_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
-        }
-
+        const reserva = await prisma.reserva.update({ where: { id }, data })
         return NextResponse.json({ reserva })
-    } catch (err) {
+    } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        console.error('RESERVA_PUT_UNHANDLED', err)
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+            return NextResponse.json({ error: 'Not found' }, { status: 404 })
+        }
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
 
-// DELETE /api/reservas/:id  (admin)
-export async function DELETE(_req: Request, context: Ctx) {
+export async function DELETE(_req: Request, context: RouteContext) {
     try {
         await requireAdmin()
         const { id } = await context.params
-        const supabase = createClientService()
-
-        const { error } = await supabase
-            .from('Reserva')
-            .delete()
-            .eq('id', id)
-
-        if (error) {
-            if ((error as any).code === 'PGRST116') {
-                return NextResponse.json({ error: 'Not found' }, { status: 404 })
-            }
-            console.error('RESERVA_DELETE_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
-        }
-
+        await prisma.reserva.delete({ where: { id } })
         return new Response(null, { status: 204 })
-    } catch (err) {
+    } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        console.error('RESERVA_DELETE_UNHANDLED', err)
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+            return NextResponse.json({ error: 'Not found' }, { status: 404 })
+        }
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
