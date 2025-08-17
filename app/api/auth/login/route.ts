@@ -20,7 +20,6 @@ export async function POST(req: Request) {
         const supabase = createClientService()
         const normalizedEmail = String(email).toLowerCase().trim()
 
-        // 1) Buscar usuário
         const { data: user, error: findErr } = await supabase
             .from('users')
             .select('id, name, email, password, role')
@@ -28,17 +27,15 @@ export async function POST(req: Request) {
             .single()
 
         if (findErr || !user) {
-            // Não revelar qual campo falhou
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
-        // 2) Verificar senha (hash Bcrypt salvo em users.password)
+
         const ok = await verifyPassword(password, user.password as string)
         if (!ok) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
-        // 3) Criar sessão
         const token = crypto.randomBytes(32).toString('hex')
         const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 dias
 
@@ -48,9 +45,6 @@ export async function POST(req: Request) {
             null
         const userAgent = req.headers.get('user-agent') ?? null
 
-        // Atenção aos nomes das colunas na tabela sessions:
-        // user_id (text), token (text), ip (text), userAgent (text),
-        // expires_at (timestamp), created_at (timestamp default)
         const { error: insertErr } = await supabase.from('sessions').insert([
             {
                 user_id: user.id,
