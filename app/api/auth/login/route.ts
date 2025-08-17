@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { verifyPassword, createSession } from '@/lib/auth'
+import { verifyPassword, createSession, SESSION_COOKIE } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({ where: { email: String(email).toLowerCase() } })
         if (!user) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
@@ -19,8 +19,23 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 
-        await createSession(user.id)
-        return NextResponse.json({ ok: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } })
+        const { token, expiresAt } = await createSession(user.id)
+
+        const res = NextResponse.json({
+            ok: true,
+            user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        })
+
+        // Set cookie on the RESPONSE (not via cookies())
+        res.cookies.set(SESSION_COOKIE, token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: true,
+            path: '/',
+            expires: expiresAt,
+        })
+
+        return res
     } catch {
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }

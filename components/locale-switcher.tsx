@@ -16,7 +16,6 @@ function swapLocale(path: string, nextLocale: Locale) {
 
 export default function LocaleSwitcher({ current }: { current: Locale }) {
     const pathname = usePathname()
-    const other = current === 'pt' ? 'en' : 'pt'
 
     return (
         <div className="flex items-center gap-3 text-sm">
