@@ -1,3 +1,4 @@
+// app/api/auth/register/route.ts
 import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
 import { hashPassword } from '@/lib/auth'
@@ -29,27 +30,24 @@ export async function POST(req: Request) {
 
         const supabase = createClientService()
 
-        // checa se já existe usuário
+        // Existe?
         const { data: existing, error: findErr } = await supabase
-            .from('users')
+            .from('users') // tabela renomeada
             .select('id')
             .eq('email', email)
-            .single()
+            .maybeSingle()
 
-        if (findErr && findErr.code !== 'PGRST116') {
-            // erro inesperado que não é "no rows found"
-            console.error(findErr)
+        if (findErr) {
+            console.error('REGISTER_FIND_ERROR', findErr)
             return NextResponse.json({ error: 'Internal error' }, { status: 500 })
         }
-
         if (existing) {
             return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
         }
 
-        // cria hash da senha
+        // Cria
         const passwordHash = await hashPassword(password)
 
-        // insere no Supabase
         const { data: user, error: insertErr } = await supabase
             .from('users')
             .insert([
@@ -60,17 +58,17 @@ export async function POST(req: Request) {
                     role: 'USER',
                 },
             ])
-            .select('id, name, email, role, created_at')
+            .select('id, name, email, role, createdAt') // <-- camelCase certo
             .single()
 
         if (insertErr) {
-            console.error(insertErr)
+            console.error('REGISTER_INSERT_ERROR', insertErr)
             return NextResponse.json({ error: 'Internal error' }, { status: 500 })
         }
 
         return NextResponse.json({ user }, { status: 201 })
     } catch (err) {
-        console.error(err)
+        console.error('REGISTER_UNHANDLED', err)
         return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
