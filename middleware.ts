@@ -1,33 +1,19 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const locales = ['pt', 'en'] as const
-const defaultLocale = 'pt'
+export function middleware(request: NextRequest) {
+    const authHeader = request.headers.get("x-api-key");
 
-export function middleware(req: NextRequest) {
-    const { pathname } = req.nextUrl
-
-    if (
-        pathname.startsWith('/api') ||
-        pathname.startsWith('/_next') ||
-        pathname.match(/\.(.*)$/)
-    ) {
-        return
+    if (authHeader !== process.env.API_SECRET) {
+        return new NextResponse(
+            JSON.stringify({ error: "Unauthorized" }),
+            { status: 401, headers: { "Content-Type": "application/json" } }
+        );
     }
 
-    const hasLocale = locales.some(
-        (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
-    )
-
-    if (!hasLocale) {
-        const url = req.nextUrl.clone()
-        url.pathname = `/${defaultLocale}${pathname}`
-        return NextResponse.redirect(url)
-    }
-
-    return NextResponse.next()
+    return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/((?!_next|api|.*\\..*).*)'],
-}
+    matcher: ["/api/:path*"],
+};
