@@ -2,12 +2,28 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const authHeader = request.headers.get("x-api-key");
+    const { pathname } = request.nextUrl;
+    const method = request.method;
 
-    if (authHeader !== process.env.API_SECRET) {
+    // ✅ Endpoints públicos: somente GET em /api/pratos e /api/pratos/*
+    const isPratosPath =
+        pathname === '/api/pratos' || pathname.startsWith('/api/pratos/');
+
+    if (method === 'GET' && isPratosPath) {
+        return NextResponse.next();
+    }
+
+    // ✅ Libera preflight CORS
+    if (method === 'OPTIONS') {
+        return NextResponse.next();
+    }
+
+    // 🔒 Demais rotas/métodos exigem x-api-key
+    const apiKey = request.headers.get('x-api-key');
+    if (apiKey !== process.env.API_SECRET) {
         return new NextResponse(
-            JSON.stringify({ error: "Unauthorized" }),
-            { status: 401, headers: { "Content-Type": "application/json" } }
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
         );
     }
 
@@ -15,5 +31,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/api/:path*"],
+    matcher: ['/api/:path*'],
 };

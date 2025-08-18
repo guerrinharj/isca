@@ -3,12 +3,10 @@ import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
 import { requireAdmin } from '@/lib/auth'
 
-// Next 15: params é uma Promise
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, context: Ctx) {
     try {
-        await requireAdmin()
         const { id } = await context.params
         const supabase = createClientService()
 
