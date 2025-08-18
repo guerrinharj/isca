@@ -34,6 +34,7 @@ export async function PUT(req: Request, context: RouteContext) {
             quantity: number
             is_confirmed: boolean
             data: string
+            message: string
         }>
 
         const data: {
@@ -43,6 +44,7 @@ export async function PUT(req: Request, context: RouteContext) {
             quantity?: number
             is_confirmed?: boolean
             data?: Date
+            message?: string
         } = {}
 
         if (typeof body.nome === 'string') data.nome = body.nome
@@ -57,6 +59,7 @@ export async function PUT(req: Request, context: RouteContext) {
             }
             data.data = when
         }
+        if (typeof body.message === 'string') data.message = body.message.trim()
 
         const reserva = await prisma.reserva.update({ where: { id }, data })
         return NextResponse.json({ reserva })

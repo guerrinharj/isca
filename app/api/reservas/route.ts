@@ -9,6 +9,7 @@ type PostBody = {
     email?: string
     telefone?: string
     quantity?: number
+    message?: string
 }
 
 function isISODateValid(value: string) {
@@ -23,6 +24,7 @@ export async function POST(req: Request) {
         const email = (body.email ?? '').trim().toLowerCase()
         const telefone = (body.telefone ?? '').trim()
         const quantity = body.quantity
+        const message = (body.message ?? '').trim()
 
         if (!nome || !email || !telefone || typeof quantity !== 'number' || !body.data) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -44,6 +46,7 @@ export async function POST(req: Request) {
                     quantity,
                     data: when,
                     is_confirmed: false,
+                    message: message || null,
                 },
             ])
             .select('*')
