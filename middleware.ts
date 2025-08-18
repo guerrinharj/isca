@@ -5,15 +5,13 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const method = request.method;
 
-    // ✅ Endpoints públicos: somente GET em /api/pratos e /api/pratos/*
     const isPratosPath =
         pathname === '/api/pratos' || pathname.startsWith('/api/pratos/');
 
-    if (method === 'GET' && isPratosPath) {
+    if (isPratosPath) {
         return NextResponse.next();
     }
 
-    // ✅ Libera preflight CORS
     if (method === 'OPTIONS') {
         return NextResponse.next();
     }
