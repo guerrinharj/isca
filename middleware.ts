@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -5,13 +6,16 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const method = request.method;
 
-    const isPratosPath =
-        pathname === '/api/pratos' || pathname.startsWith('/api/pratos/');
+    // ✅ Públicos: todo /api/pratos* e /api/reservas*
+    const isPublicPath =
+        pathname.startsWith('/api/pratos') ||
+        pathname.startsWith('/api/reservas');
 
-    if (isPratosPath) {
+    if (isPublicPath) {
         return NextResponse.next();
     }
 
+    // ✅ Libera preflight CORS
     if (method === 'OPTIONS') {
         return NextResponse.next();
     }
