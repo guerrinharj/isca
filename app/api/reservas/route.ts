@@ -1,7 +1,10 @@
 // app/api/reservas/route.ts
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
-import { requireAdmin } from '@/lib/auth'
+import { requireApiKeyOrAdmin } from '@/lib/auth'
 
 type PostBody = {
     nome?: string
@@ -72,26 +75,20 @@ export async function POST(req: Request) {
         if (error) {
             const cause = extractError(error)
             console.error('RESERVA_POST_ERROR', cause)
-            return NextResponse.json(
-                { error: 'Database insert failed', cause },
-                { status: 500 }
-            )
+            return NextResponse.json({ error: 'Database insert failed', cause }, { status: 500 })
         }
 
         return NextResponse.json({ reserva }, { status: 201 })
     } catch (err: unknown) {
         const cause = extractError(err)
         console.error('RESERVA_POST_UNHANDLED', cause)
-        return NextResponse.json(
-            { error: 'Unhandled error in POST', cause },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: 'Unhandled error in POST', cause }, { status: 500 })
     }
 }
 
 export async function GET(req: Request) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin() // 👈 uses x-api-key or ADMIN session
 
         const url = new URL(req.url)
         const from = url.searchParams.get('from')
@@ -118,10 +115,7 @@ export async function GET(req: Request) {
         if (error) {
             const cause = extractError(error)
             console.error('RESERVA_GET_ERROR', cause)
-            return NextResponse.json(
-                { error: 'Database select failed', cause },
-                { status: 500 }
-            )
+            return NextResponse.json({ error: 'Database select failed', cause }, { status: 500 })
         }
 
         return NextResponse.json({ reservas })
@@ -131,9 +125,6 @@ export async function GET(req: Request) {
         }
         const cause = extractError(err)
         console.error('RESERVA_GET_UNHANDLED', cause)
-        return NextResponse.json(
-            { error: 'Unhandled error in GET', cause },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: 'Unhandled error in GET', cause }, { status: 500 })
     }
 }
