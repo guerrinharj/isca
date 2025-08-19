@@ -17,6 +17,23 @@ function isISODateValid(value: string) {
     return !Number.isNaN(d.getTime())
 }
 
+function extractError(e: unknown): { message: string; code?: string; details?: string } {
+    let message = 'Unknown error'
+    let code: string | undefined
+    let details: string | undefined
+
+    if (typeof e === 'string') {
+        message = e
+    } else if (typeof e === 'object' && e !== null) {
+        const obj = e as Record<string, unknown>
+        if (typeof obj.message === 'string') message = obj.message
+        if (typeof obj.code === 'string') code = obj.code
+        if (typeof obj.details === 'string') details = obj.details
+    }
+
+    return { message, code, details }
+}
+
 export async function POST(req: Request) {
     try {
         const body = (await req.json()) as PostBody
@@ -53,17 +70,20 @@ export async function POST(req: Request) {
             .single()
 
         if (error) {
-            console.error('RESERVA_POST_ERROR', error)
-            // 👇 return full error for debugging
-            return NextResponse.json({ error: 'Database insert failed', details: error }, { status: 500 })
+            const cause = extractError(error)
+            console.error('RESERVA_POST_ERROR', cause)
+            return NextResponse.json(
+                { error: 'Database insert failed', cause },
+                { status: 500 }
+            )
         }
 
         return NextResponse.json({ reserva }, { status: 201 })
-    } catch (err) {
-        console.error('RESERVA_POST_UNHANDLED', err)
-        // 👇 return err.message for debugging
+    } catch (err: unknown) {
+        const cause = extractError(err)
+        console.error('RESERVA_POST_UNHANDLED', cause)
         return NextResponse.json(
-            { error: 'Unhandled error in POST', details: (err as Error).message },
+            { error: 'Unhandled error in POST', cause },
             { status: 500 }
         )
     }
@@ -96,21 +116,24 @@ export async function GET(req: Request) {
         const { data: reservas, error } = await query.order('data', { ascending: true })
 
         if (error) {
-            console.error('RESERVA_GET_ERROR', error)
-            // 👇 include error details
-            return NextResponse.json({ error: 'Database select failed', details: error }, { status: 500 })
+            const cause = extractError(error)
+            console.error('RESERVA_GET_ERROR', cause)
+            return NextResponse.json(
+                { error: 'Database select failed', cause },
+                { status: 500 }
+            )
         }
 
         return NextResponse.json({ reservas })
-    } catch (err) {
+    } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        console.error('RESERVA_GET_UNHANDLED', err)
+        const cause = extractError(err)
+        console.error('RESERVA_GET_UNHANDLED', cause)
         return NextResponse.json(
-            { error: 'Unhandled error in GET', details: (err as Error).message },
+            { error: 'Unhandled error in GET', cause },
             { status: 500 }
         )
     }
 }
-
