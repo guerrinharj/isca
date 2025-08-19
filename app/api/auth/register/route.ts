@@ -2,7 +2,10 @@
 import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
 import { hashPassword } from '@/lib/auth'
-import { randomUUID } from 'crypto' 
+import { randomUUID } from 'crypto'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 type RegisterBody = { name?: string; email?: string; password?: string }
 const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
@@ -31,7 +34,11 @@ export async function POST(req: Request) {
             .maybeSingle()
 
         if (findErr) {
-            return NextResponse.json({ error: `Find failed: ${findErr.message}` }, { status: 500 })
+            console.error('Find error:', findErr)
+            return NextResponse.json(
+                { error: 'Find failed', detail: findErr.message, hint: findErr.details ?? null },
+                { status: 500 }
+            )
         }
         if (existing) {
             return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
@@ -41,7 +48,7 @@ export async function POST(req: Request) {
         const now = new Date().toISOString()
         const passwordHash = await hashPassword(password)
 
-        // Insert new user (columns: id, name, email, password, role, createdAt, updatedAt)
+        // Insert new user
         const { data: user, error: insertErr } = await supabase
             .from('users')
             .insert([
@@ -50,7 +57,7 @@ export async function POST(req: Request) {
                     name: n,
                     email: e,
                     password: passwordHash,
-                    role: 'USER',
+                    role: 'USER', // ⚠️ must exist in your enum/domain, or drop this field
                     createdAt: now,
                     updatedAt: now,
                 },
@@ -59,12 +66,19 @@ export async function POST(req: Request) {
             .single()
 
         if (insertErr) {
-            return NextResponse.json({ error: `Insert failed: ${insertErr.message}` }, { status: 500 })
+            console.error('Insert error:', insertErr)
+            return NextResponse.json(
+                { error: 'Insert failed', detail: insertErr.message, hint: insertErr.details ?? null },
+                { status: 500 }
+            )
         }
 
         return NextResponse.json({ user }, { status: 201 })
-    } catch (err) {
-        return NextResponse.json({ error: 'Internal error (unhandled)' }, { status: 500 })
+    } catch (err: any) {
+        console.error('Unhandled error:', err)
+        return NextResponse.json(
+            { error: 'Internal error (unhandled)', detail: String(err?.message ?? err) },
+            { status: 500 }
+        )
     }
 }
-
