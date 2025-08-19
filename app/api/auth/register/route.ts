@@ -30,36 +30,46 @@ export async function POST(req: Request) {
         const now = new Date().toISOString()
         const passwordHash = await hashPassword(password)
 
-        
         const { data, error } = await supabase
             .from('users')
-            .upsert(
-                [{
+            .upsert([
+                {
                     id,
                     name: n,
                     email: e,
                     password: passwordHash,
-                    role: 'USER',         // remove or set a valid default if your enum differs
+                    role: 'USER', // adjust default if your enum differs
                     createdAt: now,
                     updatedAt: now,
-                }]
-            )
+                },
+            ])
             .select('id, name, email, role')
             .single()
 
         if (error) {
-            console.error('Unhandled error:', error)
+            console.error('REGISTER_INSERT_ERROR', error)
             return NextResponse.json(
-                { error: 'Insert failed', detail: error.message, hint: error.details ?? null },
+                {
+                    error: 'Insert failed',
+                    detail: error.message,
+                    hint: error.details ?? null,
+                },
                 { status: 500 }
             )
         }
 
         return NextResponse.json({ user: data }, { status: 201 })
-    } catch (err: any) {
-        console.error('Unhandled error:', err)
+    } catch (err: unknown) {
+        let detail = 'Unknown error'
+        if (err instanceof Error) {
+            detail = err.message
+        } else if (typeof err === 'string') {
+            detail = err
+        }
+
+        console.error('REGISTER_POST_UNHANDLED', err)
         return NextResponse.json(
-            { error: 'Internal error (unhandled)', detail: String(err?.message ?? err) },
+            { error: 'Internal error (unhandled)', detail },
             { status: 500 }
         )
     }
