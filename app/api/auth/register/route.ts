@@ -26,54 +26,37 @@ export async function POST(req: Request) {
 
         const supabase = createClientService()
 
-        // Check if email already exists
-        const { data: existing, error: findErr } = await supabase
-            .from('users')
-            .select('id')
-            .eq('email', e)
-            .maybeSingle()
-
-        if (findErr) {
-            console.error('Find error:', findErr)
-            return NextResponse.json(
-                { error: 'Find failed', detail: findErr.message, hint: findErr.details ?? null },
-                { status: 500 }
-            )
-        }
-        if (existing) {
-            return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
-        }
-
         const id = randomUUID()
         const now = new Date().toISOString()
         const passwordHash = await hashPassword(password)
 
-        // Insert new user
-        const { data: user, error: insertErr } = await supabase
+        
+        const { data, error } = await supabase
             .from('users')
-            .insert([
-                {
+            .upsert(
+                [{
                     id,
                     name: n,
                     email: e,
                     password: passwordHash,
-                    role: 'USER', // ⚠️ must exist in your enum/domain, or drop this field
+                    role: 'USER',         // remove or set a valid default if your enum differs
                     createdAt: now,
                     updatedAt: now,
-                },
-            ])
+                }],
+                { onConflict: 'email', ignoreDuplicates: true }
+            )
             .select('id, name, email, role')
             .single()
 
-        if (insertErr) {
-            console.error('Insert error:', insertErr)
+        if (error) {
+            console.error('UPSERT error:', error)
             return NextResponse.json(
-                { error: 'Insert failed', detail: insertErr.message, hint: insertErr.details ?? null },
+                { error: 'Insert failed', detail: error.message, hint: error.details ?? null },
                 { status: 500 }
             )
         }
 
-        return NextResponse.json({ user }, { status: 201 })
+        return NextResponse.json({ user: data }, { status: 201 })
     } catch (err: any) {
         console.error('Unhandled error:', err)
         return NextResponse.json(

@@ -1,9 +1,15 @@
+// lib/supabase.ts
 import { createClient } from '@supabase/supabase-js'
 
 export function createClientService() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY! // <- service_role
-    return createClient(url, key, { auth: { persistSession: false } })
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY // <-- service key (bypasses RLS)
+    if (!url || !key) throw new Error('Missing Supabase envs')
+
+    return createClient(url, key, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: { headers: { 'X-Client-Info': 'api-service' } },
+    })
 }
 
 export function createClientAnon() {
