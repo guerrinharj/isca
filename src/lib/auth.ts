@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers'
+import { headers as nextHeaders, cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
@@ -49,7 +49,7 @@ export async function getSessionUser() {
 }
 
 /**
- * Only checks role; throws Error('UNAUTHORIZED') if not admin.
+ * Legacy admin guard (session only).
  */
 export async function requireAdmin() {
     const user = await getSessionUser()
@@ -57,6 +57,25 @@ export async function requireAdmin() {
         throw new Error('UNAUTHORIZED')
     }
     return user
+}
+
+/**
+ * New admin guard:
+ * - If x-api-key matches API_SECRET, authorize immediately (no cookie/DB).
+ * - Otherwise, require an ADMIN user session.
+ */
+export async function requireApiKeyOrAdmin() {
+    const h = await nextHeaders()
+    const apiKey = h.get('x-api-key')
+    if (apiKey && process.env.API_SECRET && apiKey === process.env.API_SECRET) {
+        return { source: 'api-key' } as const
+    }
+
+    const user = await getSessionUser()
+    if (!user || user.role !== 'ADMIN') {
+        throw new Error('UNAUTHORIZED')
+    }
+    return { source: 'session', user } as const
 }
 
 export async function destroySession() {

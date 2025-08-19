@@ -1,7 +1,10 @@
 // app/api/pratos/[id]/route.ts
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
-import { requireAdmin } from '@/lib/auth'
+import { requireApiKeyOrAdmin } from '@/lib/auth'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -36,7 +39,7 @@ export async function GET(_req: Request, context: Ctx) {
 
 export async function PUT(req: Request, context: Ctx) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin() // accept x-api-key OR admin session
         const { id } = await context.params
         const body = await req.json()
         const supabase = createClientService()
@@ -67,7 +70,6 @@ export async function PUT(req: Request, context: Ctx) {
             if (error.code === 'PGRST116') {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 })
             }
-            // Surface useful DB error details
             const cause = {
                 message: typeof error.message === 'string' ? error.message : 'Unknown DB error',
                 code: typeof error.code === 'string' ? error.code : undefined,
@@ -100,10 +102,9 @@ export async function PUT(req: Request, context: Ctx) {
     }
 }
 
-
 export async function DELETE(_req: Request, context: Ctx) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin() // accept x-api-key OR admin session
         const { id } = await context.params
         const supabase = createClientService()
 
@@ -116,8 +117,18 @@ export async function DELETE(_req: Request, context: Ctx) {
             if (error.code === 'PGRST116') {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 })
             }
-            console.error('PRATO_DELETE_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+            const cause = {
+                message: typeof error.message === 'string' ? error.message : 'Unknown DB error',
+                code: typeof error.code === 'string' ? error.code : undefined,
+                details: typeof (error as { details?: unknown }).details === 'string'
+                    ? (error as { details?: string }).details
+                    : undefined,
+                hint: typeof (error as { hint?: unknown }).hint === 'string'
+                    ? (error as { hint?: string }).hint
+                    : undefined,
+            }
+            console.error('PRATO_DELETE_ERROR', cause)
+            return NextResponse.json({ error: 'Delete failed', cause }, { status: 500 })
         }
 
         return new Response(null, { status: 204 })
