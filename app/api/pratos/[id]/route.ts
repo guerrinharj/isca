@@ -1,138 +1,142 @@
-// app/api/reservas/[id]/route.ts
+// app/api/pratos/[id]/route.ts
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
+import { createClientService } from '@/lib/supabase'
 import { requireApiKeyOrAdmin } from '@/lib/auth'
 
-type RouteContext = { params: Promise<{ id: string }> }
+type Ctx = { params: Promise<{ id: string }> }
 
-function extractError(e: unknown) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        return {
-            kind: 'PrismaClientKnownRequestError',
-            code: e.code,
-            message: e.message,
-            meta: e.meta,
-        }
-    }
-    if (e instanceof Prisma.PrismaClientInitializationError) {
-        return {
-            kind: 'PrismaClientInitializationError',
-            message: e.message,
-            errorCode: e.errorCode,
-        }
-    }
-    if (e instanceof Prisma.PrismaClientValidationError) {
-        return {
-            kind: 'PrismaClientValidationError',
-            message: e.message,
-        }
-    }
-    if (e instanceof Error) {
-        return { kind: e.name, message: e.message }
-    }
-    return { kind: 'Unknown', message: String(e) }
-}
-
-export async function GET(_req: Request, context: RouteContext) {
+export async function GET(_req: Request, context: Ctx) {
     try {
-        await requireApiKeyOrAdmin()
         const { id } = await context.params
-        const reserva = await prisma.reserva.findUnique({ where: { id } })
-        if (!reserva) {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 })
+        const supabase = createClientService()
+
+        const { data: prato, error } = await supabase
+            .from('Prato')
+            .select('*')
+            .eq('id', id)
+            .single()
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 })
+            }
+            console.error('PRATO_GET_ERROR', error)
+            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
         }
-        return NextResponse.json({ reserva })
-    } catch (err: unknown) {
+
+        return NextResponse.json({ prato })
+    } catch (err) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        const cause = extractError(err)
-        console.error('RESERVA_ID_GET_UNHANDLED', cause)
-        return NextResponse.json({ error: 'Internal error', cause }, { status: 500 })
+        console.error('PRATO_GET_UNHANDLED', err)
+        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
 
-export async function PUT(req: Request, context: RouteContext) {
+export async function PUT(req: Request, context: Ctx) {
     try {
-        await requireApiKeyOrAdmin()
+        await requireApiKeyOrAdmin() // accept x-api-key OR admin session
         const { id } = await context.params
-        const body = (await req.json()) as Partial<{
-            nome: string
-            email: string
-            telefone: string
-            quantity: number
-            is_confirmed: boolean
-            data: string
-            message: string
-        }>
+        const body = await req.json()
+        const supabase = createClientService()
 
-        const data: {
-            nome?: string
-            email?: string
-            telefone?: string
-            quantity?: number
-            is_confirmed?: boolean
-            data?: Date
-            message?: string
-            updatedAt?: Date
-        } = {}
+        const updates: Record<string, unknown> = {}
+        if (typeof body.nome === 'string') updates.nome = body.nome
+        if (typeof body.preco === 'string') updates.preco = body.preco
+        if (typeof body.descricao === 'string') updates.descricao = body.descricao
+        if (typeof body.descricao_en === 'string') updates.descricao_en = body.descricao_en
+        if (Array.isArray(body.imagens)) updates.imagens = body.imagens as string[]
+        if (typeof body.isActive === 'boolean') updates.isActive = body.isActive
 
-        if (typeof body.nome === 'string') data.nome = body.nome
-        if (typeof body.email === 'string') data.email = body.email
-        if (typeof body.telefone === 'string') data.telefone = body.telefone
-        if (typeof body.quantity === 'number' && Number.isFinite(body.quantity)) data.quantity = body.quantity
-        if (typeof body.is_confirmed === 'boolean') data.is_confirmed = body.is_confirmed
-        if (typeof body.data === 'string') {
-            const when = new Date(body.data)
-            if (Number.isNaN(when.getTime())) {
-                return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
-            }
-            data.data = when
-        }
-        if (typeof body.message === 'string') data.message = body.message.trim()
+        // Keep timestamps sane if your schema enforces NOT NULL
+        updates.updatedAt = new Date().toISOString()
 
-        // keep updatedAt fresh
-        data.updatedAt = new Date()
-
-        if (Object.keys(data).length === 1 && 'updatedAt' in data) {
+        if (Object.keys(updates).length === 1 && 'updatedAt' in updates) {
             return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
         }
 
-        const reserva = await prisma.reserva.update({ where: { id }, data })
-        return NextResponse.json({ reserva })
+        const { data: prato, error } = await supabase
+            .from('Prato')
+            .update(updates)
+            .eq('id', id)
+            .select('*')
+            .single()
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 })
+            }
+            const cause = {
+                message: typeof error.message === 'string' ? error.message : 'Unknown DB error',
+                code: typeof error.code === 'string' ? error.code : undefined,
+                details: typeof (error as { details?: unknown }).details === 'string'
+                    ? (error as { details?: string }).details
+                    : undefined,
+                hint: typeof (error as { hint?: unknown }).hint === 'string'
+                    ? (error as { hint?: string }).hint
+                    : undefined,
+            }
+            console.error('PRATO_PUT_ERROR', cause)
+            return NextResponse.json({ error: 'Update failed', cause }, { status: 500 })
+        }
+
+        return NextResponse.json({ prato })
     } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
-            // record not found
-            return NextResponse.json({ error: 'Not found' }, { status: 404 })
-        }
-        const cause = extractError(err)
-        console.error('RESERVA_ID_PUT_ERROR', cause)
+
+        const cause =
+            err instanceof Error
+                ? { message: err.message, name: err.name }
+                : typeof err === 'string'
+                ? { message: err }
+                : { message: 'Unhandled non-Error exception' }
+
+        console.error('PRATO_PUT_UNHANDLED', cause)
         return NextResponse.json({ error: 'Internal error', cause }, { status: 500 })
     }
 }
 
-export async function DELETE(_req: Request, context: RouteContext) {
+export async function DELETE(_req: Request, context: Ctx) {
     try {
-        await requireApiKeyOrAdmin()
+        await requireApiKeyOrAdmin() // accept x-api-key OR admin session
         const { id } = await context.params
-        await prisma.reserva.delete({ where: { id } })
+        const supabase = createClientService()
+
+        const { error } = await supabase
+            .from('Prato')
+            .delete()
+            .eq('id', id)
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 })
+            }
+            const cause = {
+                message: typeof error.message === 'string' ? error.message : 'Unknown DB error',
+                code: typeof error.code === 'string' ? error.code : undefined,
+                details: typeof (error as { details?: unknown }).details === 'string'
+                    ? (error as { details?: string }).details
+                    : undefined,
+                hint: typeof (error as { hint?: unknown }).hint === 'string'
+                    ? (error as { hint?: string }).hint
+                    : undefined,
+            }
+            console.error('PRATO_DELETE_ERROR', cause)
+            return NextResponse.json({ error: 'Delete failed', cause }, { status: 500 })
+        }
+
         return new Response(null, { status: 204 })
-    } catch (err: unknown) {
+    } catch (err) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 })
-        }
-        const cause = extractError(err)
-        console.error('RESERVA_ID_DELETE_ERROR', cause)
-        return NextResponse.json({ error: 'Internal error', cause }, { status: 500 })
+        console.error('PRATO_DELETE_UNHANDLED', err)
+        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
