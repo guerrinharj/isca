@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             .single()
 
         if (error) {
-            console.error('UPSERT error:', error)
+            console.error('Unhandled error:', error)
             return NextResponse.json(
                 { error: 'Insert failed', detail: error.message, hint: error.details ?? null },
                 { status: 500 }

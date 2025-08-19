@@ -1,37 +1,33 @@
 // middleware.ts
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    const method = request.method;
+    const { pathname } = request.nextUrl
+    const method = request.method
 
-    // ✅ Públicos: todo /api/pratos* e /api/reservas*
-    const isPublicPath =
-        pathname.startsWith('/api/pratos') ||
-        pathname.startsWith('/api/reservas');
+    // ✅ Always allow CORS preflight
+    if (method === 'OPTIONS') return NextResponse.next()
 
-    if (isPublicPath) {
-        return NextResponse.next();
-    }
+    // ✅ Public only for the collection endpoint: GET /api/pratos (with or without trailing slash)
+    const isPublicPratosList =
+        method === 'GET' &&
+        (pathname === '/api/pratos' || pathname === '/api/pratos/')
 
-    // ✅ Libera preflight CORS
-    if (method === 'OPTIONS') {
-        return NextResponse.next();
-    }
+    if (isPublicPratosList) return NextResponse.next()
 
-    // 🔒 Demais rotas/métodos exigem x-api-key
-    const apiKey = request.headers.get('x-api-key');
+    // 🔒 Everything else requires x-api-key
+    const apiKey = request.headers.get('x-api-key')
     if (apiKey !== process.env.API_SECRET) {
-        return new NextResponse(
-            JSON.stringify({ error: 'Unauthorized' }),
-            { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+        })
     }
 
-    return NextResponse.next();
+    return NextResponse.next()
 }
 
 export const config = {
     matcher: ['/api/:path*'],
-};
+}
