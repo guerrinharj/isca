@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Isca
 
-## Getting Started
+Este é um CRM (Customer Relationship Manager) feito em **Next.js** para **Isca Bar**. O objetivo é permitir a criação, visualização, edição e exclusão de reservas (`Reservas`), além de gerenciar Pratos (`Pratos`) e usuários da produtora.
 
-First, run the development server:
+---
 
+## 📁 Estrutura do Projeto
+
+- **Framework:** Next.js (App Router)
+- **Banco de Dados:** Supabase (PostgreSQL gerenciado)
+- **ORM de apoio:** Prisma (usado apenas como schema local)
+- **Estilização:** TailwindCSS
+- **Linguagem:** TypeScript
+- **Deploy recomendado:** Vercel
+
+---
+
+## 🛠️ Supabase + Prisma
+
+Apesar do Prisma estar configurado no projeto com o schema dos modelos (`schema.prisma`), **todas as operações de leitura, escrita e atualização no banco são feitas diretamente via Supabase** (REST API ou client SDK).
+
+- Prisma serve como **referência local de schema** e ajuda no planejamento e geração de tipos.
+- O Supabase é quem efetivamente **armazena os dados** e responde às requisições do app.
+
+---
+
+## 🚀 Instalação e Execução
+
+1. **Clone o repositório**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/seu-usuario/isca.git
+cd isca
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Instale as dependências**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Configure o banco de dados**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edite o arquivo .env e certifique-se de que ele contenha:
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<sua-instancia>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<sua-chave-anon>
+USERNAME=admin
+PASSWORD=senha123
+```
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Rode as migrações e gere o cliente Prisma inicial**
+```bash
+npx prisma migrate dev --name init
+npx prisma generate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Execute o servidor de desenvolvimento**
+```bash
+npm run dev
+```
