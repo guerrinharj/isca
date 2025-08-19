@@ -1,14 +1,17 @@
 // app/api/reservas/[id]/route.ts
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { requireAdmin } from '@/lib/auth'
+import { requireApiKeyOrAdmin } from '@/lib/auth'
 
 type RouteContext = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, context: RouteContext) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin()
         const { id } = await context.params
         const reserva = await prisma.reserva.findUnique({ where: { id } })
         if (!reserva) {
@@ -25,7 +28,7 @@ export async function GET(_req: Request, context: RouteContext) {
 
 export async function PUT(req: Request, context: RouteContext) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin()
         const { id } = await context.params
         const body = (await req.json()) as Partial<{
             nome: string
@@ -76,7 +79,7 @@ export async function PUT(req: Request, context: RouteContext) {
 
 export async function DELETE(_req: Request, context: RouteContext) {
     try {
-        await requireAdmin()
+        await requireApiKeyOrAdmin()
         const { id } = await context.params
         await prisma.reserva.delete({ where: { id } })
         return new Response(null, { status: 204 })
