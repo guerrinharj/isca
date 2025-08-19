@@ -9,12 +9,19 @@ export function middleware(request: NextRequest) {
     // ✅ Always allow CORS preflight
     if (method === 'OPTIONS') return NextResponse.next()
 
-    // ✅ Public only for the collection endpoint: GET /api/pratos (with or without trailing slash)
+    // ✅ Public: GET /api/pratos (with or without trailing slash)
     const isPublicPratosList =
         method === 'GET' &&
         (pathname === '/api/pratos' || pathname === '/api/pratos/')
 
-    if (isPublicPratosList) return NextResponse.next()
+    // ✅ Public: POST /api/reservas (with or without trailing slash)
+    const isPublicReservaCreate =
+        method === 'POST' &&
+        (pathname === '/api/reservas' || pathname === '/api/reservas/')
+
+    if (isPublicPratosList || isPublicReservaCreate) {
+        return NextResponse.next()
+    }
 
     // 🔒 Everything else requires x-api-key
     const apiKey = request.headers.get('x-api-key')
