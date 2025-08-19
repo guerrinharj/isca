@@ -65,7 +65,7 @@ export async function POST(req: Request) {
                     telefone,
                     quantity,
                     data: when,
-                    is_confirmed: false,
+                    is_confirmed: true,
                     message: message || null,
                 },
             ])
