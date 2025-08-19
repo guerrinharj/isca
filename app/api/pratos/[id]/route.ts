@@ -41,7 +41,6 @@ export async function PUT(req: Request, context: Ctx) {
         const body = await req.json()
         const supabase = createClientService()
 
-        // Monta apenas campos presentes (evita sobrescrever com null)
         const updates: Record<string, unknown> = {}
         if (typeof body.nome === 'string') updates.nome = body.nome
         if (typeof body.preco === 'string') updates.preco = body.preco
@@ -50,7 +49,10 @@ export async function PUT(req: Request, context: Ctx) {
         if (Array.isArray(body.imagens)) updates.imagens = body.imagens as string[]
         if (typeof body.isActive === 'boolean') updates.isActive = body.isActive
 
-        if (Object.keys(updates).length === 0) {
+        // Keep timestamps sane if your schema enforces NOT NULL
+        updates.updatedAt = new Date().toISOString()
+
+        if (Object.keys(updates).length === 1 && 'updatedAt' in updates) {
             return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
         }
 
@@ -65,19 +67,39 @@ export async function PUT(req: Request, context: Ctx) {
             if (error.code === 'PGRST116') {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 })
             }
-            console.error('PRATO_PUT_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+            // Surface useful DB error details
+            const cause = {
+                message: typeof error.message === 'string' ? error.message : 'Unknown DB error',
+                code: typeof error.code === 'string' ? error.code : undefined,
+                details: typeof (error as { details?: unknown }).details === 'string'
+                    ? (error as { details?: string }).details
+                    : undefined,
+                hint: typeof (error as { hint?: unknown }).hint === 'string'
+                    ? (error as { hint?: string }).hint
+                    : undefined,
+            }
+            console.error('PRATO_PUT_ERROR', cause)
+            return NextResponse.json({ error: 'Update failed', cause }, { status: 500 })
         }
 
         return NextResponse.json({ prato })
-    } catch (err) {
+    } catch (err: unknown) {
         if (err instanceof Error && err.message === 'UNAUTHORIZED') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-        console.error('PRATO_PUT_UNHANDLED', err)
-        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+
+        const cause =
+            err instanceof Error
+                ? { message: err.message, name: err.name }
+                : typeof err === 'string'
+                ? { message: err }
+                : { message: 'Unhandled non-Error exception' }
+
+        console.error('PRATO_PUT_UNHANDLED', cause)
+        return NextResponse.json({ error: 'Internal error', cause }, { status: 500 })
     }
 }
+
 
 export async function DELETE(_req: Request, context: Ctx) {
     try {
