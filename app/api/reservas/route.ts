@@ -54,13 +54,18 @@ export async function POST(req: Request) {
 
         if (error) {
             console.error('RESERVA_POST_ERROR', error)
-            return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+            // 👇 return full error for debugging
+            return NextResponse.json({ error: 'Database insert failed', details: error }, { status: 500 })
         }
 
         return NextResponse.json({ reserva }, { status: 201 })
     } catch (err) {
         console.error('RESERVA_POST_UNHANDLED', err)
-        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        // 👇 return err.message for debugging
+        return NextResponse.json(
+            { error: 'Unhandled error in POST', details: (err as Error).message },
+            { status: 500 }
+        )
     }
 }
 
@@ -92,7 +97,8 @@ export async function GET(req: Request) {
 
         if (error) {
             console.error('RESERVA_GET_ERROR', error)
-            return NextResponse.json({ error: 'Database error' }, { status: 500 })
+            // 👇 include error details
+            return NextResponse.json({ error: 'Database select failed', details: error }, { status: 500 })
         }
 
         return NextResponse.json({ reservas })
@@ -101,6 +107,10 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         console.error('RESERVA_GET_UNHANDLED', err)
-        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+        return NextResponse.json(
+            { error: 'Unhandled error in GET', details: (err as Error).message },
+            { status: 500 }
+        )
     }
 }
+
