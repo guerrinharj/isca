@@ -12,8 +12,17 @@ const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
 
 export async function POST(req: Request) {
     try {
-        const { name = '', email = '', password = '' } = (await req.json()) as RegisterBody
+        const supabase = createClientService()
 
+        // ---- optional debug: if ?debug=1, tell me which DB role I'm using
+        const url = new URL(req.url)
+        if (url.searchParams.get('debug') === '1') {
+            const who = await supabase.rpc('whoami')
+            console.log('WHOAMI RPC →', who.data, who.error)
+        }
+        // -------------------------------------
+
+        const { name = '', email = '', password = '' } = (await req.json()) as RegisterBody
         const n = name.trim()
         const e = email.trim().toLowerCase()
 
@@ -24,13 +33,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
         }
 
-        const supabase = createClientService()
-
         const id = randomUUID()
         const now = new Date().toISOString()
         const passwordHash = await hashPassword(password)
 
-        
+        // NO pre-check SELECT. Let the DB's unique index enforce uniqueness.
         const { data, error } = await supabase
             .from('users')
             .upsert(
@@ -39,7 +46,8 @@ export async function POST(req: Request) {
                     name: n,
                     email: e,
                     password: passwordHash,
-                    role: 'USER',         // remove or set a valid default if your enum differs
+                    // if "role" is an enum and you don't know its values, comment the next line
+                    role: 'USER',
                     createdAt: now,
                     updatedAt: now,
                 }],
@@ -49,16 +57,16 @@ export async function POST(req: Request) {
             .single()
 
         if (error) {
-            console.error('UPSERT error:', error)
+            console.error('UPSERT error:', error) // check Vercel → Deployments → Functions
             return NextResponse.json(
-                { error: 'Insert failed', detail: error.message, hint: error.details ?? null },
+                { error: 'Insert failed', detail: error.message, hint: (error as any).details ?? null },
                 { status: 500 }
             )
         }
 
         return NextResponse.json({ user: data }, { status: 201 })
     } catch (err: any) {
-        console.error('Unhandled error:', err)
+        console.error('Unhandled error (register):', err)
         return NextResponse.json(
             { error: 'Internal error (unhandled)', detail: String(err?.message ?? err) },
             { status: 500 }
