@@ -1,8 +1,8 @@
 import '../globals.css'
-import Link from 'next/link'
-import LocaleSwitcher from '../../components/locale-switcher'
+import NavBar from '../../components/NavBar'
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
+import Link from 'next/link'
 
 type LayoutProps = {
     children: React.ReactNode
@@ -16,38 +16,42 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
     return (
         <html lang={safeLocale}>
-            <body className="bg-isca-preto text-isca-creme font-sans">
-                <header className="bg-isca-verde text-isca-creme">
-                    <div className="container flex items-center justify-between py-4">
-                        <Link href={`/${safeLocale}`} className="text-2xl font-display tracking-tightest">
-                            Isca
-                        </Link>
-                        <nav className="flex items-center gap-6">
-                            <Link href={`/${safeLocale}`} className="hover:text-isca-laranja transition-colors">
-                                {t.nav.home}
-                            </Link>
-                            <Link href={`/${safeLocale}/cardapio`} className="hover:text-isca-laranja transition-colors">
-                                {t.nav.menu}
-                            </Link>
-                            <Link href={`/${safeLocale}/reservas`} className="hover:text-isca-laranja transition-colors">
-                                {t.nav.reservas}
-                            </Link>
-                            <Link href={`/${safeLocale}/sobre`} className="hover:text-isca-laranja transition-colors">
-                                {t.nav.sobre}
-                            </Link>
-                            <LocaleSwitcher current={safeLocale} />
-                        </nav>
-                    </div>
-                </header>
+            <body className="bg-isca-creme font-sans relative min-h-screen">
+                {/* Right-side vertical NavBar */}
+                {/* NavBar wrapper */}
+                <aside
+                className="
+                    fixed top-0 right-0 z-20
+                    flex
+                    items-start
+                    p-4
+                    md:h-full md:items-center md:p-0
+                "
+                >
+                <NavBar t={t} locale={safeLocale} />
+                </aside>
 
-                <main className="container py-8">{children}</main>
 
-                <footer className="bg-isca-verde text-isca-creme mt-12">
-                    <div className="container py-6 text-sm flex justify-between items-center">
-                        <span>&copy; {new Date().getFullYear()} Isca</span>
-                        <span>{t.footer.rights}</span>
-                    </div>
-                </footer>
+                {/* Page content (add right margin so it doesn’t sit under the NavBar) */}
+                <main className="py-8 pr-32 md:pr-48">
+                    {children}
+                </main>
+
+        {/* Big 'isca' mark */}
+        <Link
+            href={`/${safeLocale}`}
+            className="
+                fixed bottom-4 left-4
+                font-burns-ultra leading-none
+                text-isca-verde
+                text-[20vw] md:text-[15vw] 
+                w-[95%] md:w-[60%]
+                !text-isca-verde hover:!text-isca-verde
+                z-40
+            "
+        >
+            isca
+        </Link>
             </body>
         </html>
     )
