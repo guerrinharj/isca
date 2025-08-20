@@ -4,8 +4,16 @@ import Link from 'next/link'
 import LocaleSwitcher from './locale-switcher'
 import { type Locale } from '@/lib/i18n/locales'
 
+type Messages = Readonly<{
+    nav: {
+        menu: string
+        reservas: string
+        sobre: string
+    }
+}>
+
 type NavBarProps = {
-    t: any
+    t: Messages
     locale: Locale
 }
 
