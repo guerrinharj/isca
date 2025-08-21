@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "public"."Prato" ALTER COLUMN "is_pintxo" DROP DEFAULT,
+ALTER COLUMN "is_vegan" DROP DEFAULT,
+ALTER COLUMN "is_vegetariano" DROP DEFAULT,
+ALTER COLUMN "is_alcoolico" DROP DEFAULT,
+ALTER COLUMN "is_drink" DROP DEFAULT,
+ALTER COLUMN "is_soft" DROP DEFAULT,
+ALTER COLUMN "is_outro" DROP DEFAULT;

@@ -10,6 +10,13 @@ type NovoPrato = {
     descricao_en: string;
     imagens?: string[];
     isActive?: boolean;
+    is_pintxo: boolean;
+    is_outro: boolean;
+    is_drink: boolean;
+    is_alcoolico: boolean;
+    is_soft: boolean;
+    is_vegan: boolean;
+    is_vegetariano: boolean
 };
 
 export async function GET() {

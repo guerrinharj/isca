@@ -1,78 +1,79 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum Role {
-  ADMIN
-  USER
+    ADMIN
+    USER
 
-  @@map("Role")
+    @@map("Role")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+    id        String   @id @default(cuid())
+    name      String
+    email     String   @unique
+    password  String
+    role      Role     @default(ADMIN)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
 
-  sessions Session[]
-  reservas Reserva[]
+    sessions Session[]
+    reservas Reserva[]
 
-  @@map("users")
+    @@map("users")
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
-  ip        String?
-  userAgent String?
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    token     String   @unique
+    ip        String?
+    userAgent String?
+    expiresAt DateTime
+    createdAt DateTime @default(now())
 
-  @@map("sessions")
+    @@map("sessions")
 }
 
 model Prato {
-  id                String   @id @default(cuid())
-  nome              String
-  preco             String
-  descricao         String
-  descricao_en      String
-  imagens           String[] // text[]
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
-  is_pintxo         Boolean  @default(false)
-  is_vegan          Boolean  @default(false)
-  is_vegetariano    Boolean  @default(false)
-  is_drink          Boolean  @default(false)
-  is_alcoolico      Boolean  @default(false)
-  is_soft           Boolean  @default(false)
-  promo_description String?  @db.Text
+    id                String   @id @default(cuid())
+    nome              String
+    preco             String
+    descricao         String
+    descricao_en      String
+    imagens           String[] // text[]
+    isActive          Boolean  @default(true)
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @default(now())
+    is_pintxo         Boolean  @default(false)
+    is_vegan          Boolean  @default(false)
+    is_vegetariano    Boolean  @default(false)
+    is_drink          Boolean  @default(false)
+    is_alcoolico      Boolean  @default(false)
+    is_soft           Boolean  @default(false)
+    is_outro          Boolean  @default(true)
+    promo_description String?  @db.Text
 }
 
 model Reserva {
-  id           String   @id @default(cuid())
-  nome         String
-  data         DateTime
-  email        String
-  telefone     String
-  quantity     Int
-  is_confirmed Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-  message      String?  @db.Text
+    id           String   @id @default(cuid())
+    nome         String
+    data         DateTime
+    email        String
+    telefone     String
+    quantity     Int
+    is_confirmed Boolean  @default(false)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @default(now())
+    message      String?  @db.Text
 
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+    userId String?
+    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

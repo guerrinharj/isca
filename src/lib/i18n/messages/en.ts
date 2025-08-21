@@ -6,7 +6,7 @@ const en = {
     nav: {
         home: 'Home',
         menu: 'Menu',
-        reservas: 'Reservations',
+        reservas: 'Bookings',
         sobre: 'About',
         dashboard: 'Dashboard',
         login: 'Log in',
