@@ -2,10 +2,9 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 
-export const dynamic = 'force-dynamic' // no cache while debugging
+export const dynamic = 'force-dynamic' // disable caching while debugging
 
 type CardapioPageProps = {
-    // Your route is emitting Promise-based dynamic params
     params: Promise<{ locale: Locale }>
 }
 
@@ -21,20 +20,105 @@ type Prato = {
     is_vegetariano?: boolean | null
 }
 
-type ApiResponse = Prato[] | { data: Prato[] }
+/* -------------------- safe type utils (no `any`) -------------------- */
+function isRecord(x: unknown): x is Record<string, unknown> {
+    return typeof x === 'object' && x !== null
+}
+function firstArrayIn(x: unknown): unknown[] | null {
+    if (Array.isArray(x)) return x
+    if (isRecord(x)) {
+        for (const v of Object.values(x)) {
+            if (Array.isArray(v)) return v
+        }
+    }
+    return null
+}
+function pickString(r: Record<string, unknown>, keys: readonly string[]): string | null {
+    for (const k of keys) {
+        const v = r[k]
+        if (typeof v === 'string') return v
+        if (typeof v === 'number') return String(v)
+    }
+    return null
+}
+function pickNumberOrString(r: Record<string, unknown>, keys: readonly string[]): number | string | null {
+    for (const k of keys) {
+        const v = r[k]
+        if (typeof v === 'number') return v
+        if (typeof v === 'string') return v
+    }
+    return null
+}
+function pickBool(r: Record<string, unknown>, keys: readonly string[]): boolean | null {
+    for (const k of keys) {
+        const v = r[k]
+        if (typeof v === 'boolean') return v
+        if (typeof v === 'number') return v !== 0
+        if (typeof v === 'string') {
+            const s = v.toLowerCase().trim()
+            if (s === 'true') return true
+            if (s === 'false') return false
+            if (s === '1') return true
+            if (s === '0') return false
+        }
+    }
+    return null
+}
+
+/* Coerce a generic object (record) into Prato, tolerating different key names */
+function coercePrato(r: Record<string, unknown>): Prato | null {
+    const id =
+        pickString(r, ['id', 'uuid', '_id']) ?? `${pickString(r, ['nome', 'name']) ?? 'item'}-${Math.random()}`
+    const nome =
+        pickString(r, ['nome', 'name', 'titulo', 'title']) ?? ''
+    // Require at least a name to render
+    if (!nome) return null
+
+    const preco = pickNumberOrString(r, ['preco', 'price', 'valor'])
+    const descricao = pickString(r, ['descricao', 'description'])
+    const descricao_en = pickString(r, ['descricao_en', 'description_en', 'descriptionEn'])
+    const promo_description = pickString(r, ['promo_description', 'promoDescription', 'promotion', 'promo'])
+    const is_pintxo = pickBool(r, ['is_pintxo', 'isPintxo', 'pintxo'])
+    const is_vegan = pickBool(r, ['is_vegan', 'isVegan', 'vegan'])
+    const is_vegetariano = pickBool(r, ['is_vegetariano', 'isVegetariano', 'vegetarian', 'isVegetarian'])
+
+    return {
+        id,
+        nome,
+        preco: preco ?? null,
+        descricao: descricao ?? null,
+        descricao_en: descricao_en ?? null,
+        promo_description: promo_description ?? null,
+        is_pintxo: is_pintxo ?? null,
+        is_vegan: is_vegan ?? null,
+        is_vegetariano: is_vegetariano ?? null,
+    }
+}
 
 async function fetchPratos(): Promise<Prato[]> {
     const res = await fetch('https://isca-omega.vercel.app/api/pratos', {
         cache: 'no-store',
         headers: { Accept: 'application/json' },
     })
-    if (!res.ok) throw new Error(`Failed to load pratos (${res.status})`)
+    if (!res.ok) {
+        // Surface server error as empty list (UI shows “No items yet.”)
+        return []
+    }
+    const json: unknown = await res.json()
+    const arr = firstArrayIn(json)
+    if (!arr) return []
 
-    const json: ApiResponse = await res.json()
-    const items = Array.isArray(json) ? json : json?.data
-    return Array.isArray(items) ? items : []
+    const coerced: Prato[] = []
+    for (const x of arr) {
+        if (isRecord(x)) {
+            const p = coercePrato(x)
+            if (p) coerced.push(p)
+        }
+    }
+    return coerced
 }
 
+/* -------------------- UI -------------------- */
 function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const descricao =
         locale === 'en'
@@ -48,7 +132,7 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const veganLabel = locale === 'en' ? '(Vegan & Vegetarian)' : '(Vegano & Vegetariano)'
 
     return (
-        <li className="py-3">
+        <li className="py-3 text-isca-verde">
             <div className="flex items-baseline justify-between gap-4">
                 <span className="font-burns-ultra text-xl leading-tight">{item.nome}</span>
                 <span className="font-burns-ultra text-xl leading-tight">{precoText}</span>
@@ -73,40 +157,23 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
 }
 
 export default async function CardapioPage({ params }: CardapioPageProps) {
-    // ✅ Await the promise-based params (no `any`, no helper)
     const { locale } = await params
     const safeLocale = locales.includes(locale) ? locale : 'pt'
     const t = await getMessages(safeLocale)
 
-    let pratos: Prato[] = []
-    try {
-        pratos = await fetchPratos()
-        console.log('Loaded pratos:', pratos.length) // server logs
-    } catch (err) {
-        console.error('Cardápio fetch error:', err)
-        return (
-            <div className="p-6">
-                <h1 className="font-burns-ultra text-2xl underline">Cardápio</h1>
-                <p className="mt-4 font-poppins">
-                    {safeLocale === 'en'
-                        ? 'Unable to load the menu right now.'
-                        : 'Não foi possível carregar o cardápio agora.'}
-                </p>
-            </div>
-        )
-    }
+    const pratos = await fetchPratos()
 
     const pintxos = pratos.filter(p => Boolean(p.is_pintxo))
     const outros = pratos.filter(p => !Boolean(p.is_pintxo))
 
-    const labelPintxos = safeLocale === 'en' ? 'Pintxos' : 'Pintxos'
+    const labelPintxos = 'Pintxos'
     const labelOutros = safeLocale === 'en' ? 'Other' : 'Outros'
 
     return (
-        <div className="container mx-auto max-w-3xl p-6">
+        <div className="container mx-auto max-w-3xl p-6 pb-40">
             {/* Pintxos */}
             <section className="mb-10">
-                <h2 className="font-burns-ultra text-3xl underline">{labelPintxos}</h2>
+                <h2 className="font-burns-ultra text-isca-verde text-3xl underline">{labelPintxos}</h2>
                 <ul className="mt-4 divide-y divide-current/20">
                     {pintxos.length > 0 ? (
                         pintxos.map(item => (
@@ -122,7 +189,7 @@ export default async function CardapioPage({ params }: CardapioPageProps) {
 
             {/* Outros / Other */}
             <section>
-                <h2 className="font-burns-ultra text-3xl underline">{labelOutros}</h2>
+                <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{labelOutros}</h2>
                 <ul className="mt-4 divide-y divide-current/20">
                     {outros.length > 0 ? (
                         outros.map(item => (
