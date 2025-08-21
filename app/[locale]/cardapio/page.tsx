@@ -5,10 +5,7 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-type CardapioPageProps = {
-    params: { locale: Locale }
-    searchParams?: { f?: string }
-}
+type SearchParams = Record<string, string | string[] | undefined>
 
 type Prato = {
     id: string
@@ -163,8 +160,18 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
 }
 
 function Section({
-    id, title, items, locale, hidden,
-}: { id: string; title: string; items: Prato[]; locale: Locale; hidden?: boolean }) {
+    id,
+    title,
+    items,
+    locale,
+    hidden,
+}: {
+    id: string
+    title: string
+    items: Prato[]
+    locale: Locale
+    hidden?: boolean
+}) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
             <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{title}</h2>
@@ -213,7 +220,13 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
     )
 }
 
-export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
+export default async function CardapioPage({
+    params,
+    searchParams,
+}: {
+    params: { locale: Locale }
+    searchParams?: SearchParams
+}) {
     const locale = params.locale
     const safeLocale: Locale = locales.includes(locale) ? locale : ('pt' as Locale)
     await getMessages(safeLocale)
@@ -224,7 +237,10 @@ export default async function CardapioPage({ params, searchParams }: CardapioPag
     const alcoolicos = pratos.filter(p => Boolean(p.is_alcoolico))
     const softs = pratos.filter(p => Boolean(p.is_soft))
     const outros = pratos.filter(p => Boolean(p.is_outro))
-    const activeFilter = typeof searchParams?.f === 'string' ? searchParams.f : ''
+
+    const rawF = searchParams?.f
+    const activeFilter = Array.isArray(rawF) ? rawF[0] ?? '' : (rawF ?? '')
+
     const baseHref = `/${safeLocale}/cardapio`
 
     return (
