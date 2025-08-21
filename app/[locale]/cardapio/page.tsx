@@ -170,7 +170,7 @@ export default async function CardapioPage({ params }: CardapioPageProps) {
     const labelOutros = safeLocale === 'en' ? 'Other' : 'Outros'
 
     return (
-        <div className="container mx-auto max-w-3xl p-6">
+        <div className="container mx-auto max-w-3xl p-6 pb-40">
             {/* Pintxos */}
             <section className="mb-10">
                 <h2 className="font-burns-ultra text-isca-verde text-3xl underline">{labelPintxos}</h2>
