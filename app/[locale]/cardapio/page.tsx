@@ -2,8 +2,11 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 
+export const dynamic = 'force-dynamic' // easier while debugging; swap later
+
 type CardapioPageProps = {
-    params: Promise<{ locale: Locale }>
+    // Works with Promise-based dynamic APIs
+    params: { locale: Locale } | Promise<{ locale: Locale }>
 }
 
 type Prato = {
@@ -18,19 +21,22 @@ type Prato = {
     is_vegetariano?: boolean | null
 }
 
+function isPromise<T>(v: T | Promise<T>): v is Promise<T> {
+    return typeof (v as any)?.then === 'function'
+}
+
+async function resolveParams(p: CardapioPageProps['params']) {
+    return isPromise(p) ? await p : p
+}
+
 async function fetchPratos(): Promise<Prato[]> {
     const res = await fetch('https://isca-omega.vercel.app/api/pratos', {
-        // revalidate periodically; tweak as you like
-        next: { revalidate: 60 },
-        // If you want truly live, swap to: cache: 'no-store'
+        cache: 'no-store',
     })
-    if (!res.ok) {
-        throw new Error(`Failed to load pratos (${res.status})`)
-    }
+    if (!res.ok) throw new Error(`Failed to load pratos (${res.status})`)
     const data = await res.json()
-    // Expecting either an array or an object like { data: [...] }
     const items = Array.isArray(data) ? data : data?.data
-    return Array.isArray(items) ? items as Prato[] : []
+    return Array.isArray(items) ? (items as Prato[]) : []
 }
 
 function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
@@ -42,9 +48,8 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const precoText =
         typeof item.preco === 'number' ? String(item.preco) : (item.preco ?? '')
 
-    const isVeganVegetariano = item.is_vegan && item.is_vegetariano
-    const veganLabel =
-        locale === 'en' ? '(Vegan & Vegetarian)' : '(Vegano & Vegetariano)'
+    const isVeganVegetariano = !!item.is_vegan && !!item.is_vegetariano
+    const veganLabel = locale === 'en' ? '(Vegan & Vegetarian)' : '(Vegano & Vegetariano)'
 
     return (
         <li className="py-3">
@@ -71,17 +76,17 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     )
 }
 
-
-export default async function CardapioPage({ params }: CardapioPageProps) {
-    const { locale } = await params
+export default async function CardapioPage(props: CardapioPageProps) {
+    const { locale } = await resolveParams(props.params) // ✅ works for both Promise/object
     const safeLocale = locales.includes(locale) ? locale : 'pt'
     const t = await getMessages(safeLocale)
 
     let pratos: Prato[] = []
     try {
         pratos = await fetchPratos()
+        console.log('Loaded pratos:', pratos.length) // server logs (Vercel functions/local terminal)
     } catch (err) {
-        // Render a minimal fallback; keep the page from crashing
+        console.error('Cardápio fetch error:', err)
         return (
             <div className="p-6">
                 <h1 className="font-burns-ultra text-2xl underline">Cardápio</h1>
@@ -107,7 +112,7 @@ export default async function CardapioPage({ params }: CardapioPageProps) {
                 <h2 className="font-burns-ultra text-3xl underline">{labelPintxos}</h2>
                 <ul className="mt-4 divide-y divide-current/20">
                     {pintxos.length > 0 ? (
-                        pintxos.map((item) => (
+                        pintxos.map(item => (
                             <ItemRow key={item.id ?? `${item.nome}-${item.preco}`} item={item} locale={safeLocale} />
                         ))
                     ) : (
@@ -123,7 +128,7 @@ export default async function CardapioPage({ params }: CardapioPageProps) {
                 <h2 className="font-burns-ultra text-3xl underline">{labelOutros}</h2>
                 <ul className="mt-4 divide-y divide-current/20">
                     {outros.length > 0 ? (
-                        outros.map((item) => (
+                        outros.map(item => (
                             <ItemRow key={item.id ?? `${item.nome}-${item.preco}`} item={item} locale={safeLocale} />
                         ))
                     ) : (
