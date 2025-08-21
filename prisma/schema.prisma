@@ -42,29 +42,31 @@ model Session {
 }
 
 model Prato {
-  id           String    @id @default(cuid())
-  nome         String
-  preco        String
-  descricao    String
-  descricao_en String
-  imagens      String[]  // text[]
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  nome              String?
+  preco             String?
+  descricao         String
+  descricao_en      String
+  imagens           String[]  // text[]
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  is_pintxo         Boolean   @default(false)
+  is_vegan          Boolean   @default(false)
+  is_vegetariano    Boolean   @default(false)
+  promo_description String   @db.Text
 }
 
 model Reserva {
   id           String    @id @default(cuid())
-  nome         String
-  data         DateTime
-  email        String
-  telefone     String
-  quantity     Int
+  nome         String?
+  data         DateTime?
+  email        String?
+  telefone     String?
+  quantity     Int?
   is_confirmed Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-
-  // NEW
   message      String?   @db.Text
 
   userId String?
