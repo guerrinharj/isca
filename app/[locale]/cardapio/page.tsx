@@ -6,7 +6,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 type CardapioPageProps = {
-    params: Promise<{ locale: Locale }>
+    params: { locale: Locale }
     searchParams?: { f?: string }
 }
 
@@ -162,7 +162,9 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     )
 }
 
-function Section({ id, title, items, locale, hidden }: { id: string; title: string; items: Prato[]; locale: Locale; hidden?: boolean }) {
+function Section({
+    id, title, items, locale, hidden,
+}: { id: string; title: string; items: Prato[]; locale: Locale; hidden?: boolean }) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
             <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{title}</h2>
@@ -212,8 +214,8 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
 }
 
 export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
-    const { locale } = await params
-    const safeLocale = locales.includes(locale) ? locale : 'pt'
+    const locale = params.locale
+    const safeLocale: Locale = locales.includes(locale) ? locale : ('pt' as Locale)
     await getMessages(safeLocale)
 
     const pratos = await fetchPratos()
