@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-type CardapioPageProps = {
-    params: { locale: string } | Promise<{ locale: string }>
+type CardapioPageProps = Promise<{
+    params: { locale: string }
     searchParams?: SearchParams
-}
+}>
 
 type Prato = {
     id: string
@@ -225,8 +225,10 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
     )
 }
 
-export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
-    const { locale: localeParam } = await params
+export default async function CardapioPage(props: CardapioPageProps) {
+    const { params, searchParams } = await props
+    const { locale: localeParam } = params
+
     const safeLocale: Locale = locales.includes(localeParam as Locale)
         ? (localeParam as Locale)
         : 'pt'
