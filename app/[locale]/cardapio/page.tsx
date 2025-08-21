@@ -1,11 +1,13 @@
 // app/[locale]/cardapio/page.tsx
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic' // disable caching while debugging
+export const dynamic = 'force-dynamic'
 
 type CardapioPageProps = {
     params: Promise<{ locale: Locale }>
+    searchParams?: { f?: string }
 }
 
 type Prato = {
@@ -18,9 +20,13 @@ type Prato = {
     promo_description?: string | null
     is_vegan?: boolean | null
     is_vegetariano?: boolean | null
+    is_drink?: boolean | null
+    is_alcoolico?: boolean | null
+    is_soft?: boolean | null
+    is_outro?: boolean | null
 }
 
-/* -------------------- safe type utils (no `any`) -------------------- */
+/* utils */
 function isRecord(x: unknown): x is Record<string, unknown> {
     return typeof x === 'object' && x !== null
 }
@@ -65,13 +71,12 @@ function pickBool(r: Record<string, unknown>, keys: readonly string[]): boolean 
     return null
 }
 
-/* Coerce a generic object (record) into Prato, tolerating different key names */
+/* coercion */
 function coercePrato(r: Record<string, unknown>): Prato | null {
     const id =
-        pickString(r, ['id', 'uuid', '_id']) ?? `${pickString(r, ['nome', 'name']) ?? 'item'}-${Math.random()}`
-    const nome =
-        pickString(r, ['nome', 'name', 'titulo', 'title']) ?? ''
-    // Require at least a name to render
+        pickString(r, ['id', 'uuid', '_id']) ??
+        `${pickString(r, ['nome', 'name']) ?? 'item'}-${Math.random()}`
+    const nome = pickString(r, ['nome', 'name', 'titulo', 'title']) ?? ''
     if (!nome) return null
 
     const preco = pickNumberOrString(r, ['preco', 'price', 'valor'])
@@ -80,7 +85,11 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
     const promo_description = pickString(r, ['promo_description', 'promoDescription', 'promotion', 'promo'])
     const is_pintxo = pickBool(r, ['is_pintxo', 'isPintxo', 'pintxo'])
     const is_vegan = pickBool(r, ['is_vegan', 'isVegan', 'vegan'])
-    const is_vegetariano = pickBool(r, ['is_vegetariano', 'isVegetariano', 'vegetarian', 'isVegetarian'])
+    const is_vegetariano = pickBool(r, ['is_vegetariano', 'isVegetariano', 'vegetarian'])
+    const is_drink = pickBool(r, ['is_drink', 'isDrink', 'drink'])
+    const is_alcoolico = pickBool(r, ['is_alcoolico', 'isAlcoolico', 'alcoolico'])
+    const is_soft = pickBool(r, ['is_soft', 'isSoft', 'soft'])
+    const is_outro = pickBool(r, ['is_outro', 'isOutro', 'outro'])
 
     return {
         id,
@@ -92,6 +101,10 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
         is_pintxo: is_pintxo ?? null,
         is_vegan: is_vegan ?? null,
         is_vegetariano: is_vegetariano ?? null,
+        is_drink: is_drink ?? null,
+        is_alcoolico: is_alcoolico ?? null,
+        is_soft: is_soft ?? null,
+        is_outro: is_outro ?? null,
     }
 }
 
@@ -100,10 +113,7 @@ async function fetchPratos(): Promise<Prato[]> {
         cache: 'no-store',
         headers: { Accept: 'application/json' },
     })
-    if (!res.ok) {
-        // Surface server error as empty list (UI shows “No items yet.”)
-        return []
-    }
+    if (!res.ok) return []
     const json: unknown = await res.json()
     const arr = firstArrayIn(json)
     if (!arr) return []
@@ -118,7 +128,7 @@ async function fetchPratos(): Promise<Prato[]> {
     return coerced
 }
 
-/* -------------------- UI -------------------- */
+/* UI */
 function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const descricao =
         locale === 'en'
@@ -134,74 +144,97 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     return (
         <li className="py-3 text-isca-verde">
             <div className="flex items-baseline justify-between gap-4">
-                <span className="font-burns-ultra text-xl leading-tight">{item.nome}</span>
-                <span className="font-burns-ultra text-xl leading-tight">{precoText}</span>
+                <span className="font-burns-ultra text-xl">{item.nome}</span>
+                <span className="font-burns-ultra text-xl">{precoText}</span>
             </div>
-
             {(descricao || isVeganVegetariano) && (
-                <p className="mt-1 font-poppins text-base leading-snug">
+                <p className="mt-1 font-poppins text-base">
                     {descricao}
                     {isVeganVegetariano && (
                         <span className="ml-2 font-cirrus text-base">{veganLabel}</span>
                     )}
                 </p>
             )}
-
-            {item.promo_description && item.promo_description.trim().length > 0 && (
-                <p className="mt-1 font-burns-ultra text-base leading-tight">
-                    [{item.promo_description}]
-                </p>
+            {item.promo_description && (
+                <p className="mt-1 font-burns-ultra text-base">[{item.promo_description}]</p>
             )}
         </li>
     )
 }
 
-export default async function CardapioPage({ params }: CardapioPageProps) {
+function Section({ id, title, items, locale, hidden }: { id: string; title: string; items: Prato[]; locale: Locale; hidden?: boolean }) {
+    return (
+        <section id={id} className={hidden ? 'hidden' : ''}>
+            <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{title}</h2>
+            <ul className="mt-4 divide-y divide-current/20">
+                {items.length > 0 ? (
+                    items.map(item => <ItemRow key={item.id} item={item} locale={locale} />)
+                ) : (
+                    <li className="py-3 font-poppins text-isca-verde">
+                        {locale === 'en' ? 'No items yet.' : 'Sem itens por enquanto.'}
+                    </li>
+                )}
+            </ul>
+        </section>
+    )
+}
+
+function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; locale: Locale }) {
+    const items = [
+        { key: 'pintxo', label: 'Pintxo' },
+        { key: 'outros', label: locale === 'en' ? 'Other' : 'Outros' },
+        { key: 'drinks', label: 'Drinks' },
+        { key: 'alcoolicos', label: locale === 'en' ? 'Beverages' : 'Alcoólicos' },
+        { key: 'softs', label: 'Softs' },
+    ]
+    return (
+        <div className="mb-8 flex flex-wrap gap-3">
+            {items.map(it => {
+                const href = `${baseHref}?f=${it.key}`
+                const isActive = active === it.key
+                return (
+                    <Link
+                        key={it.key}
+                        href={href}
+                        className={[
+                            'px-4 py-2 rounded-full border font-burns-ultra text-base',
+                            isActive
+                                ? 'bg-isca-verde text-black border-isca-verde'
+                                : 'text-isca-verde border-isca-verde/50 hover:border-isca-verde',
+                        ].join(' ')}
+                    >
+                        {it.label}
+                    </Link>
+                )
+            })}
+        </div>
+    )
+}
+
+export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
     const { locale } = await params
     const safeLocale = locales.includes(locale) ? locale : 'pt'
-    const t = await getMessages(safeLocale)
+    await getMessages(safeLocale)
 
     const pratos = await fetchPratos()
-
     const pintxos = pratos.filter(p => Boolean(p.is_pintxo))
-    const outros = pratos.filter(p => !Boolean(p.is_pintxo))
-
-    const labelPintxos = 'Pintxos'
-    const labelOutros = safeLocale === 'en' ? 'Other' : 'Outros'
+    const drinks = pratos.filter(p => Boolean(p.is_drink))
+    const alcoolicos = pratos.filter(p => Boolean(p.is_alcoolico))
+    const softs = pratos.filter(p => Boolean(p.is_soft))
+    const outros = pratos.filter(p => Boolean(p.is_outro))
+    const activeFilter = typeof searchParams?.f === 'string' ? searchParams.f : ''
+    const baseHref = `/${safeLocale}/cardapio`
 
     return (
         <div className="container mx-auto max-w-3xl p-6 pb-40">
-            {/* Pintxos */}
-            <section className="mb-10">
-                <h2 className="font-burns-ultra text-isca-verde text-3xl underline">{labelPintxos}</h2>
-                <ul className="mt-4 divide-y divide-current/20">
-                    {pintxos.length > 0 ? (
-                        pintxos.map(item => (
-                            <ItemRow key={item.id ?? `${item.nome}-${item.preco}`} item={item} locale={safeLocale} />
-                        ))
-                    ) : (
-                        <li className="py-3 font-poppins">
-                            {safeLocale === 'en' ? 'No items yet.' : 'Sem itens por enquanto.'}
-                        </li>
-                    )}
-                </ul>
-            </section>
-
-            {/* Outros / Other */}
-            <section>
-                <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{labelOutros}</h2>
-                <ul className="mt-4 divide-y divide-current/20">
-                    {outros.length > 0 ? (
-                        outros.map(item => (
-                            <ItemRow key={item.id ?? `${item.nome}-${item.preco}`} item={item} locale={safeLocale} />
-                        ))
-                    ) : (
-                        <li className="py-3 font-poppins">
-                            {safeLocale === 'en' ? 'No items yet.' : 'Sem itens por enquanto.'}
-                        </li>
-                    )}
-                </ul>
-            </section>
+            <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
+            <div className="space-y-10">
+                <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={activeFilter !== 'pintxo'} />
+                <Section id="drinks" title="Drinks" items={drinks} locale={safeLocale} hidden={activeFilter !== 'drinks'} />
+                <Section id="alcoolicos" title={safeLocale === 'en' ? 'Beverages' : 'Alcoólicos'} items={alcoolicos} locale={safeLocale} hidden={activeFilter !== 'alcoolicos'} />
+                <Section id="softs" title="Softs" items={softs} locale={safeLocale} hidden={activeFilter !== 'softs'} />
+                <Section id="outros" title={safeLocale === 'en' ? 'Other' : 'Outros'} items={outros} locale={safeLocale} hidden={activeFilter !== 'outros'} />
+            </div>
         </div>
     )
 }
