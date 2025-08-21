@@ -18,9 +18,9 @@ model User {
   name      String
   email     String    @unique
   password  String
-  role      Role      @default(USER)
+  role      Role      @default(ADMIN)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now())
 
   sessions  Session[]
   reservas  Reserva[]
@@ -43,30 +43,30 @@ model Session {
 
 model Prato {
   id                String    @id @default(cuid())
-  nome              String?
-  preco             String?
+  nome              String
+  preco             String
   descricao         String
   descricao_en      String
   imagens           String[]  // text[]
   isActive          Boolean   @default(true)
   createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  updatedAt         DateTime  @default(now())
   is_pintxo         Boolean   @default(false)
   is_vegan          Boolean   @default(false)
   is_vegetariano    Boolean   @default(false)
-  promo_description String   @db.Text
+  promo_description String?   @db.Text
 }
 
 model Reserva {
   id           String    @id @default(cuid())
-  nome         String?
-  data         DateTime?
-  email        String?
-  telefone     String?
-  quantity     Int?
+  nome         String
+  data         DateTime
+  email        String
+  telefone     String
+  quantity     Int
   is_confirmed Boolean   @default(false)
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  updatedAt    DateTime  @default(now())
   message      String?   @db.Text
 
   userId String?
