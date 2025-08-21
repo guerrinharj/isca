@@ -5,9 +5,11 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
+type SearchParams = Record<string, string | string[] | undefined>
+
 type CardapioPageProps = {
-    params: { locale: Locale }
-    searchParams?: { f?: string }
+    params: { locale: string }
+    searchParams?: SearchParams
 }
 
 type Prato = {
@@ -163,8 +165,18 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
 }
 
 function Section({
-    id, title, items, locale, hidden,
-}: { id: string; title: string; items: Prato[]; locale: Locale; hidden?: boolean }) {
+    id,
+    title,
+    items,
+    locale,
+    hidden,
+}: {
+    id: string
+    title: string
+    items: Prato[]
+    locale: Locale
+    hidden?: boolean
+}) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
             <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{title}</h2>
@@ -214,8 +226,12 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
 }
 
 export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
-    const locale = params.locale
-    const safeLocale: Locale = locales.includes(locale) ? locale : ('pt' as Locale)
+    // Validate and coerce locale from wide params type
+    const localeParam = params?.locale
+    const safeLocale: Locale = locales.includes(localeParam as Locale)
+        ? (localeParam as Locale)
+        : 'pt'
+
     await getMessages(safeLocale)
 
     const pratos = await fetchPratos()
@@ -224,7 +240,11 @@ export default async function CardapioPage({ params, searchParams }: CardapioPag
     const alcoolicos = pratos.filter(p => Boolean(p.is_alcoolico))
     const softs = pratos.filter(p => Boolean(p.is_soft))
     const outros = pratos.filter(p => Boolean(p.is_outro))
-    const activeFilter = typeof searchParams?.f === 'string' ? searchParams.f : ''
+
+    // searchParams.f can be string | string[] | undefined
+    const rawF = searchParams?.f
+    const activeFilter = Array.isArray(rawF) ? (rawF[0] ?? '') : (rawF ?? '')
+
     const baseHref = `/${safeLocale}/cardapio`
 
     return (
