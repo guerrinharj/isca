@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "public"."Prato" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "public"."Reserva" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "public"."users" ALTER COLUMN "role" SET DEFAULT 'ADMIN',
+ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
