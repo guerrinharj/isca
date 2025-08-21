@@ -2,10 +2,11 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 
-export const dynamic = 'force-dynamic' // easier while debugging; swap later
+export const dynamic = 'force-dynamic' // no cache while debugging
 
 type CardapioPageProps = {
-    params: { locale: Locale } | Promise<{ locale: Locale }>
+    // Your route is emitting Promise-based dynamic params
+    params: Promise<{ locale: Locale }>
 }
 
 type Prato = {
@@ -20,22 +21,18 @@ type Prato = {
     is_vegetariano?: boolean | null
 }
 
-function isPromise<T>(v: T | Promise<T>): v is Promise<T> {
-    return typeof (v as any)?.then === 'function'
-}
-
-async function resolveParams(p: CardapioPageProps['params']) {
-    return isPromise(p) ? await p : p
-}
+type ApiResponse = Prato[] | { data: Prato[] }
 
 async function fetchPratos(): Promise<Prato[]> {
     const res = await fetch('https://isca-omega.vercel.app/api/pratos', {
         cache: 'no-store',
+        headers: { Accept: 'application/json' },
     })
     if (!res.ok) throw new Error(`Failed to load pratos (${res.status})`)
-    const data = await res.json()
-    const items = Array.isArray(data) ? data : data?.data
-    return Array.isArray(items) ? (items as Prato[]) : []
+
+    const json: ApiResponse = await res.json()
+    const items = Array.isArray(json) ? json : json?.data
+    return Array.isArray(items) ? items : []
 }
 
 function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
@@ -47,7 +44,7 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const precoText =
         typeof item.preco === 'number' ? String(item.preco) : (item.preco ?? '')
 
-    const isVeganVegetariano = !!item.is_vegan && !!item.is_vegetariano
+    const isVeganVegetariano = Boolean(item.is_vegan) && Boolean(item.is_vegetariano)
     const veganLabel = locale === 'en' ? '(Vegan & Vegetarian)' : '(Vegano & Vegetariano)'
 
     return (
@@ -75,15 +72,16 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     )
 }
 
-export default async function CardapioPage(props: CardapioPageProps) {
-    const { locale } = await resolveParams(props.params) // ✅ works for both Promise/object
+export default async function CardapioPage({ params }: CardapioPageProps) {
+    // ✅ Await the promise-based params (no `any`, no helper)
+    const { locale } = await params
     const safeLocale = locales.includes(locale) ? locale : 'pt'
     const t = await getMessages(safeLocale)
 
     let pratos: Prato[] = []
     try {
         pratos = await fetchPratos()
-        console.log('Loaded pratos:', pratos.length) // server logs (Vercel functions/local terminal)
+        console.log('Loaded pratos:', pratos.length) // server logs
     } catch (err) {
         console.error('Cardápio fetch error:', err)
         return (
@@ -98,8 +96,8 @@ export default async function CardapioPage(props: CardapioPageProps) {
         )
     }
 
-    const pintxos = pratos.filter(p => !!p.is_pintxo)
-    const outros = pratos.filter(p => !p.is_pintxo)
+    const pintxos = pratos.filter(p => Boolean(p.is_pintxo))
+    const outros = pratos.filter(p => !Boolean(p.is_pintxo))
 
     const labelPintxos = safeLocale === 'en' ? 'Pintxos' : 'Pintxos'
     const labelOutros = safeLocale === 'en' ? 'Other' : 'Outros'
