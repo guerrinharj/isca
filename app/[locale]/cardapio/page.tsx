@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 type SearchParams = Record<string, string | string[] | undefined>
 
 type CardapioPageProps = {
-    params: { locale: string }
+    params: { locale: string } | Promise<{ locale: string }>
     searchParams?: SearchParams
 }
 
@@ -226,8 +226,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
 }
 
 export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
-    // Validate and coerce locale from wide params type
-    const localeParam = params?.locale
+    const { locale: localeParam } = await params
     const safeLocale: Locale = locales.includes(localeParam as Locale)
         ? (localeParam as Locale)
         : 'pt'
@@ -241,7 +240,6 @@ export default async function CardapioPage({ params, searchParams }: CardapioPag
     const softs = pratos.filter(p => Boolean(p.is_soft))
     const outros = pratos.filter(p => Boolean(p.is_outro))
 
-    // searchParams.f can be string | string[] | undefined
     const rawF = searchParams?.f
     const activeFilter = Array.isArray(rawF) ? (rawF[0] ?? '') : (rawF ?? '')
 
