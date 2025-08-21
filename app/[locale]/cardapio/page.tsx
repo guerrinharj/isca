@@ -5,7 +5,6 @@ import { locales, type Locale } from '@/lib/i18n/locales'
 export const dynamic = 'force-dynamic' // easier while debugging; swap later
 
 type CardapioPageProps = {
-    // Works with Promise-based dynamic APIs
     params: { locale: Locale } | Promise<{ locale: Locale }>
 }
 
