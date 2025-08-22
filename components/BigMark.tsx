@@ -6,24 +6,23 @@ import { usePathname } from 'next/navigation'
 export default function BigMark({ locale }: { locale: string }) {
     const pathname = usePathname()
 
-    const hideBigMark =
+    // Hide only on mobile for these routes
+    const hideOnMobile =
         pathname?.startsWith(`/${locale}/cardapio`) ||
         pathname?.startsWith(`/${locale}/reserva`)
-
-    if (hideBigMark) return null
+        // If you also use /reservas, add:
+        // || pathname?.startsWith(`/${locale}/reservas`)
 
     return (
         <Link
             href={`/${locale}`}
-            className="
-                fixed bottom-4 left-4
-                font-burns-ultra leading-none
-                text-isca-verde
-                text-[20vw] md:text-[15vw] 
-                w-[95%] md:w-[60%]
-                !text-isca-verde hover:!text-isca-verde
-                z-40
-            "
+            className={[
+                'fixed bottom-4 left-4 z-40',
+                'font-burns-ultra leading-none text-isca-verde',
+                'text-[20vw] md:text-[10vw] w-[95%] md:w-[60%]',
+                '!text-isca-verde hover:!text-isca-verde',
+                hideOnMobile ? 'hidden md:block' : 'block'
+            ].join(' ')}
         >
             isca
         </Link>
