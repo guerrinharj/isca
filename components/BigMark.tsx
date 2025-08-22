@@ -8,7 +8,7 @@ export default function BigMark({ locale }: { locale: string }) {
 
     // Hide only on mobile for these routes
     const hideOnMobile =
-        pathname?.startsWith(`/${locale}/cardapios`) ||
+        pathname?.startsWith(`/${locale}/cardapio`) ||
         pathname?.startsWith(`/${locale}/reserva`)
         // If you also use /reservas, add:
         // || pathname?.startsWith(`/${locale}/reservas`)
