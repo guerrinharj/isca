@@ -61,7 +61,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
                         {/* Palette centered: use a flex spacer technique */}
                         <div className="flex-1 flex justify-center">
-                            <div className="hidden md:block"><ScribblePalette /></div>
+                            <ScribblePalette />
                         </div>
 
                         <InfoText
