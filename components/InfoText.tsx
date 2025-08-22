@@ -30,7 +30,7 @@ export default function InfoText({ locale, className = '' }: InfoTextProps) {
                         Domingo:{' '}
                         <span className="text-isca-laranja">12h às 22h</span>
                     </p>
-                    <p>Rua do Russel, 724 - loja A - Glória - Rio de Janeiro</p>
+                    <p>Rua do Russel, 724 - <span className="text-isca-laranja">Rio de Janeiro</span></p>
                 </>
             )}
         </div>

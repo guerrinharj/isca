@@ -39,7 +39,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                     className="
                         fixed bottom-0 left-0 right-0 z-30
                         bg-isca-creme border-t-2 border-isca-laranja
-                        py-2 px-2
+                        py-2 px-3
                         md:py-6 md:px-4
                         lg:py-2
                     "
@@ -60,7 +60,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                             locale={safeLocale as 'pt' | 'en'}
                             className="
                                 text-right
-                                text-[0.5rem]   
+                                text-[0.7rem]   
                                 md:text-sm
                                 lg:text-base
                             "
