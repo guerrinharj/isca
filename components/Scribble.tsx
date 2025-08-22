@@ -14,19 +14,8 @@ function useIsHome() {
     return isHome && !isBlocked
 }
 
-/** Resolve 'var(--token)' to actual color (e.g. '#104730') */
-function resolveCssColor(value: string) {
-    if (value.startsWith('var(')) {
-        const token = value.slice(4, -1).trim() // --color-...
-        const resolved = getComputedStyle(document.documentElement)
-            .getPropertyValue(token)
-            .trim()
-        return resolved || value
-    }
-    return value
-}
-
-const COLORS = [
+/** CSS variable-based brand colors (no creme) */
+const COLOR_VARS = [
     'var(--color-isca-verde)',
     'var(--color-isca-laranja)',
     'var(--color-isca-azul)',
@@ -34,26 +23,32 @@ const COLORS = [
     'var(--color-isca-preto)',
 ] as const
 
-/* ---------------------------- Canvas Overlay ---------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                               ScribbleCanvas                               */
+/* -------------------------------------------------------------------------- */
 export function ScribbleCanvas() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const drawingRef = useRef(false)
     const lastPosRef = useRef<{ x: number; y: number } | null>(null)
 
-    // initialize with resolved black
+    // start with plain black; will be updated if palette emits a color
     const [color, setColor] = useState<string>('#000000')
     const isHome = useIsHome()
 
-    // Ensure initial color follows your CSS var for black
+    // On mount, resolve your black CSS var to be consistent with theme
     useEffect(() => {
-        setColor(resolveCssColor('var(--color-isca-preto)'))
+        if (typeof window === 'undefined') return
+        const root = getComputedStyle(document.documentElement)
+        const resolvedBlack =
+            root.getPropertyValue('--color-isca-preto').trim() || '#000000'
+        setColor(resolvedBlack)
     }, [])
 
-    // Palette -> Canvas channel
+    // Listen for palette events
     useEffect(() => {
         function onColor(e: Event) {
             const detail = (e as CustomEvent).detail as { color: string }
-            if (detail?.color) setColor(resolveCssColor(detail.color))
+            if (detail?.color) setColor(detail.color)
         }
         function onClear() {
             const c = canvasRef.current
@@ -70,7 +65,7 @@ export function ScribbleCanvas() {
         }
     }, [])
 
-    // Pixel ratio aware resize
+    // DPR-aware resize (keeps previous content)
     const resize = useMemo(
         () => () => {
             const c = canvasRef.current
@@ -90,11 +85,15 @@ export function ScribbleCanvas() {
             c.height = Math.floor(h * dpr)
             c.style.width = `${w}px`
             c.style.height = `${h}px`
+
+            // scale to CSS pixels
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+            // restore image roughly in CSS pixel space
             ctx.drawImage(prev, 0, 0, prev.width / dpr, prev.height / dpr)
+
             ctx.lineJoin = 'round'
             ctx.lineCap = 'round'
-            ctx.lineWidth = 1
+            ctx.lineWidth = 1 // very thin line
         },
         []
     )
@@ -106,6 +105,7 @@ export function ScribbleCanvas() {
         return () => window.removeEventListener('resize', resize)
     }, [isHome, resize])
 
+    // Drawing handlers
     useEffect(() => {
         if (!isHome) return
         const c = canvasRef.current
@@ -128,7 +128,7 @@ export function ScribbleCanvas() {
                 lastPosRef.current = pos
                 return
             }
-            ctx.strokeStyle = color // uses the latest resolved color
+            ctx.strokeStyle = color
             ctx.beginPath()
             ctx.moveTo(last.x, last.y)
             ctx.lineTo(pos.x, pos.y)
@@ -138,7 +138,9 @@ export function ScribbleCanvas() {
         const up = (e: PointerEvent) => {
             drawingRef.current = false
             lastPosRef.current = null
-            try { c.releasePointerCapture(e.pointerId) } catch {}
+            try {
+                c.releasePointerCapture(e.pointerId)
+            } catch {}
         }
 
         c.addEventListener('pointerdown', down)
@@ -164,31 +166,47 @@ export function ScribbleCanvas() {
     )
 }
 
-/* ------------------------------ Palette UI ------------------------------ */
+/* -------------------------------------------------------------------------- */
+/*                              ScribblePalette                               */
+/* -------------------------------------------------------------------------- */
 export function ScribblePalette() {
     const isHome = useIsHome()
+    const [colors, setColors] = useState<string[]>([]) // resolved once on mount
+
+    useEffect(() => {
+        if (!isHome) return
+        if (typeof window === 'undefined') return
+        const root = getComputedStyle(document.documentElement)
+        const resolved = COLOR_VARS.map(c =>
+            c.startsWith('var(')
+                ? root.getPropertyValue(c.slice(4, -1).trim()).trim() || c
+                : c
+        )
+        setColors(resolved)
+    }, [isHome])
+
     if (!isHome) return null
 
-    const pick = (c: string) => {
-        const resolved = resolveCssColor(c)
-        window.dispatchEvent(new CustomEvent('isca:setColor', { detail: { color: resolved } }))
+    const pick = (color: string) => {
+        window.dispatchEvent(new CustomEvent('isca:setColor', { detail: { color } }))
     }
     const clear = () => window.dispatchEvent(new Event('isca:clear'))
 
     return (
         <div className="flex items-center gap-2 mx-2" aria-label="Scribble palette">
-            {COLORS.map((c, i) => (
+            {colors.map((c, i) => (
                 <button
                     key={i}
                     onClick={() => pick(c)}
                     title="Selecionar cor"
                     className="
-                        h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8
-                        rounded-full border border-black/10
-                        shadow-sm
+                        h-3 w-3          /* tiny on mobile */
+                        md:h-5 md:w-5    /* medium on tablet */
+                        lg:h-6 lg:w-6    /* larger on desktop */
+                        rounded-full border border-black/10 shadow-sm
                         outline-none focus:ring-2 focus:ring-black/20
                     "
-                    style={{ background: resolveCssColor(c) }}
+                    style={{ background: c }}
                 />
             ))}
 
@@ -197,9 +215,9 @@ export function ScribblePalette() {
                 onClick={clear}
                 title="Limpar desenho"
                 className="
-                    h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8
+                    h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
                     flex items-center justify-center
-                    text-sm md:text-base
+                    text-[0.5rem] md:text-xs lg:text-sm
                     text-black
                 "
             >
