@@ -12,8 +12,8 @@ type ParamValue = { locale: string }
 type ParamLike = ParamValue | Promise<ParamValue>
 
 type CardapioPageProps = {
-    params: ParamLike
-    searchParams?: SearchParams
+    params: Promise<{ locale: string }>
+    searchParams: Promise<SearchParams>
 }
 
 type Prato = {
@@ -74,10 +74,8 @@ function pickBool(r: Record<string, unknown>, keys: readonly string[]): boolean 
         if (typeof v === 'number') return v !== 0
         if (typeof v === 'string') {
             const s = v.toLowerCase().trim()
-            if (s === 'true') return true
-            if (s === 'false') return false
-            if (s === '1') return true
-            if (s === '0') return false
+            if (s === 'true' || s === '1') return true
+            if (s === 'false' || s === '0') return false
         }
     }
     return null
@@ -205,8 +203,8 @@ function Section({
 
 function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; locale: Locale }) {
     const items = [
-        { key: 'pintxo', label: 'Pintxo' },
-        { key: 'outros', label: locale === 'en' ? 'Other' : 'Outros' },
+        { key: 'pintxo', label: 'Pintxos' },
+        { key: 'outros', label: locale === 'en' ? 'Others' : 'Outros' },
         { key: 'drinks', label: 'Drinks' },
         { key: 'alcoolicos', label: locale === 'en' ? 'Beverages' : 'Alcoólicos' },
         { key: 'softs', label: 'Softs' },
@@ -235,10 +233,16 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
     )
 }
 
-export default async function CardapioPage({ params, searchParams }: CardapioPageProps) {
-    // Normalize params whether it's a Promise or a plain object
-    const { locale: localeParam } = await resolveParams(params)
-    const safeLocale: Locale = locales.includes(localeParam as Locale) ? (localeParam as Locale) : 'pt'
+export default async function CardapioPage(props: CardapioPageProps) {
+    // In Next 15, both `params` and `searchParams` are Promises
+    const { params, searchParams } = props
+
+    const { locale: localeParam } = await params
+    const sp = (await searchParams) ?? {}
+
+    const safeLocale: Locale = locales.includes(localeParam as Locale)
+        ? (localeParam as Locale)
+        : 'pt'
 
     await getMessages(safeLocale)
 
@@ -249,7 +253,7 @@ export default async function CardapioPage({ params, searchParams }: CardapioPag
     const softs = pratos.filter(p => Boolean(p.is_soft))
     const outros = pratos.filter(p => Boolean(p.is_outro))
 
-    const rawF = searchParams?.f
+    const rawF = sp.f
     const activeFilter = Array.isArray(rawF) ? (rawF[0] ?? '') : (rawF ?? '')
 
     const baseHref = `/${safeLocale}/cardapio`
