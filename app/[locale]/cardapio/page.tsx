@@ -209,8 +209,9 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
         { key: 'alcoolicos', label: locale === 'en' ? 'Beverages' : 'Alcoólicos' },
         { key: 'softs', label: 'Softs' },
     ]
+
     return (
-        <div className="mb-8 flex flex-wrap gap-3mb-8 flex overflow-x-auto no-scrollbar gap-3">
+        <div className="mb-8 flex flex-wrap overflow-x-auto no-scrollbar gap-4">
             {items.map(it => {
                 const href = `${baseHref}?f=${it.key}`
                 const isActive = active === it.key
@@ -219,10 +220,8 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                         key={it.key}
                         href={href}
                         className={[
-                            'px-4 py-2 rounded-full border font-burns-ultra text-base',
-                            isActive
-                                ? 'bg-isca-verde text-black border-isca-verde'
-                                : 'text-isca-verde border-isca-verde/50 hover:border-isca-verde',
+                            'px-2 py-1 font-burns-ultra text-base text-isca-verde',
+                            isActive ? 'underline underline-offset-4' : 'hover:underline'
                         ].join(' ')}
                     >
                         {it.label}
@@ -232,6 +231,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
         </div>
     )
 }
+
 
 export default async function CardapioPage(props: CardapioPageProps) {
     // In Next 15, both `params` and `searchParams` are Promises
@@ -258,15 +258,19 @@ export default async function CardapioPage(props: CardapioPageProps) {
 
     const baseHref = `/${safeLocale}/cardapio`
 
+    // NEW: show all sections when no filter is active
+    const showAll = !activeFilter
+    const isHidden = (key: string) => (showAll ? false : activeFilter !== key)
+
     return (
         <div className="container mx-auto max-w-3xl p-6 pb-40 pt-20 md:pt-6">
             <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
             <div className="space-y-10">
-                <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={activeFilter !== 'pintxo'} />
-                <Section id="drinks" title="Drinks" items={drinks} locale={safeLocale} hidden={activeFilter !== 'drinks'} />
-                <Section id="alcoolicos" title={safeLocale === 'en' ? 'Beverages' : 'Alcoólicos'} items={alcoolicos} locale={safeLocale} hidden={activeFilter !== 'alcoolicos'} />
-                <Section id="softs" title="Softs" items={softs} locale={safeLocale} hidden={activeFilter !== 'softs'} />
-                <Section id="outros" title={safeLocale === 'en' ? 'Other' : 'Outros'} items={outros} locale={safeLocale} hidden={activeFilter !== 'outros'} />
+                <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={isHidden('pintxo')} />
+                <Section id="drinks" title="Drinks" items={drinks} locale={safeLocale} hidden={isHidden('drinks')} />
+                <Section id="alcoolicos" title={safeLocale === 'en' ? 'Beverages' : 'Alcoólicos'} items={alcoolicos} locale={safeLocale} hidden={isHidden('alcoolicos')} />
+                <Section id="softs" title="Softs" items={softs} locale={safeLocale} hidden={isHidden('softs')} />
+                <Section id="outros" title={safeLocale === 'en' ? 'Other' : 'Outros'} items={outros} locale={safeLocale} hidden={isHidden('outros')} />
             </div>
         </div>
     )
