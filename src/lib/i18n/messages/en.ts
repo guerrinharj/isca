@@ -39,6 +39,7 @@ const en = {
         telefone: 'Phone',
         data: 'Date & time',
         quantidade: 'Party size',
+        mensagem: 'Message',
         confirmar: 'Confirm',
         is_confirmed: 'Confirmed',
         criar: 'Create reservation',
