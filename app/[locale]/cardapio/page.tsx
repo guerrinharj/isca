@@ -210,7 +210,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
         { key: 'softs', label: 'Softs' },
     ]
     return (
-        <div className="mb-8 flex flex-wrap gap-3">
+        <div className="mb-8 flex flex-wrap gap-3mb-8 flex overflow-x-auto no-scrollbar gap-3">
             {items.map(it => {
                 const href = `${baseHref}?f=${it.key}`
                 const isActive = active === it.key

@@ -33,7 +33,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
 
                 {/* Page content (add right margin so it doesn’t sit under the NavBar) */}
-                <main className="py-8 pr-32 md:pr-48">
+                <main className="py-8">
                     {children}
                 </main>
 
