@@ -4,6 +4,7 @@ import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import BigMark from '../../components/BigMark'
 import InfoText from '../../components/InfoText'
+import { ScribbleCanvas, ScribblePalette } from '../../components/Scribble'
 
 type LayoutProps = {
     children: React.ReactNode
@@ -34,6 +35,9 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                     </div>
                 </main>
 
+                {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
+                <ScribbleCanvas />
+
                 {/* Unified footer across breakpoints */}
                 <footer
                     className="
@@ -45,7 +49,6 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                     "
                 >
                     <div className="mx-auto w-full flex justify-between items-center">
-                        {/* BigMark scales: tiny on mobile, larger on bigger screens */}
                         <BigMark
                             locale={safeLocale}
                             className="
@@ -55,12 +58,17 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                                 w-auto
                             "
                         />
-                        {/* InfoText also scales per breakpoint */}
+
+                        {/* Palette centered: use a flex spacer technique */}
+                        <div className="flex-1 flex justify-center">
+                            <div className="hidden md:block"><ScribblePalette /></div>
+                        </div>
+
                         <InfoText
                             locale={safeLocale as 'pt' | 'en'}
                             className="
                                 text-right
-                                text-[0.7rem]   
+                                text-[0.7rem]
                                 md:text-sm
                                 lg:text-base
                             "
