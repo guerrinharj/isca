@@ -44,9 +44,9 @@ export default function ReservasPage() {
         "block text-xs md:text-lg lg:text-xs font-medium mb-1 text-isca-laranja Poppins text-left"
 
     return (
-        <section className="py-15 md:py-30 lg:py-5 lg:mb-20 font-sans">
+        <section className="py-20 md:py-30 lg:py-5 lg:mb-20 font-sans">
             <h1
-                className="text-3xl tracking-tightest mb-6 text-center hidden md:block"
+                className="text-3xl tracking-tightest mb-6 text-center"
                 style={{ color: 'var(--color-isca-verde)' }}
                 >
                 {t.title}
