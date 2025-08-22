@@ -259,7 +259,7 @@ export default async function CardapioPage(props: CardapioPageProps) {
     const baseHref = `/${safeLocale}/cardapio`
 
     return (
-        <div className="container mx-auto max-w-3xl p-6 pb-40">
+        <div className="container mx-auto max-w-3xl p-6 pb-40 pt-20 md:pt-6">
             <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
             <div className="space-y-10">
                 <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={activeFilter !== 'pintxo'} />
