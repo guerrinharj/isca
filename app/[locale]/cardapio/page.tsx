@@ -148,8 +148,13 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const precoText =
         typeof item.preco === 'number' ? String(item.preco) : (item.preco ?? '')
 
-    const isVeganVegetariano = Boolean(item.is_vegan) && Boolean(item.is_vegetariano)
-    const veganLabel = locale === 'en' ? '(Vegan & Vegetarian)' : '(Vegano & Vegetariano)'
+    // exclusive label logic
+    let dietLabel: string | null = null
+    if (item.is_vegetariano) {
+        dietLabel = locale === 'en' ? 'Vegetarian' : 'Vegetariano'
+    } else if (item.is_vegan) {
+        dietLabel = locale === 'en' ? 'Vegan' : 'Vegano'
+    }
 
     return (
         <li className="py-3 text-isca-verde">
@@ -157,11 +162,19 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
                 <span className="font-burns-ultra text-xl">{item.nome}</span>
                 <span className="font-burns-ultra text-xl">{precoText}</span>
             </div>
-            {(descricao || isVeganVegetariano) && (
+            {(descricao || dietLabel) && (
                 <p className="mt-1 font-poppins text-base">
                     {descricao}
-                    {isVeganVegetariano && (
-                        <span className="ml-2 font-cirrus text-base">{veganLabel}</span>
+                    {dietLabel && (
+                        <span
+                            className="
+                                ml-2 font-cirrus text-2xl
+                                text-isca-laranja
+                                inline-block transform -rotate-12
+                            "
+                        >
+                            {dietLabel}
+                        </span>
                     )}
                 </p>
             )}
@@ -171,6 +184,8 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
         </li>
     )
 }
+
+
 
 function Section({
     id,
