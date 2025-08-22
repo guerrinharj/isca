@@ -235,7 +235,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                         key={it.key}
                         href={href}
                         className={[
-                            'px-2 py-1 font-burns-ultra text-xs text-isca-verde',
+                            'px-1 py-1 font-burns-ultra text-xs text-isca-verde',
                             isActive ? 'underline underline-offset-4' : 'hover:underline'
                         ].join(' ')}
                     >
