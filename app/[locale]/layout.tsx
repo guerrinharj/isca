@@ -3,6 +3,7 @@ import NavBar from '../../components/NavBar'
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import BigMark from '../../components/BigMark'
+import InfoText from '../../components/InfoText'
 
 type LayoutProps = {
     children: React.ReactNode
@@ -31,8 +32,10 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
                 <main className="py-8">{children}</main>
 
-                {/* Client Component handles hiding logic */}
                 <BigMark locale={safeLocale} />
+
+                {/* Bottom-right info */}
+                <InfoText locale={safeLocale} />
             </body>
         </html>
     )
