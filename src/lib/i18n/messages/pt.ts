@@ -39,6 +39,7 @@ const pt = {
         telefone: 'Telefone',
         data: 'Data e hora',
         quantidade: 'Quantidade de pessoas',
+        mensagem: 'Mensagem',
         confirmar: 'Confirmar',
         is_confirmed: 'Confirmada',
         criar: 'Fazer reserva',

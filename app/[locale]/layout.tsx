@@ -29,7 +29,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                 </aside>
 
                 <main className="py-8">
-                    <div className="mx-auto w-full px-4 md:max-w-[500px] lg:max-w-none lg:px-8">
+                    <div className="mx-auto w-full px-4 md:max-w-[480px] lg:max-w-none lg:px-8">
                         {children}
                     </div>
                 </main>
@@ -50,7 +50,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                             locale={safeLocale}
                             className="
                                 text-5xl leading-none
-                                md:text-[4vw]
+                                md:text-[8vw]
                                 lg:text-[5vw]
                                 w-auto
                             "
