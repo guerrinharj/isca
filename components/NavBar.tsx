@@ -31,7 +31,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 pt-[env(safe-area-inset-top)]
                 border-b-2 border-isca-laranja
                 transition-colors duration-300
-                ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-transparent'}
+                ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-isca-creme'}
                 md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:text-isca-creme md:border-0
             `}
             aria-label="Site navigation"
