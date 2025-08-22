@@ -37,7 +37,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
             aria-label="Site navigation"
         >
             {/* 🟢 Container centers everything */}
-            <div className="container mx-auto px-4 h-full flex items-center justify-between">
+            <div className="container mx-auto px-3 h-full flex items-center justify-between">
                 {/* MOBILE BAR */}
                 <div className="block md:hidden relative h-full w-full">
                     <div className="absolute inset-0 rotate-3 origin-top-left overflow-visible transform-gpu">

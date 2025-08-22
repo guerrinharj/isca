@@ -18,7 +18,7 @@ export default function LocaleSwitcher({ current }: { current: Locale }) {
     const pathname = usePathname()
 
     return (
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-1 text-sm">
             <Link
                 href={swapLocale(pathname || '/', 'pt')}
                 className={current === 'pt' ? 'underline' : 'opacity-80 hover:opacity-100'}
