@@ -159,11 +159,11 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     return (
         <li className="py-3 text-isca-verde">
             <div className="flex items-baseline justify-between gap-4">
-                <span className="font-burns-ultra text-xl">{item.nome}</span>
-                <span className="font-burns-ultra text-xl">{precoText}</span>
+                <span className="font-burns-ultra text-base md-text-xl">{item.nome}</span>
+                <span className="font-burns-ultra text-base md-text-xl">{precoText}</span>
             </div>
             {(descricao || dietLabel) && (
-                <p className="mt-1 font-poppins text-base">
+                <p className="mt-1 font-poppins text-sm">
                     {descricao}
                     {dietLabel && (
                         <span
@@ -235,7 +235,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                         key={it.key}
                         href={href}
                         className={[
-                            'px-2 py-1 font-burns-ultra text-base text-isca-verde',
+                            'px-2 py-1 font-burns-ultra text-xs text-isca-verde',
                             isActive ? 'underline underline-offset-4' : 'hover:underline'
                         ].join(' ')}
                     >
@@ -278,7 +278,7 @@ export default async function CardapioPage(props: CardapioPageProps) {
     const isHidden = (key: string) => (showAll ? false : activeFilter !== key)
 
     return (
-        <div className="container mx-auto max-w-3xl p-6 pb-40 pt-20 md:pt-6">
+        <div className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6">
             <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
             <div className="space-y-10">
                 <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={isHidden('pintxo')} />

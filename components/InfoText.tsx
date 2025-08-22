@@ -1,28 +1,13 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-
 type InfoTextProps = {
     locale: 'pt' | 'en'
-    inline?: boolean
+    className?: string
 }
 
-export default function InfoText({ locale, inline = false }: InfoTextProps) {
-    const pathname = usePathname()
-
-    const isAbout = pathname === `/${locale}/sobre`
-
-    // Hide on mobile for /cardapio, /reservas, and /about — only when NOT inline
-    const hideOnMobileFixed =
-        !inline &&
-        (
-            pathname?.startsWith(`/${locale}/cardapio`) ||
-            pathname?.startsWith(`/${locale}/reservas`) ||
-            isAbout
-        )
-
-    const textBlock = (
-        <div className="font-burns-ultra text-sm leading-relaxed text-isca-verde">
+export default function InfoText({ locale, className = '' }: InfoTextProps) {
+    return (
+        <div className={`font-burns-ultra text-sm leading-relaxed text-isca-verde ${className}`}>
             {locale === 'en' ? (
                 <>
                     <p>
@@ -48,23 +33,6 @@ export default function InfoText({ locale, inline = false }: InfoTextProps) {
                     <p>Rua do Russel, 724 - loja A - Glória - Rio de Janeiro</p>
                 </>
             )}
-        </div>
-    )
-
-    if (inline) {
-        // unpositioned, for stacking
-        return textBlock
-    }
-
-    // default: fixed instance controlled by layout
-    return (
-        <div
-            className={[
-                'fixed bottom-4 right-4 z-30',
-                hideOnMobileFixed ? 'hidden md:block' : 'block'
-            ].join(' ')}
-        >
-            {textBlock}
         </div>
     )
 }
