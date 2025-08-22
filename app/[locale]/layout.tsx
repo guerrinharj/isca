@@ -38,6 +38,19 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                 {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
                 <ScribbleCanvas />
 
+                {/* Palette mobile floating, fixed above footer */}
+                    <div className="md:hidden">
+                        <div
+                            className="
+                                fixed bottom-20 left-1/2 -translate-x-1/2
+                                flex justify-center
+                                z-40
+                            "
+                        >
+                            <ScribblePalette />
+                        </div>
+                    </div>
+
                 {/* Unified footer across breakpoints */}
                 <footer
                     className="
@@ -59,10 +72,11 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                             "
                         />
 
-                        {/* Palette centered: use a flex spacer technique */}
-                        <div className="flex-1 flex justify-center">
-                            <ScribblePalette />
-                        </div>
+
+                    {/* Palette inline for md+ screens */}
+                    <div className="hidden md:flex flex-1 justify-center">
+                        <ScribblePalette />
+                    </div>
 
                         <InfoText
                             locale={safeLocale as 'pt' | 'en'}
