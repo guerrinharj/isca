@@ -34,35 +34,39 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                     </div>
                 </main>
 
-                {/* Mobile (<md): disabled */}
-                <div className="hidden md:hidden">
-                    {/* nothing will render here */}
-                </div>
-
-                {/* Tablet (md to <lg): fixed footer wrapper with horizontal flex */}
+                {/* Unified footer across breakpoints */}
                 <footer
                     className="
-                        hidden md:flex lg:hidden
                         fixed bottom-0 left-0 right-0 z-30
                         bg-isca-creme border-t-2 border-isca-laranja
-                        py-6 px-4
+                        py-2 px-2
+                        md:py-6 md:px-4
+                        lg:py-2
                     "
                 >
                     <div className="mx-auto w-full flex justify-between items-center">
-                        <BigMark locale={safeLocale} className="text-[8vw] md:w-auto" />
-                        <InfoText locale={safeLocale as 'pt' | 'en'} className="text-right" />
+                        {/* BigMark scales: tiny on mobile, larger on bigger screens */}
+                        <BigMark
+                            locale={safeLocale}
+                            className="
+                                text-5xl leading-none
+                                md:text-[4vw]
+                                lg:text-[5vw]
+                                w-auto
+                            "
+                        />
+                        {/* InfoText also scales per breakpoint */}
+                        <InfoText
+                            locale={safeLocale as 'pt' | 'en'}
+                            className="
+                                text-right
+                                text-[0.5rem]   
+                                md:text-sm
+                                lg:text-base
+                            "
+                        />
                     </div>
                 </footer>
-
-                {/* Desktop (lg+): fixed corners */}
-                <div className="hidden lg:block">
-                    <div className="fixed bottom-4 left-4 z-40">
-                        <BigMark locale={safeLocale} />
-                    </div>
-                    <div className="fixed bottom-4 right-4 z-30">
-                        <InfoText locale={safeLocale as 'pt' | 'en'} />
-                    </div>
-                </div>
             </body>
         </html>
     )

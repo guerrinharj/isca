@@ -10,7 +10,7 @@ export default function BigMark({
     className?: string
 }) {
     const baseClasses =
-        'font-burns-ultra leading-none !text-isca-verde hover:!text-isca-verde text-[20vw] md:text-[10vw] w-[95%] md:w-[60%]'
+        'font-burns-ultra leading-none !text-isca-verde hover:!text-isca-verde'
 
     return (
         <Link href={`/${locale}`} className={`${baseClasses} ${className}`}>
