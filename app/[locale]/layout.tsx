@@ -21,21 +21,48 @@ export default async function RootLayout({ children, params }: LayoutProps) {
                 <aside
                     className="
                         fixed top-0 right-0 z-20
-                        flex
-                        items-start
-                        p-4
+                        flex items-start p-4
                         md:h-full md:items-center md:p-0
                     "
                 >
                     <NavBar t={t} locale={safeLocale} />
                 </aside>
 
-                <main className="py-8">{children}</main>
+                <main className="py-8">
+                    <div className="mx-auto w-full px-4 md:max-w-[500px] lg:max-w-none lg:px-8">
+                        {children}
+                    </div>
+                </main>
 
-                <BigMark locale={safeLocale} />
+                {/* Mobile (<md): disabled */}
+                <div className="hidden md:hidden">
+                    {/* nothing will render here */}
+                </div>
 
-                {/* Bottom-right info */}
-                <InfoText locale={safeLocale} />
+                {/* Tablet (md to <lg): fixed footer wrapper with horizontal flex */}
+                <footer
+                    className="
+                        hidden md:flex lg:hidden
+                        fixed bottom-0 left-0 right-0 z-30
+                        bg-isca-creme border-t-2 border-isca-laranja
+                        py-6 px-4
+                    "
+                >
+                    <div className="mx-auto w-full flex justify-between items-center">
+                        <BigMark locale={safeLocale} className="text-[8vw] md:w-auto" />
+                        <InfoText locale={safeLocale as 'pt' | 'en'} className="text-right" />
+                    </div>
+                </footer>
+
+                {/* Desktop (lg+): fixed corners */}
+                <div className="hidden lg:block">
+                    <div className="fixed bottom-4 left-4 z-40">
+                        <BigMark locale={safeLocale} />
+                    </div>
+                    <div className="fixed bottom-4 right-4 z-30">
+                        <InfoText locale={safeLocale as 'pt' | 'en'} />
+                    </div>
+                </div>
             </body>
         </html>
     )
