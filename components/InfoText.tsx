@@ -18,7 +18,7 @@ export default function InfoText({ locale, className = '' }: InfoTextProps) {
                         Sunday:{' '}
                         <span className="text-isca-laranja">12:00PM - 10:00PM</span>
                     </p>
-                    <p>Rua do Russel, 724 - loja A - Glória - Rio de Janeiro</p>
+                    <p>Rua do Russel, 724 - <span className="text-isca-laranja">Rio de Janeiro</span></p>
                 </>
             ) : (
                 <>
