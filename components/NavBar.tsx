@@ -83,7 +83,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 font-cirrus fixed top-0 left-0 right-0 z-50
                 h-20 w-full
                 pt-[env(safe-area-inset-top)]
-                border-b-2 border-isca-laranja
+                border-b-2 border-isca-verde
                 transition-colors duration-300
                 ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-isca-creme'}
                 md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:text-isca-creme md:border-0
@@ -93,10 +93,10 @@ export default function NavBar({ t, locale }: NavBarProps) {
             <div className="container mx-auto px-3 h-full flex items-center justify-between">
                 {/* MOBILE BAR (no logout here) */}
                 <div className="block md:hidden relative h-full w-full">
-                    <div className="absolute inset-0 rotate-3 origin-top-left overflow-visible transform-gpu">
+                    <div className="absolute inset-0 origin-top-left overflow-visible transform-gpu">
                         <div
                             className="
-                                -rotate-3 origin-top-left h-full
+                                origin-top-left h-full
                                 flex items-center gap-4
                                 overflow-x-auto no-scrollbar
                                 pointer-events-auto will-change-transform
@@ -104,19 +104,19 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         >
                             <Link
                                 href={`/${locale}/cardapio`}
-                                className="shrink-0 hover:text-isca-laranja text-2xl -rotate-12 origin-bottom py-1"
+                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
                             >
                                 {t.nav.menu}
                             </Link>
                             <Link
                                 href={`/${locale}/reservas`}
-                                className="shrink-0 hover:text-isca-laranja text-2xl -rotate-12 origin-bottom py-1"
+                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
                             >
                                 {t.nav.reservas}
                             </Link>
                             <Link
                                 href={`/${locale}/sobre`}
-                                className="shrink-0 hover:text-isca-laranja text-2xl -rotate-12 origin-bottom py-1"
+                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
                             >
                                 {t.nav.sobre}
                             </Link>
@@ -126,6 +126,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         </div>
                     </div>
                 </div>
+
 
                 {/* DESKTOP MENU (logout only on desktop) */}
                 <div
