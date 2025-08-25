@@ -3,27 +3,45 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
+    const { pathname, origin } = request.nextUrl
     const method = request.method
 
-    // ✅ Always allow CORS preflight
+    // Always allow CORS preflight
     if (method === 'OPTIONS') return NextResponse.next()
 
-    // ✅ Public: GET /api/pratos (with or without trailing slash)
+    // Same-origin check (Origin header first, fallback to Referer)
+    const reqOrigin = request.headers.get('origin') || ''
+    const referer = request.headers.get('referer') || ''
+    const isSameOrigin =
+        (reqOrigin && reqOrigin === origin) ||
+        (referer && referer.startsWith(origin))
+
+    // Public routes you already had
     const isPublicPratosList =
         method === 'GET' &&
         (pathname === '/api/pratos' || pathname === '/api/pratos/')
-
-    // ✅ Public: POST /api/reservas (with or without trailing slash)
     const isPublicReservaCreate =
         method === 'POST' &&
         (pathname === '/api/reservas' || pathname === '/api/reservas/')
-
     if (isPublicPratosList || isPublicReservaCreate) {
         return NextResponse.next()
     }
 
-    // 🔒 Everything else requires x-api-key
+    // Allow auth endpoints from same-origin without API key
+    const isAuthLogin =
+        method === 'POST' &&
+        (pathname === '/api/auth/login' || pathname === '/api/auth/login/')
+    const isAuthMe =
+        method === 'GET' &&
+        (pathname === '/api/auth/me' || pathname === '/api/auth/me/')
+    const isAuthLogout =
+        method === 'POST' &&
+        (pathname === '/api/auth/logout' || pathname === '/api/auth/logout/')
+    if ((isAuthLogin || isAuthMe || isAuthLogout) && isSameOrigin) {
+        return NextResponse.next()
+    }
+
+    // Everything else requires x-api-key
     const apiKey = request.headers.get('x-api-key')
     if (apiKey !== process.env.API_SECRET) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {

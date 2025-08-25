@@ -14,16 +14,14 @@ export async function POST(req: Request) {
     const token = sessionCookie ? sessionCookie.split('=')[1] : null
 
     if (token) {
-        // Apaga a sessão no Supabase
         await supabase.from('sessions').delete().eq('token', token)
     }
 
-    // Expira o cookie
     const res = NextResponse.json({ ok: true })
     res.cookies.set(SESSION_COOKIE, '', {
         httpOnly: true,
         sameSite: 'lax',
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
         expires: new Date(0),
     })
