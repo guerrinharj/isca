@@ -79,10 +79,11 @@ export async function POST(req: Request) {
         res.cookies.set(SESSION_COOKIE, token, {
             httpOnly: true,
             sameSite: 'lax',
-            secure: true,
+            secure: process.env.NODE_ENV === 'production', 
             path: '/',
             expires: expiresAt,
         })
+
 
         return res
     } catch (err) {

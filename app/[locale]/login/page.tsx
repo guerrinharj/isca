@@ -99,7 +99,10 @@ export default function LoginPage() {
         try {
             const r = await fetch('/api/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.NEXT_PUBLIC_API_SECRET ?? ''
+                },
                 credentials: 'include',
                 body: JSON.stringify({ email, password }),
             })
