@@ -14,14 +14,68 @@ type NavBarProps = {
     locale: Locale
 }
 
+type MeResponse =
+    | { user: null }
+    | {
+            user: {
+                id: string
+                name: string
+                email: string
+                role: 'ADMIN' | 'USER'
+            }
+        }
+
 export default function NavBar({ t, locale }: NavBarProps) {
     const [scrolled, setScrolled] = useState(false)
+    const [isLogged, setIsLogged] = useState<boolean>(false)
+    const [loadingLogout, setLoadingLogout] = useState(false)
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10)
         window.addEventListener('scroll', onScroll)
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
+
+    useEffect(() => {
+        let alive = true
+        ;(async () => {
+            try {
+                const r = await fetch('/api/auth/me', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'cache-control': 'no-store' },
+                })
+                const data: MeResponse = await r.json()
+                if (!alive) return
+                setIsLogged(Boolean(data.user))
+            } catch {
+                if (!alive) return
+                setIsLogged(false)
+            }
+        })()
+        return () => {
+            alive = false
+        }
+    }, [])
+
+    async function onLogout() {
+        try {
+            setLoadingLogout(true)
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'cache-control': 'no-store' },
+            })
+        } finally {
+            // Refresh UI state after logout
+            setLoadingLogout(false)
+            setIsLogged(false)
+            // Optionally redirect:
+            // window.location.href = `/${locale}`
+            // Or just reload:
+            window.location.reload()
+        }
+    }
 
     return (
         <nav
@@ -36,9 +90,8 @@ export default function NavBar({ t, locale }: NavBarProps) {
             `}
             aria-label="Site navigation"
         >
-            {/* 🟢 Container centers everything */}
             <div className="container mx-auto px-3 h-full flex items-center justify-between">
-                {/* MOBILE BAR */}
+                {/* MOBILE BAR (no logout here) */}
                 <div className="block md:hidden relative h-full w-full">
                     <div className="absolute inset-0 rotate-3 origin-top-left overflow-visible transform-gpu">
                         <div
@@ -74,7 +127,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     </div>
                 </div>
 
-                {/* DESKTOP MENU */}
+                {/* DESKTOP MENU (logout only on desktop) */}
                 <div
                     className="
                         hidden md:flex md:flex-col md:items-end md:justify-center md:gap-6
@@ -101,9 +154,30 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     >
                         {t.nav.sobre}
                     </Link>
+
+                    {/* Locale switcher */}
                     <div className="poppins-regular text-lg">
                         <LocaleSwitcher current={locale} />
                     </div>
+
+                    {/* LOGOUT shown only when logged (desktop only) */}
+                    {isLogged && (
+                        <button
+                            type="button"
+                            onClick={onLogout}
+                            className="
+                                mt-1
+                                text-base poppins-regular
+                                text-red-600                 
+                                hover:text-red-800       
+                                disabled:opacity-60
+                            "
+                            disabled={loadingLogout}
+                            aria-label="Logout"
+                        >
+                            {loadingLogout ? '…' : 'LOGOUT'}
+                        </button>
+                    )}
                 </div>
             </div>
         </nav>
