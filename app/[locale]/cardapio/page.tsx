@@ -202,7 +202,18 @@ function Section({
 }) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
-            <h2 className="font-burns-ultra text-3xl text-isca-verde underline">{title}</h2>
+
+            <div className="relative">
+                <h2
+                    className="
+                    font-cirrus -rotate-12 text-4xl text-isca-azul
+                    absolute right-0 top-1/2 -translate-y-1/2
+                    "
+                >
+                    {title}
+                </h2>
+            </div>
+
             <ul className="mt-4 divide-y divide-current/20">
                 {items.length > 0 ? (
                     items.map(item => <ItemRow key={item.id} item={item} locale={locale} />)
