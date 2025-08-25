@@ -13,7 +13,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
     return (
         <div>
             <section className="py-20 text-center text-isca-verde">
-                <h1 className="text-3xl font-display tracking-tightest mb-6">
+                <h1 className="font-cirrus text-isca-verde-claro -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest mb-6">
                     {t.nav.sobre}
                 </h1>
 
