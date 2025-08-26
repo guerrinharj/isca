@@ -15,14 +15,14 @@ export default async function SobrePage({ params }: SobrePageProps) {
             <section className="py-20 text-isca-verde">
                 <div className="relative max-w-2xl mx-auto">
                     <h1
-                        className="absolute md:-top-[40px] right-[32px] font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                        className="hidden md:block absolute md:-top-[40px] right-[32px] font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                     >
                         {t.nav.sobre}
                     </h1>
 
                     {safeLocale === 'pt' ? (
                         <>
-                            <div className="text-lg pt-14 md:pt-12">
+                            <div className="text-lg md:pt-12">
                                 <p className="text-left opacity-90 mb-4">
                                     O Isca é um bar de pintxos com foco em ingredientes frescos e uma atmosfera acolhedora.
                                 </p>

@@ -47,7 +47,7 @@ export default function ReservasPage() {
         <section className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans">
             <div className="relative max-w-md mx-auto">
                 <h1
-                    className="absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
+                    className="hidden md:block absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
                     style={{ color: 'var(--color-isca-azul)' }}
                 >
                     {t.title}
