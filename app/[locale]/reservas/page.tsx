@@ -2,28 +2,55 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 const API_KEY = process.env.NEXT_PUBLIC_API_SECRET as string
 
 /* ===== auth helper (client, tolerant to payload shape) ===== */
+type AuthResponse =
+    | { loggedIn: boolean }
+    | {
+          user?: unknown
+          session?: unknown
+          id?: unknown
+          email?: string
+          isAdmin?: boolean
+          authenticated?: boolean
+      }
+
 function useLoggedIn() {
     const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
+
     useEffect(() => {
         let ignore = false
         fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' })
             .then(async (r) => {
                 if (!r.ok) throw new Error(String(r.status))
-                let d: any = {}
-                try { d = await r.json() } catch {}
+                let d: AuthResponse | undefined
+                try {
+                    d = await r.json()
+                } catch {
+                    d = undefined
+                }
                 const inferred =
-                    d?.loggedIn ??
-                    Boolean(d?.user ?? d?.session ?? d?.id ?? d?.email ?? d?.isAdmin ?? d?.authenticated)
+                    (d as { loggedIn?: boolean })?.loggedIn ??
+                    Boolean(
+                        (d as { user?: unknown })?.user ??
+                            (d as { session?: unknown })?.session ??
+                            (d as { id?: unknown })?.id ??
+                            (d as { email?: string })?.email ??
+                            (d as { isAdmin?: boolean })?.isAdmin ??
+                            (d as { authenticated?: boolean })?.authenticated
+                    )
                 if (!ignore) setLoggedIn(Boolean(inferred))
             })
-            .catch(() => { if (!ignore) setLoggedIn(false) })
-        return () => { ignore = true }
+            .catch(() => {
+                if (!ignore) setLoggedIn(false)
+            })
+        return () => {
+            ignore = true
+        }
     }, [])
+
     return loggedIn
 }
 
@@ -43,11 +70,13 @@ type Reserva = {
 function formatWhen(iso: string, locale: string) {
     try {
         const d = new Date(iso)
-        return new Intl.DateTimeFormat(
-            locale === 'pt' ? 'pt-BR' : 'en-US',
-            { dateStyle: 'medium', timeStyle: 'short' }
-        ).format(d)
-    } catch { return iso }
+        return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        }).format(d)
+    } catch {
+        return iso
+    }
 }
 
 /* ===== admin index (client) ===== */
@@ -67,7 +96,7 @@ function ReservasIndex({ locale }: { locale: string }) {
                 cache: 'no-store',
             })
             if (!res.ok) throw new Error(await res.text())
-            const d = await res.json()
+            const d: { reservas?: Reserva[] } = await res.json()
             setReservas(Array.isArray(d?.reservas) ? d.reservas : [])
             setCanViewAdmin(true)
         } catch (e) {
@@ -77,15 +106,17 @@ function ReservasIndex({ locale }: { locale: string }) {
         }
     }
 
-    useEffect(() => { fetchAll() }, [])
+    useEffect(() => {
+        fetchAll()
+    }, [])
 
-    const ordered = useMemo(() => {
-        if (!reservas) return null
+    const ordered = useMemo<Reserva[]>(() => {
+        if (!reservas) return []
         return [...reservas].sort((a, b) => +new Date(b.data) - +new Date(a.data))
     }, [reservas])
 
     // Desktop-only gate + auth/permission gate
-    const show = (loggedIn === true || canViewAdmin)
+    const show = loggedIn === true || canViewAdmin
 
     if (!show) {
         // keep layout flow on desktop without flashing content on mobile
@@ -114,7 +145,10 @@ function ReservasIndex({ locale }: { locale: string }) {
         <div className="hidden md:block mt-12 border-t pt-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Reservas (admin)</h2>
-                <button onClick={fetchAll} className="text-sm underline underline-offset-4 hover:opacity-80">
+                <button
+                    onClick={fetchAll}
+                    className="text-sm underline underline-offset-4 hover:opacity-80"
+                >
                     {locale === 'pt' ? 'Atualizar' : 'Refresh'}
                 </button>
             </div>
@@ -123,15 +157,23 @@ function ReservasIndex({ locale }: { locale: string }) {
                 <p className="opacity-70">{locale === 'pt' ? 'Carregando...' : 'Loading...'}</p>
             ) : error ? (
                 <p className="text-red-600">{error}</p>
-            ) : ordered && ordered.length === 0 ? (
+            ) : ordered.length === 0 ? (
                 <p className="opacity-70">{locale === 'pt' ? 'Nenhuma reserva.' : 'No reservations.'}</p>
             ) : (
                 <ul className="space-y-3 pb-10">
-                    {ordered!.map(r => (
-                        <li key={r.id} className="flex items-start justify-between border p-3 rounded text-isca-verde">
+                    {ordered.map((r) => (
+                        <li
+                            key={r.id}
+                            className="flex items-start justify-between border p-3 rounded text-isca-verde"
+                        >
                             <div className="text-sm">
                                 <div className="font-medium flex items-center gap-2 flex-wrap">
-                                    <span className="font-burns-ultra">{r.nome} <span className="poppins-regular"> - {r.quantity} {locale === 'pt' ? 'pessoa(s)' : 'guest(s)'}</span></span>
+                                    <span className="font-burns-ultra">
+                                        {r.nome}{' '}
+                                        <span className="poppins-regular">
+                                            - {r.quantity} {locale === 'pt' ? 'pessoa(s)' : 'guest(s)'}
+                                        </span>
+                                    </span>
                                     <span className="opacity-60">•</span>
                                     <span className="opacity-80">{formatWhen(r.data, locale)}</span>
                                     {r.is_confirmed ? (
@@ -144,7 +186,9 @@ function ReservasIndex({ locale }: { locale: string }) {
                                         </span>
                                     )}
                                 </div>
-                                <div className="opacity-80">{r.email} · {r.telefone}</div>
+                                <div className="opacity-80">
+                                    {r.email} · {r.telefone}
+                                </div>
                                 {r.message ? <div className="mt-1 italic opacity-90">{r.message}</div> : null}
                             </div>
                             <div className="ml-4 shrink-0 flex items-center gap-3 text-sm">
@@ -172,7 +216,7 @@ export default function Page() {
         telefone: '',
         data: '',
         quantity: 2,
-        mensagem: ''
+        mensagem: '',
     })
 
     const t = {
@@ -188,7 +232,10 @@ export default function Page() {
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setForm(f => ({ ...f, [name]: name === 'quantity' ? Number(value) : value }))
+        setForm((f) => ({
+            ...f,
+            [name]: name === 'quantity' ? Number(value) : value,
+        }))
     }
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -197,12 +244,12 @@ export default function Page() {
     }
 
     const inputClasses =
-        "bg-transparent border-b border-isca-verde/40 outline-none ring-0 shadow-none py-2 w-full " +
-        "text-isca-verde font-sans placeholder:opacity-40 " +
-        "focus:border-isca-laranja focus:outline-none focus:ring-0 "
+        'bg-transparent border-b border-isca-verde/40 outline-none ring-0 shadow-none py-2 w-full ' +
+        'text-isca-verde font-sans placeholder:opacity-40 ' +
+        'focus:border-isca-laranja focus:outline-none focus:ring-0 '
 
     const labelClasses =
-        "block text-xs md:text-lg lg:text-xs font-medium mb-1 text-isca-laranja Poppins text-left"
+        'block text-xs md:text-lg lg:text-xs font-medium mb-1 text-isca-laranja Poppins text-left'
 
     return (
         <section className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans relative">
