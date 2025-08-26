@@ -6,24 +6,25 @@ import Link from 'next/link'
 
 const API_KEY = process.env.NEXT_PUBLIC_API_SECRET as string
 
-/* ===== auth helper (client) ===== */
+/* ===== auth helper (client, tolerant to payload shape) ===== */
 function useLoggedIn() {
     const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
     useEffect(() => {
         let ignore = false
-        fetch('/api/me', { credentials: 'include', cache: 'no-store' })
-            .then(r => (r.ok ? r.json() : Promise.reject()))
-            .then(d => { if (!ignore) setLoggedIn(Boolean(d?.loggedIn)) })
+        fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' })
+            .then(async (r) => {
+                if (!r.ok) throw new Error(String(r.status))
+                let d: any = {}
+                try { d = await r.json() } catch {}
+                const inferred =
+                    d?.loggedIn ??
+                    Boolean(d?.user ?? d?.session ?? d?.id ?? d?.email ?? d?.isAdmin ?? d?.authenticated)
+                if (!ignore) setLoggedIn(Boolean(inferred))
+            })
             .catch(() => { if (!ignore) setLoggedIn(false) })
         return () => { ignore = true }
     }, [])
     return loggedIn
-}
-
-function IfLoggedDesktop({ children }: { children: React.ReactNode }) {
-    const loggedIn = useLoggedIn()
-    if (loggedIn !== true) return null
-    return <div className="hidden md:block">{children}</div>
 }
 
 /* ===== types ===== */
@@ -53,6 +54,8 @@ function formatWhen(iso: string, locale: string) {
 function ReservasIndex({ locale }: { locale: string }) {
     const [reservas, setReservas] = useState<Reserva[] | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [canViewAdmin, setCanViewAdmin] = useState(false) // allow if reservas fetch works
+    const loggedIn = useLoggedIn()
     const router = useRouter()
 
     const fetchAll = async () => {
@@ -66,6 +69,7 @@ function ReservasIndex({ locale }: { locale: string }) {
             if (!res.ok) throw new Error(await res.text())
             const d = await res.json()
             setReservas(Array.isArray(d?.reservas) ? d.reservas : [])
+            setCanViewAdmin(true)
         } catch (e) {
             console.error(e)
             setReservas([])
@@ -79,6 +83,14 @@ function ReservasIndex({ locale }: { locale: string }) {
         if (!reservas) return null
         return [...reservas].sort((a, b) => +new Date(b.data) - +new Date(a.data))
     }, [reservas])
+
+    // Desktop-only gate + auth/permission gate
+    const show = (loggedIn === true || canViewAdmin)
+
+    if (!show) {
+        // keep layout flow on desktop without flashing content on mobile
+        return <div className="hidden md:block" />
+    }
 
     const onDelete = async (id: string) => {
         if (!confirm(locale === 'pt' ? 'Deseja deletar esta reserva?' : 'Delete this reservation?')) return
@@ -99,63 +111,61 @@ function ReservasIndex({ locale }: { locale: string }) {
     }
 
     return (
-        <IfLoggedDesktop>
-            <div className="mt-12 border-t pt-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">Reservas (admin)</h2>
-                    <button onClick={fetchAll} className="text-sm underline underline-offset-4 hover:opacity-80">
-                        {locale === 'pt' ? 'Atualizar' : 'Refresh'}
-                    </button>
-                </div>
-
-                {reservas === null ? (
-                    <p className="opacity-70">{locale === 'pt' ? 'Carregando...' : 'Loading...'}</p>
-                ) : error ? (
-                    <p className="text-red-600">{error}</p>
-                ) : ordered && ordered.length === 0 ? (
-                    <p className="opacity-70">{locale === 'pt' ? 'Nenhuma reserva.' : 'No reservations.'}</p>
-                ) : (
-                    <ul className="space-y-3">
-                        {ordered!.map(r => (
-                            <li key={r.id} className="flex items-start justify-between border p-3 rounded">
-                                <div className="text-sm">
-                                    <div className="font-medium flex items-center gap-2 flex-wrap">
-                                        <span>{r.nome} — {r.quantity} {locale === 'pt' ? 'pessoa(s)' : 'guest(s)'}</span>
-                                        <span className="opacity-60">•</span>
-                                        <span className="opacity-80">{formatWhen(r.data, locale)}</span>
-                                        {r.is_confirmed ? (
-                                            <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-green-600/40">
-                                                {locale === 'pt' ? 'confirmada' : 'confirmed'}
-                                            </span>
-                                        ) : (
-                                            <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-yellow-700/40">
-                                                {locale === 'pt' ? 'pendente' : 'pending'}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="opacity-80">{r.email} · {r.telefone}</div>
-                                    {r.message ? <div className="mt-1 italic opacity-90">{r.message}</div> : null}
-                                </div>
-                                <div className="ml-4 shrink-0 flex items-center gap-3 text-sm">
-                                    <Link
-                                        href={`/${locale}/reservas/${r.id}/edit`}
-                                        className="underline underline-offset-4 hover:opacity-80"
-                                    >
-                                        edit
-                                    </Link>
-                                    <button
-                                        onClick={() => onDelete(r.id)}
-                                        className="text-red-600 underline underline-offset-4 hover:opacity-80"
-                                    >
-                                        delete
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+        <div className="hidden md:block mt-12 border-t pt-6">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Reservas (admin)</h2>
+                <button onClick={fetchAll} className="text-sm underline underline-offset-4 hover:opacity-80">
+                    {locale === 'pt' ? 'Atualizar' : 'Refresh'}
+                </button>
             </div>
-        </IfLoggedDesktop>
+
+            {reservas === null ? (
+                <p className="opacity-70">{locale === 'pt' ? 'Carregando...' : 'Loading...'}</p>
+            ) : error ? (
+                <p className="text-red-600">{error}</p>
+            ) : ordered && ordered.length === 0 ? (
+                <p className="opacity-70">{locale === 'pt' ? 'Nenhuma reserva.' : 'No reservations.'}</p>
+            ) : (
+                <ul className="space-y-3 pb-10">
+                    {ordered!.map(r => (
+                        <li key={r.id} className="flex items-start justify-between border p-3 rounded text-isca-verde">
+                            <div className="text-sm">
+                                <div className="font-medium flex items-center gap-2 flex-wrap">
+                                    <span className="font-burns-ultra">{r.nome} <span className="poppins-regular"> - {r.quantity} {locale === 'pt' ? 'pessoa(s)' : 'guest(s)'}</span></span>
+                                    <span className="opacity-60">•</span>
+                                    <span className="opacity-80">{formatWhen(r.data, locale)}</span>
+                                    {r.is_confirmed ? (
+                                        <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-green-600/40">
+                                            {locale === 'pt' ? 'Confirmada' : 'Confirmed'}
+                                        </span>
+                                    ) : (
+                                        <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-yellow-700/40">
+                                            {locale === 'pt' ? 'Pendente' : 'Pending'}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="opacity-80">{r.email} · {r.telefone}</div>
+                                {r.message ? <div className="mt-1 italic opacity-90">{r.message}</div> : null}
+                            </div>
+                            <div className="ml-4 shrink-0 flex items-center gap-3 text-sm">
+                                <Link
+                                    href={`/${locale}/reservas/${r.id}/edit`}
+                                    className="underline underline-offset-4 hover:opacity-80 !text-isca-azul"
+                                >
+                                    edit
+                                </Link>
+                                <button
+                                    onClick={() => onDelete(r.id)}
+                                    className="text-red-600 underline underline-offset-4 hover:opacity-80"
+                                >
+                                    delete
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
     )
 }
 
