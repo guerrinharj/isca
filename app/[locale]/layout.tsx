@@ -29,7 +29,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <NavBar t={t} locale={safeLocale} />
             </aside>
 
-            <main className="py-8">
+            <main className="py-8 md:py-0">
                 <div className="mx-auto w-full px-4 md:max-w-[480px] lg:max-w-none lg:px-8">
                     {children}
                 </div>
