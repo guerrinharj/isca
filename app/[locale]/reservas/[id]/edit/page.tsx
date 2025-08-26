@@ -28,7 +28,7 @@ export default function EditReservaPage({ params }: { params: { locale: string; 
         try {
             const res = await fetch(`/api/reservas/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-api-key':  process.env.API_SECRET || '' },
+                headers: { 'Content-Type': 'application/json', 'x-api-key':  process.env.NEXT_PUBLIC_API_SECRET || '' },
                 credentials: 'include',
                 body: JSON.stringify(form)
             })
