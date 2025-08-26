@@ -2,12 +2,13 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-// Accept param as value OR promise (matches your env's typing)
 type ParamValue = { locale: string }
 type ParamLike = ParamValue | Promise<ParamValue>
 
@@ -139,7 +140,17 @@ async function fetchPratos(): Promise<Prato[]> {
 }
 
 /* UI */
-function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
+function ItemRow({
+    item,
+    locale,
+    loggedIn,
+    deleteActionFor,
+}: {
+    item: Prato
+    locale: Locale
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
+}) {
     const descricao =
         locale === 'en'
             ? (item.descricao_en?.trim() || item.descricao?.trim() || '')
@@ -148,7 +159,6 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     const precoText =
         typeof item.preco === 'number' ? String(item.preco) : (item.preco ?? '')
 
-    // exclusive label logic
     let dietLabel: string | null = null
     if (item.is_vegetariano) {
         dietLabel = locale === 'en' ? 'Vegetarian' : 'Vegetariano'
@@ -160,8 +170,31 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
         <li className="py-3 text-isca-verde">
             <div className="flex items-baseline justify-between gap-4">
                 <span className="font-burns-ultra text-base md-text-xl">{item.nome}</span>
-                <span className="font-burns-ultra text-base md-text-xl">{precoText}</span>
+                <div className="flex items-center gap-3">
+                    <span className="font-burns-ultra text-base md-text-xl">{precoText}</span>
+
+                    {loggedIn && (
+                        <>
+                            <Link
+                                href={`/${locale}/cardapio/${item.id}/edit`}
+                                className="!text-isca-azul text-sm underline underline-offset-4 hover:opacity-80"
+                            >
+                                edit
+                            </Link>
+
+                            <form action={deleteActionFor(item.id)}>
+                                <button
+                                    type="submit"
+                                    className="text-red-600 text-sm underline underline-offset-4 hover:opacity-80"
+                                >
+                                    delete
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
             </div>
+
             {(descricao || dietLabel) && (
                 <p className="mt-1 font-poppins text-sm">
                     {descricao}
@@ -185,29 +218,30 @@ function ItemRow({ item, locale }: { item: Prato; locale: Locale }) {
     )
 }
 
-
-
 function Section({
     id,
     title,
     items,
     locale,
     hidden,
+    loggedIn,
+    deleteActionFor,
 }: {
     id: string
     title: string
     items: Prato[]
     locale: Locale
     hidden?: boolean
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
 }) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
-
             <div className="relative">
                 <h2
                     className="
-                    font-cirrus -rotate-12 text-4xl text-isca-azul
-                    absolute right-0 top-1/2 -translate-y-1/2
+                        font-cirrus -rotate-12 text-4xl text-isca-azul
+                        absolute right-0 top-1/2 -translate-y-1/2
                     "
                 >
                     {title}
@@ -216,7 +250,15 @@ function Section({
 
             <ul className="mt-4 divide-y divide-current/20">
                 {items.length > 0 ? (
-                    items.map(item => <ItemRow key={item.id} item={item} locale={locale} />)
+                    items.map(item => (
+                        <ItemRow
+                            key={item.id}
+                            item={item}
+                            locale={locale}
+                            loggedIn={loggedIn}
+                            deleteActionFor={deleteActionFor}
+                        />
+                    ))
                 ) : (
                     <li className="py-3 font-poppins text-isca-verde">
                         {locale === 'en' ? 'No items yet.' : 'Sem itens por enquanto.'}
@@ -258,9 +300,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
     )
 }
 
-
 export default async function CardapioPage(props: CardapioPageProps) {
-    // In Next 15, both `params` and `searchParams` are Promises
     const { params, searchParams } = props
 
     const { locale: localeParam } = await params
@@ -284,19 +324,93 @@ export default async function CardapioPage(props: CardapioPageProps) {
 
     const baseHref = `/${safeLocale}/cardapio`
 
-    // NEW: show all sections when no filter is active
     const showAll = !activeFilter
     const isHidden = (key: string) => (showAll ? false : activeFilter !== key)
 
+    const jar = await cookies()
+    const loggedIn = Boolean(jar.get('isca_session')?.value)
+
+    const deleteActionFor = (id: string) => {
+        return async (_formData: FormData) => {
+            'use server'
+            try {
+                await fetch(`https://isca-omega.vercel.app/api/pratos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': process.env.API_SECRET || '',
+                    },
+                })
+            } finally {
+                revalidatePath(`/${safeLocale}/cardapio`)
+            }
+        }
+    }
+
     return (
-        <div className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6">
+        <div className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative">
+            {loggedIn && (
+                <Link
+                    href={`/${safeLocale}/cardapio/new`}
+                    className="
+                        hidden md:flex fixed left-6 z-40
+                        h-14 w-14 items-center justify-center
+                        rounded-full border border-black/20 bg-isca-verde text-white
+                        text-3xl leading-none shadow-lg hover:scale-105 transition
+                    "
+                    aria-label="Criar Prato"
+                    title="Criar Prato"
+                >
+                    +
+                </Link>
+            )}
+
             <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
             <div className="space-y-10">
-                <Section id="pintxos" title="Pintxos" items={pintxos} locale={safeLocale} hidden={isHidden('pintxo')} />
-                <Section id="drinks" title="Drinks" items={drinks} locale={safeLocale} hidden={isHidden('drinks')} />
-                <Section id="alcoolicos" title={safeLocale === 'en' ? 'Beverages' : 'Alcoólicos'} items={alcoolicos} locale={safeLocale} hidden={isHidden('alcoolicos')} />
-                <Section id="softs" title="Softs" items={softs} locale={safeLocale} hidden={isHidden('softs')} />
-                <Section id="outros" title={safeLocale === 'en' ? 'Other' : 'Outros'} items={outros} locale={safeLocale} hidden={isHidden('outros')} />
+                <Section
+                    id="pintxos"
+                    title="Pintxos"
+                    items={pintxos}
+                    locale={safeLocale}
+                    hidden={isHidden('pintxo')}
+                    loggedIn={loggedIn}
+                    deleteActionFor={deleteActionFor}
+                />
+                <Section
+                    id="drinks"
+                    title="Drinks"
+                    items={drinks}
+                    locale={safeLocale}
+                    hidden={isHidden('drinks')}
+                    loggedIn={loggedIn}
+                    deleteActionFor={deleteActionFor}
+                />
+                <Section
+                    id="alcoolicos"
+                    title={safeLocale === 'en' ? 'Beverages' : 'Alcoólicos'}
+                    items={alcoolicos}
+                    locale={safeLocale}
+                    hidden={isHidden('alcoolicos')}
+                    loggedIn={loggedIn}
+                    deleteActionFor={deleteActionFor}
+                />
+                <Section
+                    id="softs"
+                    title="Softs"
+                    items={softs}
+                    locale={safeLocale}
+                    hidden={isHidden('softs')}
+                    loggedIn={loggedIn}
+                    deleteActionFor={deleteActionFor}
+                />
+                <Section
+                    id="outros"
+                    title={safeLocale === 'en' ? 'Other' : 'Outros'}
+                    items={outros}
+                    locale={safeLocale}
+                    hidden={isHidden('outros')}
+                    loggedIn={loggedIn}
+                    deleteActionFor={deleteActionFor}
+                />
             </div>
         </div>
     )
