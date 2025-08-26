@@ -52,9 +52,9 @@ export default function EditPratoPage({
         setForm((prev) =>
             prev
                 ? {
-                        ...prev,
-                        [name]: type === 'checkbox' ? checked : value,
-                    }
+                      ...prev,
+                      [name]: type === 'checkbox' ? checked : value,
+                  }
                 : prev
         )
     }
@@ -92,43 +92,43 @@ export default function EditPratoPage({
     }
 
     if (error) {
-        return <p className="text-red-600">{error}</p>
+        return <p className="text-isca-verde">{error}</p>
     }
 
     if (!form) {
-        return <p>Carregando...</p>
+        return <p className="text-isca-verde">Carregando...</p>
     }
 
     return (
-        <section className="max-w-3xl mx-auto py-10">
+        <section className="max-w-3xl mx-auto py-10 text-isca-verde">
             <h1 className="text-2xl font-bold mb-6">Editar Prato</h1>
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-4 text-isca-verde">
                 <input
                     name="nome"
                     value={form.nome}
                     onChange={onInputChange}
-                    className="border p-2 w-full"
+                    className="border p-2 w-full text-isca-verde"
                 />
                 <input
                     name="preco"
                     value={form.preco}
                     onChange={onInputChange}
-                    className="border p-2 w-full"
+                    className="border p-2 w-full text-isca-verde"
                 />
                 <textarea
                     name="descricao"
                     value={form.descricao}
                     onChange={onTextareaChange}
-                    className="border p-2 w-full"
+                    className="border p-2 w-full text-isca-verde"
                 />
                 <textarea
                     name="descricao_en"
                     value={form.descricao_en}
                     onChange={onTextareaChange}
-                    className="border p-2 w-full"
+                    className="border p-2 w-full text-isca-verde"
                 />
 
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -137,7 +137,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Pintxo
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -146,7 +146,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Vegano
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -155,7 +155,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Vegetariano
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -164,7 +164,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Drink
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -173,7 +173,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Alcoólico
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -182,7 +182,7 @@ export default function EditPratoPage({
                         onChange={onInputChange}
                     /> Soft
                 </label>
-                <label>
+                <label className="text-isca-verde">
                     <input
                         type="checkbox"
                         className="mx-2"
@@ -194,7 +194,7 @@ export default function EditPratoPage({
 
                 <button
                     disabled={saving}
-                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                    className="bg-blue-600 text-isca-verde px-4 py-2 rounded"
                 >
                     {saving ? 'Salvando...' : 'Atualizar'}
                 </button>

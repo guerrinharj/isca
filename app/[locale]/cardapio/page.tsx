@@ -350,9 +350,9 @@ export default async function CardapioPage(props: CardapioPageProps) {
         <div className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative">
             {loggedIn && (
                 <Link
-                    href={`/${safeLocale}/pratos/new`}
+                    href={`/${safeLocale}/cardapio/new`}
                     className="
-                        hidden md:flex fixed bottom-6 left-6 z-40
+                        hidden md:flex fixed left-6 z-40
                         h-14 w-14 items-center justify-center
                         rounded-full border border-black/20 bg-isca-verde text-white
                         text-3xl leading-none shadow-lg hover:scale-105 transition
