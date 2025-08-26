@@ -157,7 +157,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     </Link>
 
                     {/* Locale switcher */}
-                    <div className="poppins-regular text-lg">
+                    <div className="poppins-regular text-lg text-isca-verde">
                         <LocaleSwitcher current={locale} />
                     </div>
 
