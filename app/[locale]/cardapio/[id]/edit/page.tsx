@@ -30,8 +30,11 @@ export default function EditPratoPage({
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    // Single source of truth for the client key
+    const API_KEY =
+        (process.env.NEXT_PUBLIC_API_KEY ?? process.env.NEXT_PUBLIC_API_SECRET) || undefined
+
     useEffect(() => {
-        const API_KEY = process.env.NEXT_PUBLIC_API_KEY
         fetch(`/api/pratos/${id}`, {
             credentials: 'include',
             headers: API_KEY ? { 'x-api-key': API_KEY } : undefined,
@@ -45,6 +48,7 @@ export default function EditPratoPage({
                 console.error(e)
                 setError('Não autorizado ou erro ao carregar prato')
             })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
     const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +73,6 @@ export default function EditPratoPage({
         if (!form) return
         setSaving(true)
         try {
-            const API_KEY = process.env.NEXT_PUBLIC_API_KEY
             const res = await fetch(`/api/pratos/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -78,8 +81,18 @@ export default function EditPratoPage({
                 },
                 credentials: 'include',
                 body: JSON.stringify(form),
+                redirect: 'manual',
             })
-            if (!res.ok) throw new Error(await res.text())
+
+            if (res.type === 'opaqueredirect' || (res.status >= 300 && res.status < 400)) {
+                throw new Error(`Redirect detected on PUT /api/pratos/${id}.`)
+            }
+
+            if (!res.ok) {
+                const txt = await res.text()
+                throw new Error(`${res.status} ${txt}`)
+            }
+
             alert('Prato atualizado com sucesso!')
             router.push(`/${locale}/cardapio`)
             router.refresh()
@@ -128,73 +141,76 @@ export default function EditPratoPage({
                     className="border p-2 w-full text-isca-verde"
                 />
 
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_pintxo"
-                        checked={form.is_pintxo}
-                        onChange={onInputChange}
-                    /> Pintxo
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_vegan"
-                        checked={form.is_vegan}
-                        onChange={onInputChange}
-                    /> Vegano
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_vegetariano"
-                        checked={form.is_vegetariano}
-                        onChange={onInputChange}
-                    /> Vegetariano
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_drink"
-                        checked={form.is_drink}
-                        onChange={onInputChange}
-                    /> Drink
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_alcoolico"
-                        checked={form.is_alcoolico}
-                        onChange={onInputChange}
-                    /> Alcoólico
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_soft"
-                        checked={form.is_soft}
-                        onChange={onInputChange}
-                    /> Soft
-                </label>
-                <label className="text-isca-verde">
-                    <input
-                        type="checkbox"
-                        className="mx-2"
-                        name="is_outro"
-                        checked={form.is_outro}
-                        onChange={onInputChange}
-                    /> Outro
-                </label>
+                {/* Checkboxes */}
+                <div className="space-y-2">
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_pintxo"
+                            checked={form.is_pintxo}
+                            onChange={onInputChange}
+                        /> Pintxo
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_vegan"
+                            checked={form.is_vegan}
+                            onChange={onInputChange}
+                        /> Vegano
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_vegetariano"
+                            checked={form.is_vegetariano}
+                            onChange={onInputChange}
+                        /> Vegetariano
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_drink"
+                            checked={form.is_drink}
+                            onChange={onInputChange}
+                        /> Drink
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_alcoolico"
+                            checked={form.is_alcoolico}
+                            onChange={onInputChange}
+                        /> Alcoólico
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_soft"
+                            checked={form.is_soft}
+                            onChange={onInputChange}
+                        /> Soft
+                    </label>
+                    <label className="text-isca-verde block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_outro"
+                            checked={form.is_outro}
+                            onChange={onInputChange}
+                        /> Outro
+                    </label>
+                </div>
 
                 <button
                     disabled={saving}
-                    className="bg-blue-600 text-isca-verde px-4 py-2 rounded"
+                    className="bg-isca-verde text-white px-4 py-2 rounded mt-4"
                 >
                     {saving ? 'Salvando...' : 'Atualizar'}
                 </button>
