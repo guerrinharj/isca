@@ -15,7 +15,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
             <section className="py-20 text-isca-verde">
                 <div className="relative max-w-2xl mx-auto">
                     <h1
-                        className="hidden md:block absolute md:-top-[40px] right-[32px] font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                        className="hidden md:block absolute md:-top-[40px] right-[32px] font-cirrus text-isca-verde -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                     >
                         {t.nav.sobre}
                     </h1>
