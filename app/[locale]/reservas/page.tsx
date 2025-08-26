@@ -148,12 +148,6 @@ function ReservasIndex({ locale }: { locale: string }) {
                                 {r.message ? <div className="mt-1 italic opacity-90">{r.message}</div> : null}
                             </div>
                             <div className="ml-4 shrink-0 flex items-center gap-3 text-sm">
-                                <Link
-                                    href={`/${locale}/reservas/${r.id}/edit`}
-                                    className="underline underline-offset-4 hover:opacity-80 !text-isca-azul"
-                                >
-                                    edit
-                                </Link>
                                 <button
                                     onClick={() => onDelete(r.id)}
                                     className="text-red-600 underline underline-offset-4 hover:opacity-80"
