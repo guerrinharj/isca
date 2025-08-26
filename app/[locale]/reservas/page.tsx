@@ -48,7 +48,7 @@ export default function ReservasPage() {
             <div className="relative max-w-md mx-auto">
                 <h1
                     className="hidden md:block absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
-                    style={{ color: 'var(--color-isca-azul)' }}
+                    style={{ color: 'var(--color-isca-verde)' }}
                 >
                     {t.title}
                 </h1>
