@@ -44,97 +44,100 @@ export default function ReservasPage() {
         "block text-xs md:text-lg lg:text-xs font-medium mb-1 text-isca-laranja Poppins text-left"
 
     return (
-        <section className="py-20 md:py-30 lg:py-5 lg:mb-20 font-sans">
-            <h1
-                className="font-cirrus -rotate-12 text-4xl lg:-text-5xl tracking-tightest mb-6 text-center"
-                style={{ color: 'var(--color-isca-verde-claro)' }}
+        <section className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans">
+            <div className="relative max-w-md mx-auto">
+                <h1
+                    className="absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
+                    style={{ color: 'var(--color-isca-azul)' }}
                 >
-                {t.title}
-            </h1>
+                    {t.title}
+                </h1>
 
-            <form onSubmit={onSubmit} className="grid gap-6 max-w-md mx-auto w-full">
-                <div>
-                    <label className={labelClasses}>{t.name}</label>
-                    <input
-                        name="nome"
-                        value={form.nome}
-                        onChange={onChange}
-                        placeholder="Donizete Pantera"
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
+                    <div>
+                        <label className={labelClasses}>{t.name}</label>
+                        <input
+                            name="nome"
+                            value={form.nome}
+                            onChange={onChange}
+                            placeholder="Donizete Pantera"
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <div>
-                    <label className={labelClasses}>{t.email}</label>
-                    <input
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={onChange}
-                        placeholder="donizetepantera@gmail.com"
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                    <div>
+                        <label className={labelClasses}>{t.email}</label>
+                        <input
+                            name="email"
+                            type="email"
+                            value={form.email}
+                            onChange={onChange}
+                            placeholder="donizetepantera@gmail.com"
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <div>
-                    <label className={labelClasses}>{t.phone}</label>
-                    <input
-                        name="telefone"
-                        value={form.telefone}
-                        onChange={onChange}
-                        placeholder="+55 21 2569 6969"
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                    <div>
+                        <label className={labelClasses}>{t.phone}</label>
+                        <input
+                            name="telefone"
+                            value={form.telefone}
+                            onChange={onChange}
+                            placeholder="+55 21 2569 6969"
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <div>
-                    <label className={labelClasses}>{t.datetime}</label>
-                    <input
-                        name="data"
-                        type="datetime-local"
-                        value={form.data}
-                        onChange={onChange}
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                    <div>
+                        <label className={labelClasses}>{t.datetime}</label>
+                        <input
+                            name="data"
+                            type="datetime-local"
+                            value={form.data}
+                            onChange={onChange}
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <div>
-                    <label className={labelClasses}>{t.qty}</label>
-                    <input
-                        name="quantity"
-                        type="number"
-                        min={1}
-                        value={form.quantity}
-                        onChange={onChange}
-                        placeholder={t.qty}
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                    <div>
+                        <label className={labelClasses}>{t.qty}</label>
+                        <input
+                            name="quantity"
+                            type="number"
+                            min={1}
+                            value={form.quantity}
+                            onChange={onChange}
+                            placeholder={t.qty}
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <div>
-                    <label className={labelClasses}>{t.mensagem}</label>
-                    <input
-                        name="mensagem"
-                        value={form.mensagem}
-                        onChange={onChange}
-                        placeholder="Quero uma mesa que nem a do Maradona"
-                        required
-                        className={inputClasses}
-                    />
-                </div>
+                    <div>
+                        <label className={labelClasses}>{t.mensagem}</label>
+                        <input
+                            name="mensagem"
+                            value={form.mensagem}
+                            onChange={onChange}
+                            placeholder="Quero uma mesa que nem a do Maradona"
+                            required
+                            className={inputClasses}
+                        />
+                    </div>
 
-                <button
-                    type="submit"
-                    className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 bg-isca-laranja text-isca-verde font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
-                >
-                    {t.submit}
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 bg-isca-laranja text-isca-verde font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
+                    >
+                        {t.submit}
+                    </button>
+                </form>
+            </div>
         </section>
+
     )
 }
