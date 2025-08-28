@@ -39,12 +39,11 @@ export function ScribbleCanvas() {
     useEffect(() => {
         if (typeof window === 'undefined') return
         const root = getComputedStyle(document.documentElement)
-        const resolvedBlack =
-            root.getPropertyValue('--color-isca-preto').trim() || '#000000'
+        const resolvedBlack = root.getPropertyValue('--color-isca-preto').trim() || '#000000'
         setColor(resolvedBlack)
     }, [])
 
-    // Listen for palette events
+    // Listen for palette events + clear + save
     useEffect(() => {
         function onColor(e: Event) {
             const detail = (e as CustomEvent).detail as { color: string }
@@ -57,11 +56,35 @@ export function ScribbleCanvas() {
             if (!ctx) return
             ctx.clearRect(0, 0, c.width, c.height)
         }
+        async function onSave() {
+            const c = canvasRef.current
+            if (!c) return
+            // Prefer toBlob (async, memory-friendly)
+            const blob: Blob | null = await new Promise(res => c.toBlob(res, 'image/png'))
+            if (!blob) return
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            const ts = new Date()
+                .toISOString()
+                .replaceAll(':', '')
+                .replaceAll('.', '')
+                .replace('T', '-')
+                .slice(0, 15)
+            a.href = url
+            a.download = `isca-scribble-${ts}.png`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+        }
+
         window.addEventListener('isca:setColor', onColor as EventListener)
         window.addEventListener('isca:clear', onClear)
+        window.addEventListener('isca:save', onSave)
         return () => {
             window.removeEventListener('isca:setColor', onColor as EventListener)
             window.removeEventListener('isca:clear', onClear)
+            window.removeEventListener('isca:save', onSave)
         }
     }, [])
 
@@ -147,11 +170,22 @@ export function ScribbleCanvas() {
         c.addEventListener('pointermove', move)
         c.addEventListener('pointerup', up)
         c.addEventListener('pointercancel', up)
+
+        // Keyboard shortcut: Shift+S to save
+        const onKey = (e: KeyboardEvent) => {
+            if ((e.key === 'S' || e.key === 's') && e.shiftKey) {
+                e.preventDefault()
+                window.dispatchEvent(new Event('isca:save'))
+            }
+        }
+        window.addEventListener('keydown', onKey)
+
         return () => {
             c.removeEventListener('pointerdown', down)
             c.removeEventListener('pointermove', move)
             c.removeEventListener('pointerup', up)
             c.removeEventListener('pointercancel', up)
+            window.removeEventListener('keydown', onKey)
         }
     }, [isHome, color])
 
@@ -191,6 +225,7 @@ export function ScribblePalette() {
         window.dispatchEvent(new CustomEvent('isca:setColor', { detail: { color } }))
     }
     const clear = () => window.dispatchEvent(new Event('isca:clear'))
+    const save = () => window.dispatchEvent(new Event('isca:save'))
 
     return (
         <div className="flex items-center gap-2 mx-2" aria-label="Scribble palette">
@@ -213,7 +248,7 @@ export function ScribblePalette() {
             {/* Clear (X) */}
             <button
                 onClick={clear}
-                title="Limpar desenho"
+                title="Limpar"
                 className="
                     h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
                     flex items-center justify-center
@@ -222,6 +257,21 @@ export function ScribblePalette() {
                 "
             >
                 ✕
+            </button>
+
+            {/* Save (↓) */}
+            <button
+                onClick={save}
+                title="Salvar (Shift+S)"
+                className="
+                    h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
+                    flex items-center justify-center
+                    text-[0.5rem] md:text-xs lg:text-sm
+                    text-black
+                "
+                aria-keyshortcuts="Shift+S"
+            >
+                ↓
             </button>
         </div>
     )
