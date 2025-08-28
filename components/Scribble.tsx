@@ -33,6 +33,7 @@ export function ScribbleCanvas() {
 
     // start with plain black; will be updated if palette emits a color
     const [color, setColor] = useState<string>('#000000')
+    const [lineWidth, setLineWidth] = useState<number>(2)
     const isHome = useIsHome()
 
     // On mount, resolve your black CSS var to be consistent with theme
@@ -43,7 +44,7 @@ export function ScribbleCanvas() {
         setColor(resolvedBlack)
     }, [])
 
-    // Listen for palette events + clear + save
+    // Listen for palette events: color / clear / save / width
     useEffect(() => {
         function onColor(e: Event) {
             const detail = (e as CustomEvent).detail as { color: string }
@@ -59,7 +60,6 @@ export function ScribbleCanvas() {
         async function onSave() {
             const c = canvasRef.current
             if (!c) return
-            // Prefer toBlob (async, memory-friendly)
             const blob: Blob | null = await new Promise(res => c.toBlob(res, 'image/png'))
             if (!blob) return
             const url = URL.createObjectURL(blob)
@@ -77,14 +77,25 @@ export function ScribbleCanvas() {
             a.remove()
             URL.revokeObjectURL(url)
         }
+        function onWidth(e: Event) {
+            const detail = (e as CustomEvent).detail as { width: number }
+            if (typeof detail?.width === 'number' && detail.width > 0) {
+                setLineWidth(detail.width)
+                const c = canvasRef.current
+                const ctx = c?.getContext('2d')
+                if (ctx) ctx.lineWidth = detail.width
+            }
+        }
 
         window.addEventListener('isca:setColor', onColor as EventListener)
         window.addEventListener('isca:clear', onClear)
         window.addEventListener('isca:save', onSave)
+        window.addEventListener('isca:setWidth', onWidth as EventListener)
         return () => {
             window.removeEventListener('isca:setColor', onColor as EventListener)
             window.removeEventListener('isca:clear', onClear)
             window.removeEventListener('isca:save', onSave)
+            window.removeEventListener('isca:setWidth', onWidth as EventListener)
         }
     }, [])
 
@@ -116,9 +127,9 @@ export function ScribbleCanvas() {
 
             ctx.lineJoin = 'round'
             ctx.lineCap = 'round'
-            ctx.lineWidth = 1 // very thin line
+            ctx.lineWidth = lineWidth // keep current thickness on resize
         },
-        []
+        [lineWidth]
     )
 
     useEffect(() => {
@@ -171,7 +182,7 @@ export function ScribbleCanvas() {
         c.addEventListener('pointerup', up)
         c.addEventListener('pointercancel', up)
 
-        // Keyboard shortcut: Shift+S to save
+        // Keyboard: Shift+S to save
         const onKey = (e: KeyboardEvent) => {
             if ((e.key === 'S' || e.key === 's') && e.shiftKey) {
                 e.preventDefault()
@@ -206,6 +217,8 @@ export function ScribbleCanvas() {
 export function ScribblePalette() {
     const isHome = useIsHome()
     const [colors, setColors] = useState<string[]>([]) // resolved once on mount
+    const [width, setWidth] = useState<number>(2)
+    const [selectedColor, setSelectedColor] = useState<string>('#000000')
 
     useEffect(() => {
         if (!isHome) return
@@ -217,33 +230,101 @@ export function ScribblePalette() {
                 : c
         )
         setColors(resolved)
+        // initialize selection to brand black
+        const initial = root.getPropertyValue('--color-isca-preto').trim() || '#000000'
+        setSelectedColor(initial)
+        window.dispatchEvent(new CustomEvent('isca:setWidth', { detail: { width } }))
+
+        // keep in sync if some other control fires a color event
+        const onExternalColor = (e: Event) => {
+            const detail = (e as CustomEvent).detail as { color: string }
+            if (detail?.color) setSelectedColor(detail.color)
+        }
+        window.addEventListener('isca:setColor', onExternalColor as EventListener)
+        return () => window.removeEventListener('isca:setColor', onExternalColor as EventListener)
     }, [isHome])
 
     if (!isHome) return null
 
     const pick = (color: string) => {
+        setSelectedColor(color)
         window.dispatchEvent(new CustomEvent('isca:setColor', { detail: { color } }))
     }
     const clear = () => window.dispatchEvent(new Event('isca:clear'))
     const save = () => window.dispatchEvent(new Event('isca:save'))
 
+    const onWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = Number(e.target.value)
+        setWidth(val)
+        window.dispatchEvent(new CustomEvent('isca:setWidth', { detail: { width: val } }))
+    }
+
+    // inline style for CSS var (typed for TS)
+    const trackStyle = { ['--track-color' as any]: selectedColor } as React.CSSProperties
+
     return (
-        <div className="flex items-center gap-2 mx-2" aria-label="Scribble palette">
-            {colors.map((c, i) => (
-                <button
-                    key={i}
-                    onClick={() => pick(c)}
-                    title="Selecionar cor"
+        <div className="flex items-center gap-3 mx-2" aria-label="Scribble palette">
+            {/* Color dots */}
+            <div className="flex items-center gap-2">
+                {colors.map((c, i) => {
+                    const isActive = c === selectedColor
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => pick(c)}
+                            title="Selecionar cor"
+                            className={`
+                                h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
+                                rounded-full border shadow-sm outline-none
+                                focus:ring-2 focus:ring-black/20
+                                ${isActive ? 'ring-2 ring-black/40 border-black/20' : 'border-black/10'}
+                            `}
+                            style={{ background: c }}
+                        />
+                    )
+                })}
+            </div>
+
+            {/* Width slider (track reflects selected color) */}
+            <div className="flex items-center gap-2 min-w-[90px]">
+                <span className="text-[10px] md:text-xs select-none">1px</span>
+                <input
+                    type="range"
+                    min={1}
+                    max={24}
+                    step={1}
+                    value={width}
+                    onChange={onWidthChange}
+                    title="Espessura do traço"
+                    style={trackStyle}
                     className="
-                        h-3 w-3          /* tiny on mobile */
-                        md:h-5 md:w-5    /* medium on tablet */
-                        lg:h-6 lg:w-6    /* larger on desktop */
-                        rounded-full border border-black/10 shadow-sm
-                        outline-none focus:ring-2 focus:ring-black/20
+                        h-2 w-24 md:w-28 lg:w-32
+                        appearance-none rounded outline-none
+                        bg-[var(--track-color)]
+                        [&::-webkit-slider-runnable-track]:appearance-none
+                        [&::-webkit-slider-runnable-track]:h-2
+                        [&::-webkit-slider-runnable-track]:rounded
+                        [&::-webkit-slider-runnable-track]:bg-[var(--track-color)]
+                        [&::-moz-range-track]:h-2
+                        [&::-moz-range-track]:rounded
+                        [&::-moz-range-track]:bg-[var(--track-color)]
+                        [--thumb-size:12px]
+                        [&::-webkit-slider-thumb]:appearance-none
+                        [&::-webkit-slider-thumb]:h-[var(--thumb-size)]
+                        [&::-webkit-slider-thumb]:w-[var(--thumb-size)]
+                        [&::-webkit-slider-thumb]:rounded-full
+                        [&::-webkit-slider-thumb]:bg-black
+                        [&::-moz-range-thumb]:h-[var(--thumb-size)]
+                        [&::-moz-range-thumb]:w-[var(--thumb-size)]
+                        [&::-moz-range-thumb]:rounded-full
+                        [&::-moz-range-thumb]:bg-black
                     "
-                    style={{ background: c }}
                 />
-            ))}
+                <span className="text-[10px] md:text-xs select-none">24px</span>
+                <span className="text-[10px] md:text-xs text-black/70 w-8 text-right tabular-nums">
+                    {width}px
+                </span>
+            </div>
 
             {/* Clear (X) */}
             <button
