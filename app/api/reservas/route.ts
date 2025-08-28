@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClientService } from '@/lib/supabase'
 import { requireApiKeyOrAdmin } from '@/lib/auth'
+import nodemailer from 'nodemailer'
 
 type PostBody = {
     nome?: string
@@ -35,6 +36,58 @@ function extractError(e: unknown): { message: string; code?: string; details?: s
     }
 
     return { message, code, details }
+}
+
+function fmtWhen(iso: string) {
+    try {
+        const d = new Date(iso)
+        return d.toLocaleString('pt-BR', { hour12: false })
+    } catch {
+        return iso
+    }
+}
+
+/* ========== EMAIL (Gmail via SMTP) ========== */
+async function sendEmail({
+    subject,
+    html,
+}: {
+    subject: string
+    html: string
+}) {
+    const {
+        SMTP_HOST,
+        SMTP_PORT,
+        SMTP_USER,
+        SMTP_PASS,
+        RESERVA_NOTIFY_FROM,
+        RESERVA_NOTIFY_TO,
+    } = process.env
+
+    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !RESERVA_NOTIFY_FROM || !RESERVA_NOTIFY_TO) {
+        return { ok: false, error: 'Missing SMTP envs' }
+    }
+
+    const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT),
+        secure: Number(SMTP_PORT) === 465, // TLS implicit para 465; STARTTLS para 587
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
+    })
+
+    try {
+        await transporter.sendMail({
+            from: RESERVA_NOTIFY_FROM,
+            to: RESERVA_NOTIFY_TO,
+            subject,
+            html,
+        })
+        return { ok: true }
+    } catch (err) {
+        const cause = extractError(err)
+        console.error('EMAIL_SEND_ERROR', cause)
+        return { ok: false, error: cause.message }
+    }
 }
 
 export async function POST(req: Request) {
@@ -72,13 +125,30 @@ export async function POST(req: Request) {
             .select('*')
             .single()
 
-        if (error) {
+        if (error || !reserva) {
             const cause = extractError(error)
             console.error('RESERVA_POST_ERROR', cause)
             return NextResponse.json({ error: 'Database insert failed', cause }, { status: 500 })
         }
 
-        return NextResponse.json({ reserva }, { status: 201 })
+        // ===== Notificação por e-mail (não falha a reserva se der erro) =====
+        const subject = `Nova reserva: ${reserva.nome} • ${fmtWhen(reserva.data)}`
+        const html = [
+            `<p><strong>Nova reserva confirmada</strong></p>`,
+            `<p><strong>Nome:</strong> ${reserva.nome}</p>`,
+            `<p><strong>Email:</strong> ${reserva.email}</p>`,
+            `<p><strong>Telefone:</strong> ${reserva.telefone}</p>`,
+            `<p><strong>Pessoas:</strong> ${reserva.quantity}</p>`,
+            `<p><strong>Quando:</strong> ${fmtWhen(reserva.data)}</p>`,
+            reserva.message ? `<p><strong>Mensagem:</strong> ${reserva.message}</p>` : '',
+            `<p><strong>ID:</strong> ${reserva.id}</p>`,
+        ]
+            .filter(Boolean)
+            .join('\n')
+
+        const emailResult = await sendEmail({ subject, html })
+
+        return NextResponse.json({ reserva, notifications: { email: emailResult } }, { status: 201 })
     } catch (err: unknown) {
         const cause = extractError(err)
         console.error('RESERVA_POST_UNHANDLED', cause)
