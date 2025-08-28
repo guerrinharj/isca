@@ -10,7 +10,7 @@ Ele expõe uma pequena API REST para:
 
 🍽️ CRUD de itens do cardápio (``Prato``)
 
-📅 Criação e gestão de reservas (``Reserva``)
+📅 Criação e gestão de reservas (``Reserva``), com notificação automática por e-mail
 
 
 ## Dependências principais & Runtime
@@ -24,6 +24,8 @@ Ele expõe uma pequena API REST para:
 - ``prisma`` (para gerenciamento/geração do schema, mesmo que as queries em runtime usem Supabase)
 
 - ``zod`` (disponível para validação; não é obrigatório nas rotas mostradas)
+
+- ```nodemailer``` para envio de notificações por email
 
 ## Notas de build/runtime:
 
@@ -154,7 +156,7 @@ O arquivo ``middleware.ts`` define quais rotas exigem ``x-api-key`` e quais são
 
 ### Reservas
 
-``POST /api/reservas`` (PÚBLICA) → cria reserva (valida data e campos).
+``POST /api/reservas`` (PÚBLICA) → cria reserva (valida data e campos) e envia email automático de notificação (via Gmail SMTP)
 
 ``GET /api/reservas`` (PROTEGIDA) → lista reservas (filtros: from, to, confirmed).
 
@@ -176,6 +178,24 @@ O arquivo ``middleware.ts`` define quais rotas exigem ``x-api-key`` e quais são
 ``404`` → registro não encontrado (Supabase retorna código PGRST116)
 
 ``500`` → erro de DB ou exceção não tratada
+
+
+
+## Notificação por Email (Reservas)
+
+- Sempre que uma reserva é criada, o sistema dispara um email automático contendo os dados da reserva.
+- O envio é feito via ```nodemailer``` e SMTP do Gmail (com App Password).
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu.email@gmail.com
+SMTP_PASS=sua_senha_de_app   # gerada em "App Passwords" do Google
+RESERVA_NOTIFY_FROM="Isca <seu.email@gmail.com>"
+RESERVA_NOTIFY_TO=seu.email@gmail.com
+```
+
+- No retorno da API, a chave ``notifications.email.ok`` indica se o envio foi bem-sucedido.
 
 
 ## Notas de segurança
