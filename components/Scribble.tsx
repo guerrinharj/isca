@@ -260,7 +260,8 @@ export function ScribblePalette() {
     }
 
     // inline style for CSS var (typed for TS)
-    const trackStyle = { ['--track-color' as any]: selectedColor } as React.CSSProperties
+    type TrackStyle = React.CSSProperties & { ['--track-color']: string }
+    const trackStyle: TrackStyle = { ['--track-color']: selectedColor }
 
     return (
         <div className="flex items-center gap-3 mx-2" aria-label="Scribble palette">
@@ -296,30 +297,44 @@ export function ScribblePalette() {
                     value={width}
                     onChange={onWidthChange}
                     title="Espessura do traço"
-                    style={trackStyle}
+                    style={trackStyle} // trackStyle has { ['--track-color']: selectedColor }
                     className="
-                        h-2 w-24 md:w-28 lg:w-32
-                        appearance-none rounded outline-none
+                        relative
+                        w-24 md:w-28 lg:w-32
+                        appearance-none
                         bg-[var(--track-color)]
+                        rounded
+                        h-1
+                        outline-none
+                        [--thumb-size:12px]
+
                         [&::-webkit-slider-runnable-track]:appearance-none
-                        [&::-webkit-slider-runnable-track]:h-2
+                        [&::-webkit-slider-runnable-track]:h-1
                         [&::-webkit-slider-runnable-track]:rounded
                         [&::-webkit-slider-runnable-track]:bg-[var(--track-color)]
-                        [&::-moz-range-track]:h-2
+
+                        [&::-moz-range-track]:h-1
                         [&::-moz-range-track]:rounded
                         [&::-moz-range-track]:bg-[var(--track-color)]
-                        [--thumb-size:12px]
+
                         [&::-webkit-slider-thumb]:appearance-none
                         [&::-webkit-slider-thumb]:h-[var(--thumb-size)]
                         [&::-webkit-slider-thumb]:w-[var(--thumb-size)]
                         [&::-webkit-slider-thumb]:rounded-full
-                        [&::-webkit-slider-thumb]:bg-black
+                        [&::-webkit-slider-thumb]:bg-[var(--track-color)]
+                        [&::-webkit-slider-thumb]:border
+                        [&::-webkit-slider-thumb]:border-black/30
+                        [&::-webkit-slider-thumb]:-mt-[calc(var(--thumb-size)/4)]
+
                         [&::-moz-range-thumb]:h-[var(--thumb-size)]
                         [&::-moz-range-thumb]:w-[var(--thumb-size)]
                         [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:bg-black
+                        [&::-moz-range-thumb]:bg-[var(--track-color)]
+                        [&::-moz-range-thumb]:border
+                        [&::-moz-range-thumb]:border-black/30
                     "
                 />
+
                 <span className="text-[10px] md:text-xs select-none">24px</span>
                 <span className="text-[10px] md:text-xs text-black/70 w-8 text-right tabular-nums">
                     {width}px
