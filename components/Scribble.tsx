@@ -297,7 +297,7 @@ export function ScribblePalette() {
                     value={width}
                     onChange={onWidthChange}
                     title="Espessura do traço"
-                    style={trackStyle} // trackStyle has { ['--track-color']: selectedColor }
+                    style={trackStyle}
                     className="
                         relative
                         w-24 md:w-28 lg:w-32
