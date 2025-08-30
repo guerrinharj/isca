@@ -138,19 +138,19 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 >
                     <Link
                         href={`/${locale}/cardapio`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
                     >
                         {t.nav.menu}
                     </Link>
                     <Link
                         href={`/${locale}/reservas`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
                     >
                         {t.nav.reservas}
                     </Link>
                     <Link
                         href={`/${locale}/sobre`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
                     >
                         {t.nav.sobre}
                     </Link>

@@ -34,7 +34,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                         </h1>
 
                         {safeLocale === 'pt' ? (
-                            <div className="text-lg md:pt-12">
+                            <div className="text-base pt-13 md:pt-12">
                                 <p className="text-left opacity-90 mb-4">
                                     O Isca é um bar de pintxos com foco em ingredientes frescos e uma atmosfera acolhedora.
                                 </p>
@@ -46,7 +46,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                                 </p>
                             </div>
                         ) : (
-                            <div className="text-lg md:pt-12">
+                            <div className="text-base pt-13 md:pt-12">
                                 <p className="text-left opacity-90 mb-4">
                                     Isca is a pintxos bar focused on fresh ingredients and a cozy atmosphere.
                                 </p>
@@ -63,7 +63,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                     {/* Block 2: InfoText, aligned right on larger screens */}
                     <div className="relative max-w-2xl mx-auto">
                         <h1
-                            className="absolute right-0 md:right-20 bottom-15 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                            className="absolute right-0 md:right-20 bottom-20 md:bottom-20 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
                             {t.nav.horario}
                         </h1>
@@ -72,9 +72,8 @@ export default async function SobrePage({ params }: SobrePageProps) {
                             locale={safeLocale as 'pt' | 'en'}
                             className="
                                 md:inline-block
-                                text-base
-                                md:text-sm
-                                lg:text-lg
+                                text-lg
+                                md:text-2xl
                             "
                         />
                     </div>
