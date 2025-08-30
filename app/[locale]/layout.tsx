@@ -38,18 +38,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
             <ScribbleCanvas />
 
-            {/* Palette mobile floating, fixed above footer */}
-            <div>
-                <div
-                    className="
-                        fixed bottom-20 md:bottom-22 lg:bottom-25 left-1/2 -translate-x-1/2
-                        flex justify-center
-                        z-40
-                    "
-                >
-                    <ScribblePalette />
-                </div>
-            </div>
 
             {/* Unified footer across breakpoints */}
             <footer
@@ -61,6 +49,20 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     lg:py-2
                 "
             >
+
+                {/* Palette mobile floating, fixed above footer */}
+                <div
+                    className="
+                        fixed bottom-20 md:bottom-22 lg:bottom-25 left-1/2 -translate-x-1/2
+                        z-40 flex justify-center
+                        transform-gpu origin-bottom
+                        scale-[0.8] md:scale-[0.85] lg:scale-[0.9]
+                    "
+                >
+                    <ScribblePalette />
+                </div>
+
+
                 <div
                     className="
                         mx-auto w-full flex items-center
