@@ -28,7 +28,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                     {/* Block 1: Title + copy */}
                     <div className="relative max-w-2xl mx-auto">
                         <h1
-                            className="absolute right-0 hidden md:block font-cirrus text-isca-laranja -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                            className="absolute right-0 md:right-20 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
                             {t.nav.sobre}
                         </h1>
@@ -63,7 +63,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                     {/* Block 2: InfoText, aligned right on larger screens */}
                     <div className="relative max-w-2xl mx-auto">
                         <h1
-                            className="absolute right-20 hidden md:block font-cirrus text-isca-laranja -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                            className="absolute right-0 md:right-20 bottom-15 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
                             {t.nav.horario}
                         </h1>
@@ -72,9 +72,9 @@ export default async function SobrePage({ params }: SobrePageProps) {
                             locale={safeLocale as 'pt' | 'en'}
                             className="
                                 md:inline-block
-                                text-[0.7rem]
+                                text-base
                                 md:text-sm
-                                lg:text-base
+                                lg:text-lg
                             "
                         />
                     </div>
