@@ -68,17 +68,19 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                         mx-auto w-full flex items-center
                         justify-center
                         border-t-1 border-isca-verde
+                        pt-2
                     "
                 >
-                    <BigMark
-                        locale={safeLocale}
-                        className="
-                            text-5xl leading-none
-                            md:text-[6vw]
-                            lg:text-[5vw]
-                            w-auto
-                        "
-                    />
+                <BigMark
+                    locale={safeLocale}
+                    className="
+                        text-5xl leading-none
+                        md:text-[6vw]
+                        lg:text-[5vw]
+                        w-auto
+                        transform translate-y-[2px]
+                    "
+                />
                 </div>
             </footer>
         </>

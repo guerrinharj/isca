@@ -268,13 +268,15 @@ export default function Page() {
                 className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans relative will-change-[opacity,transform]"
                 style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
             >
-                <div className="relative max-w-md mx-auto">
-                    <h1
+
+                <h1
                         className="hidden md:block absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
                         style={{ color: 'var(--color-isca-azul)' }}
                     >
                         {t.title}
-                    </h1>
+                </h1>
+                
+                <div className="relative max-w-md mx-auto">
 
                     <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
                         <div>
