@@ -65,6 +65,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     className="
                         mx-auto w-full flex items-center
                         justify-center md:justify-between
+                        border-t-1 border-isca-verde
                     "
                 >
                     <BigMark

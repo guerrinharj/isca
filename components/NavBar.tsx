@@ -83,7 +83,6 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 font-cirrus fixed top-0 left-0 right-0 z-50
                 h-20 w-full
                 pt-[env(safe-area-inset-top)]
-                border-b-1 border-isca-verde
                 transition-colors duration-300
                 ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-isca-creme'}
                 md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:text-isca-creme md:border-0
@@ -93,7 +92,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
             <div className="container mx-auto px-3 h-full flex items-center justify-between">
                 {/* MOBILE BAR (no logout here) */}
                 <div className="block md:hidden relative h-full w-full">
-                    <div className="absolute inset-0 origin-top-left overflow-visible transform-gpu">
+                    <div className="border-b-1 border-isca-verde absolute inset-0 origin-top-left overflow-visible transform-gpu">
                         <div
                             className="
                                 origin-top-left h-full
