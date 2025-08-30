@@ -80,7 +80,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
     return (
         <nav
             className={`
-                font-cirrus fixed top-0 left-0 right-0 z-50
+                font-burns-ultra fixed top-0 left-0 right-0 z-50
                 h-20 w-full
                 pt-[env(safe-area-inset-top)]
                 transition-colors duration-300
@@ -133,24 +133,24 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         hidden md:flex md:flex-col md:items-end md:justify-center md:gap-6
                         md:fixed md:right-0 md:top-0 md:z-50
                         md:h-screen md:w-auto md:p-6
-                        md:transform md:rotate-2
+                        md:transform
                     "
                 >
                     <Link
                         href={`/${locale}/cardapio`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl -rotate-12 origin-right"
+                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
                     >
                         {t.nav.menu}
                     </Link>
                     <Link
                         href={`/${locale}/reservas`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl -rotate-12 origin-right"
+                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
                     >
                         {t.nav.reservas}
                     </Link>
                     <Link
                         href={`/${locale}/sobre`}
-                        className="hover:text-isca-laranja block text-4xl lg:text-5xl -rotate-12 origin-right"
+                        className="hover:text-isca-laranja block text-4xl lg:text-5xl origin-right"
                     >
                         {t.nav.sobre}
                     </Link>

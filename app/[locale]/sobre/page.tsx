@@ -1,5 +1,6 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
+import InfoText from '../../../components/InfoText'
 
 type SobrePageProps = {
     params: Promise<{ locale: Locale }>
@@ -59,6 +60,18 @@ export default async function SobrePage({ params }: SobrePageProps) {
                             </>
                         )}
                     </div>
+
+                    <InfoText
+                        locale={safeLocale as 'pt' | 'en'}
+                        className="
+                            hidden
+                            md:block
+                            text-right
+                            text-[0.7rem]
+                            md:text-sm
+                            lg:text-base
+                        "
+                    />
                 </section>
             </div>
         </>

@@ -39,7 +39,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <ScribbleCanvas />
 
             {/* Palette mobile floating, fixed above footer */}
-            <div className="md:hidden">
+            <div>
                 <div
                     className="
                         fixed bottom-20 left-1/2 -translate-x-1/2
@@ -64,7 +64,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <div
                     className="
                         mx-auto w-full flex items-center
-                        justify-center md:justify-between
+                        justify-center
                         border-t-1 border-isca-verde
                     "
                 >
@@ -75,23 +75,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                             md:text-[8vw]
                             lg:text-[5vw]
                             w-auto
-                        "
-                    />
-
-                    {/* Palette inline for md+ screens */}
-                    <div className="hidden md:flex flex-1 justify-center">
-                        <ScribblePalette />
-                    </div>
-
-                    <InfoText
-                        locale={safeLocale as 'pt' | 'en'}
-                        className="
-                            hidden
-                            md:block
-                            text-right
-                            text-[0.7rem]
-                            md:text-sm
-                            lg:text-base
                         "
                     />
                 </div>
