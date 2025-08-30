@@ -9,13 +9,13 @@ const API_KEY = process.env.NEXT_PUBLIC_API_SECRET as string
 type AuthResponse =
     | { loggedIn: boolean }
     | {
-          user?: unknown
-          session?: unknown
-          id?: unknown
-          email?: string
-          isAdmin?: boolean
-          authenticated?: boolean
-      }
+            user?: unknown
+            session?: unknown
+            id?: unknown
+            email?: string
+            isAdmin?: boolean
+            authenticated?: boolean
+        }
 
 function useLoggedIn() {
     const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
@@ -142,7 +142,10 @@ function ReservasIndex({ locale }: { locale: string }) {
     }
 
     return (
-        <div className="hidden md:block mt-12 border-t pt-6">
+        <div
+            className="hidden md:block mt-12 border-t pt-6 will-change-[opacity,transform]"
+            style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
+        >
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Reservas (admin)</h2>
                 <button
@@ -252,102 +255,115 @@ export default function Page() {
         'block text-xs md:text-lg lg:text-xs font-medium mb-1 text-isca-laranja Poppins text-left'
 
     return (
-        <section className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans relative">
-            <div className="relative max-w-md mx-auto">
-                <h1
-                    className="hidden md:block absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
-                    style={{ color: 'var(--color-isca-verde)' }}
-                >
-                    {t.title}
-                </h1>
+        <>
+            {/* global to this file; used by outer section and admin list */}
+            <style>{`
+                @keyframes fadeInUpMini {
+                    from { opacity: 0; transform: translateY(2px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
 
-                <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
-                    <div>
-                        <label className={labelClasses}>{t.name}</label>
-                        <input
-                            name="nome"
-                            value={form.nome}
-                            onChange={onChange}
-                            placeholder="Donizete Pantera"
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <div>
-                        <label className={labelClasses}>{t.email}</label>
-                        <input
-                            name="email"
-                            type="email"
-                            value={form.email}
-                            onChange={onChange}
-                            placeholder="donizetepantera@gmail.com"
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <div>
-                        <label className={labelClasses}>{t.phone}</label>
-                        <input
-                            name="telefone"
-                            value={form.telefone}
-                            onChange={onChange}
-                            placeholder="+55 21 2569 6969"
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <div>
-                        <label className={labelClasses}>{t.datetime}</label>
-                        <input
-                            name="data"
-                            type="datetime-local"
-                            value={form.data}
-                            onChange={onChange}
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <div>
-                        <label className={labelClasses}>{t.qty}</label>
-                        <input
-                            name="quantity"
-                            type="number"
-                            min={1}
-                            value={form.quantity}
-                            onChange={onChange}
-                            placeholder={t.qty}
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <div>
-                        <label className={labelClasses}>{t.mensagem}</label>
-                        <input
-                            name="mensagem"
-                            value={form.mensagem}
-                            onChange={onChange}
-                            placeholder="Quero uma mesa que nem a do Maradona"
-                            required
-                            className={inputClasses}
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 bg-isca-laranja text-isca-verde font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
+            <section
+                className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans relative will-change-[opacity,transform]"
+                style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
+            >
+                <div className="relative max-w-md mx-auto">
+                    <h1
+                        className="hidden md:block absolute -top-[40px] right-[32px] font-cirrus -rotate-12 text-4xl md:text-5xl tracking-tightest"
+                        style={{ color: 'var(--color-isca-verde)' }}
                     >
-                        {t.submit}
-                    </button>
-                </form>
+                        {t.title}
+                    </h1>
 
-                {/* índice de reservas (admin only) */}
-                <ReservasIndex locale={locale} />
-            </div>
-        </section>
+                    <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
+                        <div>
+                            <label className={labelClasses}>{t.name}</label>
+                            <input
+                                name="nome"
+                                value={form.nome}
+                                onChange={onChange}
+                                placeholder="Donizete Pantera"
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClasses}>{t.email}</label>
+                            <input
+                                name="email"
+                                type="email"
+                                value={form.email}
+                                onChange={onChange}
+                                placeholder="donizetepantera@gmail.com"
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClasses}>{t.phone}</label>
+                            <input
+                                name="telefone"
+                                value={form.telefone}
+                                onChange={onChange}
+                                placeholder="+55 21 2569 6969"
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClasses}>{t.datetime}</label>
+                            <input
+                                name="data"
+                                type="datetime-local"
+                                value={form.data}
+                                onChange={onChange}
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClasses}>{t.qty}</label>
+                            <input
+                                name="quantity"
+                                type="number"
+                                min={1}
+                                value={form.quantity}
+                                onChange={onChange}
+                                placeholder={t.qty}
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClasses}>{t.mensagem}</label>
+                            <input
+                                name="mensagem"
+                                value={form.mensagem}
+                                onChange={onChange}
+                                placeholder="Quero uma mesa que nem a do Maradona"
+                                required
+                                className={inputClasses}
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 bg-isca-laranja text-isca-verde font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
+                        >
+                            {t.submit}
+                        </button>
+                    </form>
+
+                    {/* índice de reservas (admin only) */}
+                    <ReservasIndex locale={locale} />
+                </div>
+            </section>
+        </>
     )
 }
