@@ -83,7 +83,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 font-cirrus fixed top-0 left-0 right-0 z-50
                 h-20 w-full
                 pt-[env(safe-area-inset-top)]
-                border-b-2 border-isca-verde
+                border-b-1 border-isca-verde
                 transition-colors duration-300
                 ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-isca-creme'}
                 md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:text-isca-creme md:border-0
