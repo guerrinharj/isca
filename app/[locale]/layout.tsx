@@ -38,52 +38,45 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
             <ScribbleCanvas />
 
-            {/* Palette mobile floating, fixed above footer */}
-            <div className="md:hidden">
-                <div
-                    className="
-                        fixed bottom-20 left-1/2 -translate-x-1/2
-                        flex justify-center
-                        z-40
-                    "
-                >
-                    <ScribblePalette />
-                </div>
-            </div>
 
             {/* Unified footer across breakpoints */}
             <footer
                 className="
                     fixed bottom-0 left-0 right-0 z-30
-                    bg-isca-creme border-t-2 border-isca-verde
+                    bg-isca-creme
                     py-2 px-3
                     md:py-6 md:px-4
                     lg:py-2
                 "
             >
-                <div className="mx-auto w-full flex justify-between items-center">
+
+                {/* Palette mobile floating, fixed above footer */}
+                <div
+                    className="
+                        fixed bottom-20 md:bottom-22 lg:bottom-25 left-1/2 -translate-x-1/2
+                        z-40 flex justify-center
+                        transform-gpu origin-bottom
+                        scale-[0.8] md:scale-[0.85] lg:scale-[0.9]
+                    "
+                >
+                    <ScribblePalette />
+                </div>
+
+
+                <div
+                    className="
+                        mx-auto w-full flex items-center
+                        justify-center
+                        border-t-1 border-isca-verde
+                    "
+                >
                     <BigMark
                         locale={safeLocale}
                         className="
                             text-5xl leading-none
-                            md:text-[8vw]
+                            md:text-[6vw]
                             lg:text-[5vw]
                             w-auto
-                        "
-                    />
-
-                    {/* Palette inline for md+ screens */}
-                    <div className="hidden md:flex flex-1 justify-center">
-                        <ScribblePalette />
-                    </div>
-
-                    <InfoText
-                        locale={safeLocale as 'pt' | 'en'}
-                        className="
-                            text-right
-                            text-[0.7rem]
-                            md:text-sm
-                            lg:text-base
                         "
                     />
                 </div>
