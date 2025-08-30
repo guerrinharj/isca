@@ -42,7 +42,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <div>
                 <div
                     className="
-                        fixed bottom-20 left-1/2 -translate-x-1/2
+                        fixed bottom-20 md:bottom-22 lg:bottom-25 left-1/2 -translate-x-1/2
                         flex justify-center
                         z-40
                     "
@@ -72,7 +72,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                         locale={safeLocale}
                         className="
                             text-5xl leading-none
-                            md:text-[8vw]
+                            md:text-[6vw]
                             lg:text-[5vw]
                             w-auto
                         "
