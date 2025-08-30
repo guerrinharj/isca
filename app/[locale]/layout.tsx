@@ -61,7 +61,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     lg:py-2
                 "
             >
-                <div className="mx-auto w-full flex justify-between items-center">
+                <div
+                    className="
+                        mx-auto w-full flex items-center
+                        justify-center md:justify-between
+                    "
+                >
                     <BigMark
                         locale={safeLocale}
                         className="
@@ -80,6 +85,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <InfoText
                         locale={safeLocale as 'pt' | 'en'}
                         className="
+                            hidden
+                            md:block
                             text-right
                             text-[0.7rem]
                             md:text-sm
