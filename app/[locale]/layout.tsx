@@ -55,7 +55,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <footer
                 className="
                     fixed bottom-0 left-0 right-0 z-30
-                    bg-isca-creme border-t-2 border-isca-verde
+                    bg-isca-creme
                     py-2 px-3
                     md:py-6 md:px-4
                     lg:py-2
