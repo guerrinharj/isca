@@ -8,7 +8,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pt">
-            <body className="bg-isca-creme font-sans relative min-h-screen">
+            <body className="bg-isca-creme font-sans relative min-h-screen  animate-fadeIn">
                 {children}
             </body>
         </html>
