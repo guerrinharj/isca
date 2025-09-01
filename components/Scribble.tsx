@@ -31,20 +31,20 @@ export function ScribbleCanvas() {
     const drawingRef = useRef(false)
     const lastPosRef = useRef<{ x: number; y: number } | null>(null)
 
-    // start with plain black; will be updated if palette emits a color
-    const [color, setColor] = useState<string>('#000000')
+    // start with brand orange
+    const [color, setColor] = useState<string>('#ff6600')
     const [lineWidth, setLineWidth] = useState<number>(2)
     const isHome = useIsHome()
 
-    // On mount, resolve your black CSS var to be consistent with theme
+    // On mount, resolve orange CSS var
     useEffect(() => {
         if (typeof window === 'undefined') return
         const root = getComputedStyle(document.documentElement)
-        const resolvedBlack = root.getPropertyValue('--color-isca-preto').trim() || '#000000'
-        setColor(resolvedBlack)
+        const resolvedOrange = root.getPropertyValue('--color-isca-laranja').trim() || '#ff6600'
+        setColor(resolvedOrange)
     }, [])
 
-    // Listen for palette events: color / clear / save / width
+    // Listen for palette events
     useEffect(() => {
         function onColor(e: Event) {
             const detail = (e as CustomEvent).detail as { color: string }
@@ -99,7 +99,7 @@ export function ScribbleCanvas() {
         }
     }, [])
 
-    // DPR-aware resize (keeps previous content)
+    // DPR-aware resize
     const resize = useMemo(
         () => () => {
             const c = canvasRef.current
@@ -120,14 +120,12 @@ export function ScribbleCanvas() {
             c.style.width = `${w}px`
             c.style.height = `${h}px`
 
-            // scale to CSS pixels
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-            // restore image roughly in CSS pixel space
             ctx.drawImage(prev, 0, 0, prev.width / dpr, prev.height / dpr)
 
             ctx.lineJoin = 'round'
             ctx.lineCap = 'round'
-            ctx.lineWidth = lineWidth // keep current thickness on resize
+            ctx.lineWidth = lineWidth
         },
         [lineWidth]
     )
@@ -216,9 +214,9 @@ export function ScribbleCanvas() {
 /* -------------------------------------------------------------------------- */
 export function ScribblePalette() {
     const isHome = useIsHome()
-    const [colors, setColors] = useState<string[]>([]) // resolved once on mount
+    const [colors, setColors] = useState<string[]>([])
     const [width, setWidth] = useState<number>(2)
-    const [selectedColor, setSelectedColor] = useState<string>('#000000')
+    const [selectedColor, setSelectedColor] = useState<string>('#ff6600')
 
     useEffect(() => {
         if (!isHome) return
@@ -230,12 +228,12 @@ export function ScribblePalette() {
                 : c
         )
         setColors(resolved)
-        // initialize selection to brand black
-        const initial = root.getPropertyValue('--color-isca-preto').trim() || '#000000'
+
+        const initial = root.getPropertyValue('--color-isca-laranja').trim() || '#ff6600'
         setSelectedColor(initial)
+        window.dispatchEvent(new CustomEvent('isca:setColor', { detail: { color: initial } }))
         window.dispatchEvent(new CustomEvent('isca:setWidth', { detail: { width } }))
 
-        // keep in sync if some other control fires a color event
         const onExternalColor = (e: Event) => {
             const detail = (e as CustomEvent).detail as { color: string }
             if (detail?.color) setSelectedColor(detail.color)
@@ -259,9 +257,18 @@ export function ScribblePalette() {
         window.dispatchEvent(new CustomEvent('isca:setWidth', { detail: { width: val } }))
     }
 
-    // inline style for CSS var (typed for TS)
-    type TrackStyle = React.CSSProperties & { ['--track-color']: string }
-    const trackStyle: TrackStyle = { ['--track-color']: selectedColor }
+    type TrackStyle = React.CSSProperties & {
+        ['--track-color']: string
+        ['--track-h']?: string
+        ['--thumb-size']?: string
+    }
+
+    // Thin track + centered thumb vars (tweak sizes here if desired)
+    const trackStyle: TrackStyle = {
+        ['--track-color']: selectedColor,
+        ['--track-h']: '2px',
+        ['--thumb-size']: '12px',
+    }
 
     return (
         <div className="flex items-center gap-3 mx-2" aria-label="Scribble palette">
@@ -286,7 +293,7 @@ export function ScribblePalette() {
                 })}
             </div>
 
-            {/* Width slider (track reflects selected color) */}
+            {/* Width slider */}
             <div className="flex items-center gap-2 min-w-[90px]">
                 <span className="text-[10px] md:text-xs select-none">1px</span>
                 <input
@@ -302,21 +309,21 @@ export function ScribblePalette() {
                         relative
                         w-24 md:w-28 lg:w-32
                         appearance-none
-                        bg-[var(--track-color)]
-                        rounded
-                        h-1
-                        outline-none
-                        [--thumb-size:12px]
+                        bg-transparent
+                        h-[var(--thumb-size)]                 /* give input the thumb height */
 
+                        /* WEBKIT track */
                         [&::-webkit-slider-runnable-track]:appearance-none
-                        [&::-webkit-slider-runnable-track]:h-1
+                        [&::-webkit-slider-runnable-track]:h-[var(--track-h)]
                         [&::-webkit-slider-runnable-track]:rounded
                         [&::-webkit-slider-runnable-track]:bg-[var(--track-color)]
 
-                        [&::-moz-range-track]:h-1
+                        /* FIREFOX track */
+                        [&::-moz-range-track]:h-[var(--track-h)]
                         [&::-moz-range-track]:rounded
                         [&::-moz-range-track]:bg-[var(--track-color)]
 
+                        /* WEBKIT thumb */
                         [&::-webkit-slider-thumb]:appearance-none
                         [&::-webkit-slider-thumb]:h-[var(--thumb-size)]
                         [&::-webkit-slider-thumb]:w-[var(--thumb-size)]
@@ -324,8 +331,10 @@ export function ScribblePalette() {
                         [&::-webkit-slider-thumb]:bg-[var(--track-color)]
                         [&::-webkit-slider-thumb]:border
                         [&::-webkit-slider-thumb]:border-black/30
-                        [&::-webkit-slider-thumb]:-mt-[calc(var(--thumb-size)/4)]
+                        [&::-webkit-slider-thumb]:-mt-[calc((var(--thumb-size)-var(--track-h))/2)]
+                        /* centers thumb over thin track in Chrome/Safari */
 
+                        /* FIREFOX thumb (Firefox centers without mt hack) */
                         [&::-moz-range-thumb]:h-[var(--thumb-size)]
                         [&::-moz-range-thumb]:w-[var(--thumb-size)]
                         [&::-moz-range-thumb]:rounded-full
@@ -346,9 +355,9 @@ export function ScribblePalette() {
                 onClick={clear}
                 title="Limpar"
                 className="
-                    h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
+                    h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6
                     flex items-center justify-center
-                    text-[0.5rem] md:text-xs lg:text-sm
+                    text-[0.6rem] md:text-xs lg:text-sm
                     text-black
                 "
             >
@@ -360,9 +369,9 @@ export function ScribblePalette() {
                 onClick={save}
                 title="Salvar (Shift+S)"
                 className="
-                    h-3 w-3 md:h-5 md:w-5 lg:h-6 lg:w-6
+                    h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6
                     flex items-center justify-center
-                    text-[0.5rem] md:text-xs lg:text-sm
+                    text-[0.6rem] md:text-xs lg:text-sm
                     text-black
                 "
                 aria-keyshortcuts="Shift+S"
