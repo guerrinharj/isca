@@ -317,3 +317,31 @@ a:hover {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;     /* Firefox */
 }
+
+
+/* Wave on hover */
+.wave-hover { 
+  display: inline-flex; 
+}
+
+.wave-hover span { 
+    display: inline-block; 
+}
+
+.wave-hover:hover span {
+    animation: wave-bounce 0.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 80ms);
+}
+
+@keyframes wave-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-0.4em); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wave-hover:hover span { animation: none; }
+}
+
+
+
+

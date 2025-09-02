@@ -58,6 +58,20 @@ export default function NavBar({ t, locale }: NavBarProps) {
         }
     }, [])
 
+    // Build wave spans into elements we control (React won't overwrite)
+    useEffect(() => {
+        document.querySelectorAll<HTMLElement>('[data-wave]').forEach(el => {
+            if (el.getAttribute('data-wave-init')) return
+            el.setAttribute('data-wave-init', 'true')
+            const text = el.dataset.text ?? el.textContent ?? ''
+            el.setAttribute('aria-hidden', 'true')
+            el.innerHTML = text
+                .split('')
+                .map((ch, i) => `<span style="--i:${i}">${ch === ' ' ? '&nbsp;' : ch}</span>`)
+                .join('')
+        })
+    }, [])
+
     async function onLogout() {
         try {
             setLoadingLogout(true)
@@ -144,23 +158,34 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         md:transform
                     "
                 >
+                    {/* Cardápio */}
                     <Link
                         href={`/${locale}/cardapio`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.menu}
                     >
-                        {t.nav.menu}
+                        <span className="sr-only">{t.nav.menu}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.menu} />
                     </Link>
+
+                    {/* Reservas */}
                     <Link
                         href={`/${locale}/reservas`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.reservas}
                     >
-                        {t.nav.reservas}
+                        <span className="sr-only">{t.nav.reservas}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.reservas} />
                     </Link>
+
+                    {/* Sobre */}
                     <Link
                         href={`/${locale}/sobre`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.sobre}
                     >
-                        {t.nav.sobre}
+                        <span className="sr-only">{t.nav.sobre}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.sobre} />
                     </Link>
 
                     {/* Locale switcher + Instagram */}
