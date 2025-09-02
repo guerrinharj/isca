@@ -271,12 +271,22 @@ function Section({
 
 function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; locale: Locale }) {
     const items = [
-        { key: 'pintxo', label: 'Pintxos' },
-        { key: 'outros', label: locale === 'en' ? 'Others' : 'Outros' },
-        { key: 'drinks', label: 'Drinks' },
-        { key: 'alcoolicos', label: locale === 'en' ? 'Beverages' : 'Alcoólicos' },
-        { key: 'softs', label: 'Softs' },
+        { key: 'pintxo',     label: 'Pintxos' },
+        { key: 'outros',     label: locale === 'en' ? 'Others'     : 'Outros' },
+        { key: 'drinks',     label: 'Drinks' },
+        { key: 'alcoolicos', label: locale === 'en' ? 'Beverages'  : 'Alcoólicos' },
+        { key: 'softs',      label: 'Softs' },
     ]
+
+    const wave = (text: string) => (
+        <span className="wave-hover" aria-hidden="true">
+            {Array.from(text).map((ch, i) => (
+                <span key={i} style={{ ['--i' as any]: i }}>
+                    {ch === ' ' ? '\u00A0' : ch}
+                </span>
+            ))}
+        </span>
+    )
 
     return (
         <div className="mb-8 flex flex-wrap overflow-x-auto no-scrollbar gap-4">
@@ -287,18 +297,21 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                     <Link
                         key={it.key}
                         href={href}
+                        aria-label={it.label}
                         className={[
                             'px-1 py-1 font-burns-ultra text-xs text-isca-verde',
                             isActive ? 'underline underline-offset-4' : 'hover:underline'
                         ].join(' ')}
                     >
-                        {it.label}
+                        <span className="sr-only">{it.label}</span>
+                        {wave(it.label)}
                     </Link>
                 )
             })}
         </div>
     )
 }
+
 
 export default async function CardapioPage(props: CardapioPageProps) {
     const { params, searchParams } = props
