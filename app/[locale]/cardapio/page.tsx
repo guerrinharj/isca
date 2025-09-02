@@ -4,6 +4,7 @@ import { locales, type Locale } from '@/lib/i18n/locales'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import type { CSSProperties } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,8 @@ type Prato = {
     is_soft?: boolean | null
     is_outro?: boolean | null
 }
+
+type CSSVars = CSSProperties & { ['--i']?: number | string }
 
 /* utils */
 function isRecord(x: unknown): x is Record<string, unknown> {
@@ -278,16 +281,6 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
         { key: 'softs',      label: 'Softs' },
     ]
 
-    const wave = (text: string) => (
-        <span className="wave-hover" aria-hidden="true">
-            {Array.from(text).map((ch, i) => (
-                <span key={i} style={{ ['--i' as any]: i }}>
-                    {ch === ' ' ? '\u00A0' : ch}
-                </span>
-            ))}
-        </span>
-    )
-
     return (
         <div className="mb-8 flex flex-wrap overflow-x-auto no-scrollbar gap-4">
             {items.map(it => {
@@ -304,14 +297,22 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                         ].join(' ')}
                     >
                         <span className="sr-only">{it.label}</span>
-                        {wave(it.label)}
+                        <span className="wave-hover" aria-hidden="true">
+                            {Array.from(it.label).map((ch, i) => {
+                                const spanStyle: CSSVars = { ['--i']: i }
+                                return (
+                                    <span key={i} style={spanStyle}>
+                                        {ch === ' ' ? '\u00A0' : ch}
+                                    </span>
+                                )
+                            })}
+                        </span>
                     </Link>
                 )
             })}
         </div>
     )
 }
-
 
 export default async function CardapioPage(props: CardapioPageProps) {
     const { params, searchParams } = props
@@ -365,6 +366,21 @@ export default async function CardapioPage(props: CardapioPageProps) {
                 @keyframes fadeInUpMini {
                     from { opacity: 0; transform: translateY(2px); }
                     to   { opacity: 1; transform: translateY(0); }
+                }
+
+                /* wave effect (infinite while hovered) */
+                .wave-hover { display: inline-flex; }
+                .wave-hover span { display: inline-block; }
+                .wave-hover:hover span {
+                  animation: wave-bounce 0.6s ease-in-out infinite;
+                  animation-delay: calc(var(--i) * 80ms);
+                }
+                @keyframes wave-bounce {
+                  0%, 100% { transform: translateY(0); }
+                  50%      { transform: translateY(-0.4em); }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                  .wave-hover:hover span { animation: none; }
                 }
             `}</style>
 
