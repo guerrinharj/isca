@@ -17,13 +17,13 @@ type NavBarProps = {
 type MeResponse =
     | { user: null }
     | {
-            user: {
-                id: string
-                name: string
-                email: string
-                role: 'ADMIN' | 'USER'
-            }
-        }
+          user: {
+              id: string
+              name: string
+              email: string
+              role: 'ADMIN' | 'USER'
+          }
+      }
 
 export default function NavBar({ t, locale }: NavBarProps) {
     const [scrolled, setScrolled] = useState(false)
@@ -58,6 +58,20 @@ export default function NavBar({ t, locale }: NavBarProps) {
         }
     }, [])
 
+    // Build wave spans into elements we control (React won't overwrite)
+    useEffect(() => {
+        document.querySelectorAll<HTMLElement>('[data-wave]').forEach(el => {
+            if (el.getAttribute('data-wave-init')) return
+            el.setAttribute('data-wave-init', 'true')
+            const text = el.dataset.text ?? el.textContent ?? ''
+            el.setAttribute('aria-hidden', 'true')
+            el.innerHTML = text
+                .split('')
+                .map((ch, i) => `<span style="--i:${i}">${ch === ' ' ? '&nbsp;' : ch}</span>`)
+                .join('')
+        })
+    }, [])
+
     async function onLogout() {
         try {
             setLoadingLogout(true)
@@ -67,12 +81,8 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 headers: { 'cache-control': 'no-store' },
             })
         } finally {
-            // Refresh UI state after logout
             setLoadingLogout(false)
             setIsLogged(false)
-            // Optionally redirect:
-            // window.location.href = `/${locale}`
-            // Or just reload:
             window.location.reload()
         }
     }
@@ -119,13 +129,25 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             >
                                 {t.nav.sobre}
                             </Link>
-                            <div className="shrink-0 poppins-regular text-base">
+                            <div className="shrink-0 poppins-regular text-base flex items-center gap-2">
                                 <LocaleSwitcher current={locale} />
+                                <a
+                                    href="https://www.instagram.com/_iscaisca/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Instagram"
+                                >
+                                    <img
+                                        width="20"
+                                        height="20"
+                                        src="https://img.icons8.com/ios/50/instagram-new--v1.png"
+                                        alt="Instagram"
+                                    />
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-
 
                 {/* DESKTOP MENU (logout only on desktop) */}
                 <div
@@ -136,31 +158,56 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         md:transform
                     "
                 >
+                    {/* Cardápio */}
                     <Link
                         href={`/${locale}/cardapio`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.menu}
                     >
-                        {t.nav.menu}
+                        <span className="sr-only">{t.nav.menu}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.menu} />
                     </Link>
+
+                    {/* Reservas */}
                     <Link
                         href={`/${locale}/reservas`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.reservas}
                     >
-                        {t.nav.reservas}
+                        <span className="sr-only">{t.nav.reservas}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.reservas} />
                     </Link>
+
+                    {/* Sobre */}
                     <Link
                         href={`/${locale}/sobre`}
                         className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        aria-label={t.nav.sobre}
                     >
-                        {t.nav.sobre}
+                        <span className="sr-only">{t.nav.sobre}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.sobre} />
                     </Link>
 
-                    {/* Locale switcher */}
-                    <div className="poppins-regular text-lg text-isca-verde">
+                    {/* Locale switcher + Instagram */}
+                    <div className="poppins-regular text-lg text-isca-verde flex flex-col items-end gap-2">
                         <LocaleSwitcher current={locale} />
+                        <a
+                            href="https://www.instagram.com/_iscaisca/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Instagram"
+                            className="hover:opacity-50"
+                        >
+                            <img
+                                width="24"
+                                height="24"
+                                src="https://img.icons8.com/ios/50/instagram-new--v1.png"
+                                alt="Instagram"
+                            />
+                        </a>
                     </div>
 
-                    {/* LOGOUT shown only when logged (desktop only) */}
+                    {/* LOGOUT (desktop only) */}
                     {isLogged && (
                         <button
                             type="button"
@@ -168,8 +215,8 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             className="
                                 mt-1
                                 text-base poppins-regular
-                                text-red-600                 
-                                hover:text-red-800       
+                                text-red-600
+                                hover:text-red-800
                                 disabled:opacity-60
                             "
                             disabled={loadingLogout}
