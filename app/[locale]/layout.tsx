@@ -39,12 +39,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
             <ScribbleCanvas />
 
-
             {/* Unified footer across breakpoints */}
             <footer
                 className="
                     fixed bottom-0 left-0 right-0 z-30
-                    bg-theme        /* ← theme-aware footer background */
+                    bg-theme
                     py-2 px-3
                     md:py-6 md:px-4
                     lg:py-2
@@ -67,7 +66,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     className="
                         mx-auto w-full flex items-center
                         justify-center
-                        border-t-theme   /* ← replaces border-t-1 + color */
+                        border-t-theme
                         pt-2
                     "
                 >
@@ -82,12 +81,17 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                         "
                     />
                 </div>
-
-                {/* Theme switcher row */}
-                <div className="mx-auto w-full max-w-5xl flex items-center justify-center mb-2 md:mb-3">
-                    <ThemeSwitcher />
-                </div>
             </footer>
+
+            {/* Theme switcher fixed bottom-right */}
+            <div
+                className="
+                    fixed bottom-3 right-3 z-40
+                    scale-75 md:scale-90
+                "
+            >
+                <ThemeSwitcher />
+            </div>
         </>
     )
 }
