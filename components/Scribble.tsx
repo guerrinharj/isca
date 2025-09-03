@@ -20,6 +20,7 @@ const COLOR_VARS = [
     'var(--color-isca-laranja)',
     'var(--color-isca-azul)',
     'var(--color-isca-verde-claro)',
+    'var(--color-isca-preto)',
     'var(--color-isca-creme)',
 ] as const
 
