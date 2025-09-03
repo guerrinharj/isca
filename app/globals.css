@@ -38,7 +38,7 @@
     /* Creme: bg creme, text verde, links laranja, cirrus azul */
     --bg: var(--color-isca-creme);
     --fg: var(--color-isca-verde);
-    --accent: var(--color-isca-laranja);
+    --accent: var(--color-isca-verde);
     --cirrus: var(--color-isca-azul);
     --border: var(--color-isca-verde);
     --bigmark: var(--color-isca-verde);
@@ -89,6 +89,17 @@
     --cirrus: var(--color-isca-creme);
     --border: var(--color-isca-azul);
     --bigmark: var(--color-isca-azul);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+[data-theme="preto"] {
+    --bg: var(--color-isca-preto);        
+    --fg: var(--color-isca-creme);       
+    --accent: var(--color-isca-creme);  
+    --cirrus: var(--color-isca-laranja);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-creme);    
     --footer-bg: var(--bg);
     --nav-bg: var(--bg);
 }
