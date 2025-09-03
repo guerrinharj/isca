@@ -8,7 +8,7 @@ const pt = {
         menu: 'Cardápio',
         reservas: 'Reservas',
         sobre: 'Sobre',
-        horario: 'Horarios',
+        info: 'Info',
         dashboard: 'Dashboard',
         login: 'Entrar',
         logout: 'Sair',

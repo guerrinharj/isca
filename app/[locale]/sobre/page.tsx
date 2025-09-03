@@ -65,7 +65,7 @@ export default async function SobrePage({ params }: SobrePageProps) {
                         <h1
                             className="absolute right-0 md:right-20 bottom-20 md:bottom-20 md:block font-cirrus  -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
-                            {t.nav.horario}
+                            {t.nav.info}
                         </h1>
 
                         <InfoText
