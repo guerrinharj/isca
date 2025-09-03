@@ -78,6 +78,26 @@
     --border-strong: rgba(255, 238, 207, 0.45);
 }
 
+:root,
+[data-theme="default"] {
+    --bigmark: var(--color-isca-verde);       /* default theme → verde */
+}
+
+[data-theme="verde"] {
+    --bigmark: var(--color-isca-laranja);     /* verde theme → laranja */
+}
+
+[data-theme="azul"] {
+    --bigmark: var(--color-isca-creme);       /* azul theme → creme */
+}
+
+:root,
+[data-theme="default"] { --nav-bg: var(--bg); }
+[data-theme="verde"]   { --nav-bg: var(--bg); }
+[data-theme="azul"]    { --nav-bg: var(--bg); }
+
+
+
 /* === Helper utilities (theme-aware) === */
 .bg-theme { background: var(--footer-bg) !important; }
 .text-theme { color: var(--fg) !important; }
@@ -97,18 +117,12 @@
 .border-b-theme-2 { border-bottom: 2px solid var(--border-strong) !important; }
 .border-theme-2   { border: 2px solid var(--border-strong) !important; }
 
-:root,
-[data-theme="default"] {
-    --bigmark: var(--color-isca-verde);       /* default theme → verde */
-}
+/* Theme-aware background (reuse for nav, footer, etc.) */
+.bg-theme  { background-color: var(--bg) !important; }
+.bg-nav    { background-color: var(--nav-bg) !important; }
 
-[data-theme="verde"] {
-    --bigmark: var(--color-isca-laranja);     /* verde theme → laranja */
-}
-
-[data-theme="azul"] {
-    --bigmark: var(--color-isca-creme);       /* azul theme → creme */
-}
+/* Simple hover helper for accent links */
+.hover-accent:hover { color: var(--accent) !important; }
 
 
 
