@@ -22,13 +22,13 @@ export default async function SobrePage({ params }: SobrePageProps) {
 
             <div>
                 <section
-                    className="py-20 text-isca-verde will-change-[opacity,transform] space-y-20"
+                    className="py-20 will-change-[opacity,transform] space-y-20"
                     style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
                 >
                     {/* Block 1: Title + copy */}
                     <div className="relative max-w-2xl mx-auto">
                         <h1
-                            className="absolute right-0 md:right-20 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                            className="absolute right-0 md:right-20 md:block font-cirrus  -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
                             {t.nav.sobre}
                         </h1>
@@ -63,9 +63,9 @@ export default async function SobrePage({ params }: SobrePageProps) {
                     {/* Block 2: InfoText, aligned right on larger screens */}
                     <div className="relative max-w-2xl mx-auto">
                         <h1
-                            className="absolute right-0 md:right-20 bottom-20 md:bottom-20 md:block font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                            className="absolute right-0 md:right-20 bottom-20 md:bottom-20 md:block font-cirrus  -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
                         >
-                            {t.nav.horario}
+                            {t.nav.info}
                         </h1>
 
                         <InfoText

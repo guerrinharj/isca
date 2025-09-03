@@ -8,7 +8,7 @@ const en = {
         menu: 'Menu',
         reservas: 'Bookings',
         sobre: 'About',
-        horario: 'Hours',
+        info: 'Info',
         dashboard: 'Dashboard',
         login: 'Log in',
         logout: 'Log out',

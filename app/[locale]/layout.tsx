@@ -5,6 +5,7 @@ import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import BigMark from '../../components/BigMark'
 import InfoText from '../../components/InfoText'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
 import { ScribbleCanvas, ScribblePalette } from '../../components/Scribble'
 
 type LayoutProps = {
@@ -38,18 +39,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
             <ScribbleCanvas />
 
-
             {/* Unified footer across breakpoints */}
             <footer
                 className="
                     fixed bottom-0 left-0 right-0 z-30
-                    bg-isca-creme
+                    bg-theme
                     py-2 px-3
                     md:py-6 md:px-4
                     lg:py-2
                 "
             >
-
                 {/* Palette mobile floating, fixed above footer */}
                 <div
                     className="
@@ -62,27 +61,37 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <ScribblePalette />
                 </div>
 
-
+                {/* Top border on the footer row (theme-aware) */}
                 <div
                     className="
                         mx-auto w-full flex items-center
                         justify-center
-                        border-t-1 border-isca-verde
+                        border-t-theme
                         pt-2
                     "
                 >
-                <BigMark
-                    locale={safeLocale}
-                    className="
-                        text-5xl leading-none
-                        md:text-[6vw]
-                        lg:text-[5vw]
-                        w-auto
-                        transform translate-y-[2px]
-                    "
-                />
+                    <BigMark
+                        locale={safeLocale}
+                        className="
+                            text-5xl leading-none
+                            md:text-[6vw]
+                            lg:text-[5vw]
+                            w-auto
+                            transform translate-y-[2px]
+                        "
+                    />
                 </div>
             </footer>
+
+            {/* Theme switcher fixed bottom-right */}
+            <div
+                className="
+                    fixed bottom-3 right-3 z-40
+                    scale-75 md:scale-90
+                "
+            >
+                <ThemeSwitcher />
+            </div>
         </>
     )
 }

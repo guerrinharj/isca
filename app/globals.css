@@ -32,12 +32,108 @@
     font-display: swap;
 }
 
-/* (Opcional) Variáveis custom para CSS puro */
-:root {
-    --bg: var(--color-isca-preto);
+/* ==== Core theme variables ==== */
+:root,
+[data-theme="creme"] {
+    /* Creme: bg creme, text verde, links laranja, cirrus azul */
+    --bg: var(--color-isca-creme);
+    --fg: var(--color-isca-verde);
+    --accent: var(--color-isca-verde);
+    --cirrus: var(--color-isca-azul);
+    --border: var(--color-isca-verde);
+    --bigmark: var(--color-isca-verde);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+/* Verde */
+[data-theme="verde"] {
+    --bg: var(--color-isca-verde);
     --fg: var(--color-isca-creme);
     --accent: var(--color-isca-laranja);
+    --cirrus: var(--color-isca-laranja);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-laranja);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
 }
+
+/* Azul */
+[data-theme="azul"] {
+    --bg: var(--color-isca-azul);
+    --fg: var(--color-isca-creme);
+    --accent: var(--color-isca-laranja);
+    --cirrus: var(--color-isca-verde-claro);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-creme);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+/* Laranja */
+[data-theme="laranja"] {
+    --bg: var(--color-isca-laranja);
+    --fg: var(--color-isca-verde);
+    --accent: var(--color-isca-verde);
+    --cirrus: var(--color-isca-creme);
+    --border: var(--color-isca-verde);
+    --bigmark: var(--color-isca-azul);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+[data-theme="verdeclaro"] {
+    --bg: var(--color-isca-verde-claro);
+    --fg: var(--color-isca-azul);
+    --accent: var(--color-isca-azul); /* links follow text here */
+    --cirrus: var(--color-isca-creme);
+    --border: var(--color-isca-azul);
+    --bigmark: var(--color-isca-azul);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+[data-theme="preto"] {
+    --bg: var(--color-isca-preto);        
+    --fg: var(--color-isca-creme);       
+    --accent: var(--color-isca-creme);  
+    --cirrus: var(--color-isca-laranja);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-creme);    
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
+}
+
+
+
+
+/* === Helper utilities (theme-aware) === */
+.bg-theme { background: var(--footer-bg) !important; }
+.text-theme { color: var(--fg) !important; }
+
+/* Border color helpers */
+.border-theme { border-color: var(--border) !important; }
+.border-strong { border-color: var(--border-strong) !important; }
+
+/* Side-specific border helpers */
+.border-t-theme { border-top: 1px solid var(--border) !important; }
+.border-b-theme { border-bottom: 1px solid var(--border) !important; }
+.border-l-theme { border-left: 1px solid var(--border) !important; }
+.border-r-theme { border-right: 1px solid var(--border) !important; }
+
+/* If you need thicker borders sometimes */
+.border-t-theme-2 { border-top: 2px solid var(--border-strong) !important; }
+.border-b-theme-2 { border-bottom: 2px solid var(--border-strong) !important; }
+.border-theme-2   { border: 2px solid var(--border-strong) !important; }
+
+/* Theme-aware background (reuse for nav, footer, etc.) */
+.bg-theme  { background-color: var(--bg) !important; }
+.bg-nav    { background-color: var(--nav-bg) !important; }
+
+/* Simple hover helper for accent links */
+.hover-accent:hover { color: var(--accent) !important; }
+
+
 
 /* Reset suave + base */
 *,
@@ -51,13 +147,13 @@ html, body {
 }
 
 html {
-    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     margin: 0;
+    background: var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
     line-height: 1.6;
@@ -268,8 +364,15 @@ a:hover {
 }
 
 /* ===== Utility classes ===== */
-.font-cirrus { font-family: "Cirrus Cumulus", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-.font-burns-ultra { font-family: "TWK Burns", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: 900; }
+.font-cirrus {
+    font-family: "Cirrus Cumulus", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* pick up the theme color for Cirrus elements */
+    color: var(--cirrus);
+}
+.font-burns-ultra {
+    font-family: "TWK Burns", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 900;
+}
 
 .poppins-thin       { font-family: "Poppins", sans-serif; font-weight: 100; }
 .poppins-thin-italic{ font-family: "Poppins", sans-serif; font-weight: 100; font-style: italic; }
@@ -309,7 +412,6 @@ a:hover {
     }
 }
 
-
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -341,7 +443,3 @@ a:hover {
 @media (prefers-reduced-motion: reduce) {
     .wave-hover:hover span { animation: none; }
 }
-
-
-
-

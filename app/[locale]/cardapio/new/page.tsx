@@ -87,7 +87,7 @@ export default function NewPratoPage({
     }
 
     return (
-        <section className="max-w-3xl mx-auto py-10 !text-isca-verde">
+        <section className="max-w-3xl mx-auto py-10">
             <h1 className="text-2xl font-bold mb-6">Novo Prato</h1>
             <form onSubmit={submit} className="space-y-4">
                 <input

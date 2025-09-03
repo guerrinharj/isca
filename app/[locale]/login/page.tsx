@@ -9,13 +9,13 @@ export const dynamic = 'force-dynamic'
 type MeResponse =
     | { user: null }
     | {
-            user: {
-                id: string
-                name: string
-                email: string
-                role: 'ADMIN' | 'USER'
-            }
-        }
+          user: {
+              id: string
+              name: string
+              email: string
+              role: 'ADMIN' | 'USER'
+          }
+      }
 
 export default function LoginPage() {
     const { locale: rawLocale } = useParams<{ locale: Locale }>()
@@ -26,32 +26,32 @@ export default function LoginPage() {
         () =>
             locale === 'pt'
                 ? {
-                        title: 'Entrar',
-                        subtitle: 'Acesse com seu e-mail e senha.',
-                        email: 'E-mail',
-                        password: 'Senha',
-                        submit: 'Entrar',
-                        loggingIn: 'Entrando…',
-                        required: 'Preencha todos os campos.',
-                        invalid: 'Credenciais inválidas.',
-                        unknown: 'Erro inesperado. Tente novamente.',
-                        alreadyIn: 'Você já está conectado. Redirecionando…',
-                        back: 'Voltar',
-                    }
+                      title: 'Entrar',
+                      subtitle: 'Acesse com seu e-mail e senha.',
+                      email: 'E-mail',
+                      password: 'Senha',
+                      submit: 'Entrar',
+                      loggingIn: 'Entrando…',
+                      required: 'Preencha todos os campos.',
+                      invalid: 'Credenciais inválidas.',
+                      unknown: 'Erro inesperado. Tente novamente.',
+                      alreadyIn: 'Você já está conectado. Redirecionando…',
+                      back: 'Voltar',
+                  }
                 : {
-                        title: 'Sign in',
-                        subtitle: 'Sign in with your email and password.',
-                        email: 'Email',
-                        password: 'Password',
-                        submit: 'Sign in',
-                        loggingIn: 'Signing in…',
-                        required: 'Please fill in all fields.',
-                        invalid: 'Invalid credentials.',
-                        unknown: 'Unexpected error. Please try again.',
-                        alreadyIn: 'You are already signed in. Redirecting…',
-                        back: 'Back',
-                    },
-            [locale]
+                      title: 'Sign in',
+                      subtitle: 'Sign in with your email and password.',
+                      email: 'Email',
+                      password: 'Password',
+                      submit: 'Sign in',
+                      loggingIn: 'Signing in…',
+                      required: 'Please fill in all fields.',
+                      invalid: 'Invalid credentials.',
+                      unknown: 'Unexpected error. Please try again.',
+                      alreadyIn: 'You are already signed in. Redirecting…',
+                      back: 'Back',
+                  },
+        [locale]
     )
 
     const [email, setEmail] = useState('')
@@ -60,7 +60,6 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const [notice, setNotice] = useState<string | null>(null)
 
-    // If already logged in, bounce away
     useEffect(() => {
         let alive = true
         ;(async () => {
@@ -101,7 +100,7 @@ export default function LoginPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': process.env.NEXT_PUBLIC_API_SECRET ?? ''
+                    'x-api-key': process.env.NEXT_PUBLIC_API_SECRET ?? '',
                 },
                 credentials: 'include',
                 body: JSON.stringify({ email, password }),
@@ -139,14 +138,14 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-[70vh] flex items-center justify-center px-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white/70 shadow-lg border border-black/5 backdrop-blur p-6">
-                <h1 className="text-2xl font-semibold text-isca-verde mb-1">
+            <div className="w-full max-w-sm rounded-2xl bg-theme shadow-lg border border-theme backdrop-blur p-6">
+                <h1 className="text-2xl font-semibold mb-1 text-theme">
                     {t.title}
                 </h1>
-                <p className="text-sm text-black/60 mb-6">{t.subtitle}</p>
+                <p className="text-sm text-theme/70 mb-6">{t.subtitle}</p>
 
                 {notice && (
-                    <div className="mb-4 text-xs rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2">
+                    <div className="mb-4 text-xs rounded-md bg-accent/10 border border-accent/30 text-theme px-3 py-2">
                         {notice}
                     </div>
                 )}
@@ -158,7 +157,7 @@ export default function LoginPage() {
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div className="space-y-1">
-                        <label htmlFor="email" className="block text-sm font-medium text-isca-verde">
+                        <label htmlFor="email" className="block text-sm font-medium text-accent">
                             {t.email}
                         </label>
                         <input
@@ -166,24 +165,24 @@ export default function LoginPage() {
                             type="email"
                             inputMode="email"
                             autoComplete="email"
-                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white text-isca-verde"
+                            className="w-full rounded-lg border border-theme px-3 py-2 text-sm outline-none bg-theme text-theme focus-accent"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                             disabled={loading}
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label htmlFor="password" className="block text-sm font-medium text-isca-verde">
+                        <label htmlFor="password" className="block text-sm font-medium text-accent">
                             {t.password}
                         </label>
                         <input
                             id="password"
                             type="password"
                             autoComplete="current-password"
-                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white text-isca-verde"
+                            className="w-full rounded-lg border border-theme px-3 py-2 text-sm outline-none bg-theme text-theme focus-accent"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                             disabled={loading}
                         />
                     </div>
@@ -191,7 +190,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-lg bg-isca-verde text-white py-2.5 text-sm font-medium hover:opacity-95 disabled:opacity-60 transition"
+                        className="w-full rounded-lg bg-accent text-theme py-2.5 text-sm font-medium hover:opacity-95 disabled:opacity-60 transition"
                     >
                         {loading ? t.loggingIn : t.submit}
                     </button>
@@ -199,7 +198,7 @@ export default function LoginPage() {
                     <div className="flex items-center justify-between pt-1">
                         <a
                             href={`/${locale}`}
-                            className="text-xs underline underline-offset-2 text-black/60 hover:text-black"
+                            className="text-xs underline underline-offset-2 text-theme/70 hover:text-accent"
                         >
                             {t.back}
                         </a>
