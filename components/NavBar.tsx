@@ -102,7 +102,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
             <div className="container mx-auto px-3 h-full flex items-center justify-between">
                 {/* MOBILE BAR (no logout here) */}
                 <div className="block md:hidden relative h-full w-full">
-                    <div className="border-b-1 border-isca-verde absolute inset-0 origin-top-left overflow-visible transform-gpu">
+                    <div className="border-b-1 absolute inset-0 origin-top-left overflow-visible transform-gpu">
                         <div
                             className="
                                 origin-top-left h-full
