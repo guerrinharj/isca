@@ -152,16 +152,16 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 {/* DESKTOP MENU (logout only on desktop) */}
                 <div
                     className="
-                        hidden md:flex md:flex-col md:items-end md:justify-center md:gap-6
-                        md:fixed md:right-0 md:top-0 md:z-50
-                        md:h-screen md:w-auto md:p-6
-                        md:transform
+                    hidden md:flex md:flex-col md:items-end md:gap-6
+                    md:fixed md:right-0 md:top-0 md:z-50
+                    md:w-auto md:p-6
+                    md:text-right
                     "
                 >
                     {/* Cardápio */}
                     <Link
                         href={`/${locale}/cardapio`}
-                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-left"
                         aria-label={t.nav.menu}
                     >
                         <span className="sr-only">{t.nav.menu}</span>
@@ -171,7 +171,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     {/* Reservas */}
                     <Link
                         href={`/${locale}/reservas`}
-                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-left"
                         aria-label={t.nav.reservas}
                     >
                         <span className="sr-only">{t.nav.reservas}</span>
@@ -181,7 +181,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     {/* Sobre */}
                     <Link
                         href={`/${locale}/sobre`}
-                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-right"
+                        className="hover:text-isca-laranja block text-4xl md:text-3xl lg:text-5xl origin-left"
                         aria-label={t.nav.sobre}
                     >
                         <span className="sr-only">{t.nav.sobre}</span>
@@ -226,6 +226,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         </button>
                     )}
                 </div>
+
             </div>
         </nav>
     )
