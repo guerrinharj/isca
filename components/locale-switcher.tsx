@@ -21,14 +21,14 @@ export default function LocaleSwitcher({ current }: { current: Locale }) {
         <div className="flex items-center gap-1 text-sm">
             <Link
                 href={swapLocale(pathname || '/', 'pt')}
-                className={current === 'pt' ? 'underline !text-isca-verde-claro' : 'opacity-80 hover:opacity-100 !text-isca-verde-claro'}
+                className={current === 'pt' ? 'underline ' : 'opacity-80 hover:opacity-100 '}
             >
                 PT
             </Link>
             <span className="opacity-50">/</span>
             <Link
                 href={swapLocale(pathname || '/', 'en')}
-                className={current === 'en' ? 'underline !text-isca-verde-claro' : 'opacity-80 hover:opacity-100 !text-isca-verde-claro'}
+                className={current === 'en' ? 'underline ' : 'opacity-80 hover:opacity-100 '}
             >
                 EN
             </Link>

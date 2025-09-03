@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 
-type ThemeKey = 'default' | 'verde' | 'azul'
+type ThemeKey = 'default' | 'verde' | 'azul' | 'laranja'
 const STORAGE_KEY = 'isca:theme'
 
 const THEMES: Record<ThemeKey, { label: string; bg: string }> = {
     default: { label: 'Clássico', bg: '#ffeecf' },
     verde:   { label: 'Verde',    bg: '#104730' },
     azul:    { label: 'Azul',     bg: '#3b429f' },
+    laranja: { label: 'Laranja',  bg: '#ff7e45' },
 }
 
 export default function ThemeSwitcher() {
@@ -34,7 +35,7 @@ export default function ThemeSwitcher() {
             className="inline-flex items-center gap-1"
             aria-label="Selecionar tema de cores"
         >
-            {(['verde', 'azul', 'default'] as ThemeKey[]).map((key) => {
+            {(['verde', 'azul', 'laranja', 'default'] as ThemeKey[]).map((key) => {
                 const active = theme === key
                 const { label, bg } = THEMES[key]
 

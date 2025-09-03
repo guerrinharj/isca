@@ -58,6 +58,16 @@
     --cirrus: var(--color-isca-verde-claro);
 }
 
+[data-theme="laranja"] {
+    /* Laranja theme */
+    --bg: var(--color-isca-laranja);
+    --fg: var(--color-isca-verde);
+    --accent: var(--color-isca-verde);
+    --cirrus: var(--color-isca-azul);
+    --border: var(--color-isca-verde);
+    --bigmark: var(--color-isca-azul);
+}
+
 :root,
 [data-theme="default"] {
     --footer-bg: var(--bg);
@@ -89,6 +99,10 @@
 
 [data-theme="azul"] {
     --bigmark: var(--color-isca-creme);       /* azul theme → creme */
+}
+
+[data-theme="laranja"] {
+    --bigmark: var(--color-isca-verde);       /* azul theme → creme */
 }
 
 :root,
