@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react'
 
-type ThemeKey = 'creme' | 'verde' | 'azul' | 'laranja'
+type ThemeKey = 'creme' | 'verde' | 'azul' | 'laranja' | 'verdeclaro'
 const STORAGE_KEY = 'isca:theme'
 
 const THEMES: Record<ThemeKey, { label: string; bg: string }> = {
-    creme:   { label: 'Creme',   bg: '#ffeecf' },
-    verde:   { label: 'Verde',   bg: '#104730' },
-    azul:    { label: 'Azul',    bg: '#3b429f' },
-    laranja: { label: 'Laranja', bg: '#ff7e45' },
+    creme:      { label: 'Creme',       bg: '#ffeecf' },
+    verde:      { label: 'Verde',       bg: '#104730' },
+    azul:       { label: 'Azul',        bg: '#3b429f' },
+    laranja:    { label: 'Laranja',     bg: '#ff7e45' },
+    verdeclaro: { label: 'Verde-claro', bg: '#73a580' }, // new
 }
 
 export default function ThemeSwitcher() {
@@ -23,10 +24,9 @@ export default function ThemeSwitcher() {
         let initial: ThemeKey = 'creme'
 
         if (savedRaw === 'default') {
-            // migrate old "default" key to "creme"
             try { localStorage.setItem(STORAGE_KEY, 'creme') } catch {}
             initial = 'creme'
-        } else if (savedRaw && ['creme', 'verde', 'azul', 'laranja'].includes(savedRaw)) {
+        } else if (savedRaw && ['creme', 'verde', 'azul', 'laranja', 'verdeclaro'].includes(savedRaw)) {
             initial = savedRaw as ThemeKey
         }
 
@@ -42,7 +42,7 @@ export default function ThemeSwitcher() {
 
     return (
         <div className="inline-flex items-center gap-1" aria-label="Selecionar tema de cores">
-            {(['verde', 'azul', 'laranja', 'creme'] as ThemeKey[]).map((key) => {
+            {(['verde', 'azul', 'laranja', 'verdeclaro', 'creme'] as ThemeKey[]).map((key) => {
                 const active = theme === key
                 const { label, bg } = THEMES[key]
                 return (
