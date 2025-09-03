@@ -58,6 +58,45 @@
     --cirrus: var(--color-isca-verde-claro);
 }
 
+:root,
+[data-theme="default"] {
+    --footer-bg: var(--bg);
+    /* border uses the theme's text color, softened */
+    --border: rgba(16, 71, 48, 0.35);          /* verde (fg) @ 35% */
+    --border-strong: rgba(16, 71, 48, 0.55);
+}
+
+[data-theme="verde"] {
+    --footer-bg: var(--bg);
+    --border: rgba(255, 238, 207, 0.25);       /* creme (fg) @ 25% */
+    --border-strong: rgba(255, 238, 207, 0.45);
+}
+
+[data-theme="azul"] {
+    --footer-bg: var(--bg);
+    --border: rgba(255, 238, 207, 0.25);       /* creme (fg) @ 25% */
+    --border-strong: rgba(255, 238, 207, 0.45);
+}
+
+/* === Helper utilities (theme-aware) === */
+.bg-theme { background: var(--footer-bg) !important; }
+.text-theme { color: var(--fg) !important; }
+
+/* Border color helpers */
+.border-theme { border-color: var(--border) !important; }
+.border-strong { border-color: var(--border-strong) !important; }
+
+/* Side-specific border helpers */
+.border-t-theme { border-top: 1px solid var(--border) !important; }
+.border-b-theme { border-bottom: 1px solid var(--border) !important; }
+.border-l-theme { border-left: 1px solid var(--border) !important; }
+.border-r-theme { border-right: 1px solid var(--border) !important; }
+
+/* If you need thicker borders sometimes */
+.border-t-theme-2 { border-top: 2px solid var(--border-strong) !important; }
+.border-b-theme-2 { border-bottom: 2px solid var(--border-strong) !important; }
+.border-theme-2   { border: 2px solid var(--border-strong) !important; }
+
 
 /* Reset suave + base */
 *,

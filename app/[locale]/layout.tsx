@@ -44,12 +44,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <footer
                 className="
                     fixed bottom-0 left-0 right-0 z-30
+                    bg-theme        /* ← theme-aware footer background */
                     py-2 px-3
                     md:py-6 md:px-4
                     lg:py-2
                 "
             >
-
                 {/* Palette mobile floating, fixed above footer */}
                 <div
                     className="
@@ -62,25 +62,25 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <ScribblePalette />
                 </div>
 
-
+                {/* Top border on the footer row (theme-aware) */}
                 <div
                     className="
                         mx-auto w-full flex items-center
                         justify-center
-                        border-t-1 border-isca-verde
+                        border-t-theme   /* ← replaces border-t-1 + color */
                         pt-2
                     "
                 >
-                <BigMark
-                    locale={safeLocale}
-                    className="
-                        text-5xl leading-none
-                        md:text-[6vw]
-                        lg:text-[5vw]
-                        w-auto
-                        transform translate-y-[2px]
-                    "
-                />
+                    <BigMark
+                        locale={safeLocale}
+                        className="
+                            text-5xl leading-none
+                            md:text-[6vw]
+                            lg:text-[5vw]
+                            w-auto
+                            transform translate-y-[2px]
+                        "
+                    />
                 </div>
 
                 {/* Theme switcher row */}
