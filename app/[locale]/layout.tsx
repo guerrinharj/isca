@@ -5,6 +5,7 @@ import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import BigMark from '../../components/BigMark'
 import InfoText from '../../components/InfoText'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
 import { ScribbleCanvas, ScribblePalette } from '../../components/Scribble'
 
 type LayoutProps = {
@@ -81,6 +82,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                         transform translate-y-[2px]
                     "
                 />
+                </div>
+
+                {/* Theme switcher row */}
+                <div className="mx-auto w-full max-w-5xl flex items-center justify-center mb-2 md:mb-3">
+                    <ThemeSwitcher />
                 </div>
             </footer>
         </>

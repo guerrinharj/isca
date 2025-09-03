@@ -170,7 +170,7 @@ function ItemRow({
     }
 
     return (
-        <li className="py-3 text-isca-verde">
+        <li className="py-3">
             <div className="flex items-baseline justify-between gap-4">
                 <span className="font-burns-ultra text-base md-text-xl">{item.nome}</span>
                 <div className="flex items-center gap-3">
@@ -292,7 +292,7 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
                         href={href}
                         aria-label={it.label}
                         className={[
-                            'px-1 py-1 font-burns-ultra text-xs text-isca-verde',
+                            'px-1 py-1 font-burns-ultra text-xs',
                             isActive ? 'underline underline-offset-4' : 'hover:underline'
                         ].join(' ')}
                     >

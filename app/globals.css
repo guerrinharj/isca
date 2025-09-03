@@ -32,12 +32,32 @@
     font-display: swap;
 }
 
-/* (Opcional) Variáveis custom para CSS puro */
-:root {
-    --bg: var(--color-isca-preto);
+/* === Theme variables === */
+:root,
+[data-theme="default"] {
+    /* Default: bg creme, text verde, links laranja, cirrus azul */
+    --bg: var(--color-isca-creme);
+    --fg: var(--color-isca-verde);
+    --accent: var(--color-isca-laranja);
+    --cirrus: var(--color-isca-azul);
+}
+
+[data-theme="verde"] {
+    /* Verde theme: bg verde, text creme, links laranja, cirrus laranja */
+    --bg: var(--color-isca-verde);
     --fg: var(--color-isca-creme);
     --accent: var(--color-isca-laranja);
+    --cirrus: var(--color-isca-laranja);
 }
+
+[data-theme="azul"] {
+    /* Azul theme: bg azul, text creme, links laranja, cirrus verde-claro */
+    --bg: var(--color-isca-azul);
+    --fg: var(--color-isca-creme);
+    --accent: var(--color-isca-laranja);
+    --cirrus: var(--color-isca-verde-claro);
+}
+
 
 /* Reset suave + base */
 *,
@@ -51,13 +71,13 @@ html, body {
 }
 
 html {
-    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     margin: 0;
+    background: var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
     line-height: 1.6;
@@ -268,8 +288,15 @@ a:hover {
 }
 
 /* ===== Utility classes ===== */
-.font-cirrus { font-family: "Cirrus Cumulus", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-.font-burns-ultra { font-family: "TWK Burns", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: 900; }
+.font-cirrus {
+    font-family: "Cirrus Cumulus", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* pick up the theme color for Cirrus elements */
+    color: var(--cirrus);
+}
+.font-burns-ultra {
+    font-family: "TWK Burns", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 900;
+}
 
 .poppins-thin       { font-family: "Poppins", sans-serif; font-weight: 100; }
 .poppins-thin-italic{ font-family: "Poppins", sans-serif; font-weight: 100; font-style: italic; }
@@ -309,7 +336,6 @@ a:hover {
     }
 }
 
-
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -341,7 +367,3 @@ a:hover {
 @media (prefers-reduced-motion: reduce) {
     .wave-hover:hover span { animation: none; }
 }
-
-
-
-
