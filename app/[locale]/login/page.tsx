@@ -140,7 +140,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-[70vh] flex items-center justify-center px-4">
             <div className="w-full max-w-sm rounded-2xl bg-white/70 shadow-lg border border-black/5 backdrop-blur p-6">
-                <h1 className="text-2xl font-semibold text-isca-verde mb-1">
+                <h1 className="text-2xl font-semibold mb-1">
                     {t.title}
                 </h1>
                 <p className="text-sm text-black/60 mb-6">{t.subtitle}</p>
@@ -158,7 +158,7 @@ export default function LoginPage() {
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div className="space-y-1">
-                        <label htmlFor="email" className="block text-sm font-medium text-isca-verde">
+                        <label htmlFor="email" className="block text-sm font-medium">
                             {t.email}
                         </label>
                         <input
@@ -166,7 +166,7 @@ export default function LoginPage() {
                             type="email"
                             inputMode="email"
                             autoComplete="email"
-                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white text-isca-verde"
+                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             disabled={loading}
@@ -174,14 +174,14 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-1">
-                        <label htmlFor="password" className="block text-sm font-medium text-isca-verde">
+                        <label htmlFor="password" className="block text-sm font-medium">
                             {t.password}
                         </label>
                         <input
                             id="password"
                             type="password"
                             autoComplete="current-password"
-                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white text-isca-verde"
+                            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-isca-verde/40 bg-white"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             disabled={loading}
@@ -191,7 +191,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-lg bg-isca-verde text-white py-2.5 text-sm font-medium hover:opacity-95 disabled:opacity-60 transition"
+                        className="w-full rounded-lg text-white py-2.5 text-sm font-medium hover:opacity-95 disabled:opacity-60 transition"
                     >
                         {loading ? t.loggingIn : t.submit}
                     </button>

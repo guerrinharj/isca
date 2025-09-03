@@ -167,7 +167,7 @@ function ReservasIndex({ locale }: { locale: string }) {
                     {ordered.map((r) => (
                         <li
                             key={r.id}
-                            className="flex items-start justify-between border p-3 rounded text-isca-verde"
+                            className="flex items-start justify-between border p-3 rounded"
                         >
                             <div className="text-sm">
                                 <div className="font-medium flex items-center gap-2 flex-wrap">
@@ -248,7 +248,7 @@ export default function Page() {
 
     const inputClasses =
         'bg-transparent border-b border-isca-verde/40 outline-none ring-0 shadow-none py-2 w-full ' +
-        'text-isca-verde font-sans placeholder:opacity-40 ' +
+        'font-sans placeholder:opacity-40 ' +
         'focus:border-isca-laranja focus:outline-none focus:ring-0 '
 
     const labelClasses =
@@ -272,8 +272,8 @@ export default function Page() {
                 <div className="relative max-w-md mx-auto">
 
                 <h1
-                        className="absolute right-0 font-cirrus text-isca-azul -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
-                        style={{ color: 'var(--color-isca-azul)' }}
+                        className="absolute right-0 font-cirrus -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
+                        
                     >
                         {t.title}
                 </h1>
@@ -356,7 +356,7 @@ export default function Page() {
 
                         <button
                             type="submit"
-                            className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 bg-isca-laranja text-isca-verde font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
+                            className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto"
                         >
                             {t.submit}
                         </button>

@@ -180,7 +180,7 @@ function ItemRow({
                         <>
                             <Link
                                 href={`/${locale}/cardapio/${item.id}/edit`}
-                                className="!text-isca-azul text-sm underline underline-offset-4 hover:opacity-80"
+                                className="text-sm underline underline-offset-4 hover:opacity-80"
                             >
                                 edit
                             </Link>
@@ -243,7 +243,7 @@ function Section({
             <div className="relative">
                 <h2
                     className="
-                        font-cirrus -rotate-12 text-4xl text-isca-azul
+                        font-cirrus -rotate-12 text-4xl
                         absolute right-0 top-1/2 -translate-y-1/2
                     "
                 >
@@ -263,7 +263,7 @@ function Section({
                         />
                     ))
                 ) : (
-                    <li className="py-3 font-poppins text-isca-verde">
+                    <li className="py-3 font-poppins">
                         {locale === 'en' ? 'No items yet.' : 'Sem itens por enquanto.'}
                     </li>
                 )}
@@ -394,7 +394,7 @@ export default async function CardapioPage(props: CardapioPageProps) {
                         className="
                             hidden md:flex fixed left-6 z-40
                             h-14 w-14 items-center justify-center
-                            rounded-full border border-black/20 bg-isca-verde text-white
+                            rounded-full border border-black/20 text-white
                             text-3xl leading-none shadow-lg hover:scale-105 transition
                         "
                         aria-label="Criar Prato"

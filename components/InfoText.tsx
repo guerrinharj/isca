@@ -7,7 +7,7 @@ type InfoTextProps = {
 
 export default function InfoText({ locale, className = '' }: InfoTextProps) {
     return (
-        <div className={`font-burns-ultra text-sm leading-relaxed text-isca-verde ${className}`}>
+        <div className={`font-burns-ultra text-sm leading-relaxed ${className}`}>
             {locale === 'en' ? (
                 <>
                     <p>

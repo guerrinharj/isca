@@ -94,8 +94,8 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 h-20 w-full
                 pt-[env(safe-area-inset-top)]
                 transition-colors duration-300
-                ${scrolled ? 'bg-isca-creme text-black' : 'text-isca-creme bg-isca-creme'}
-                md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:text-isca-creme md:border-0
+                ${scrolled ? 'text-black' : ''}
+                md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0 md:bg-transparent md:border-0
             `}
             aria-label="Site navigation"
         >
@@ -113,19 +113,19 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         >
                             <Link
                                 href={`/${locale}/cardapio`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
+                                className="shrink-0 text-xl font-burns-ultra py-1"
                             >
                                 {t.nav.menu}
                             </Link>
                             <Link
                                 href={`/${locale}/reservas`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
+                                className="shrink-0 text-xl font-burns-ultra py-1"
                             >
                                 {t.nav.reservas}
                             </Link>
                             <Link
                                 href={`/${locale}/sobre`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 !text-isca-verde"
+                                className="shrink-0 text-xl font-burns-ultra py-1"
                             >
                                 {t.nav.sobre}
                             </Link>
@@ -189,7 +189,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     </Link>
 
                     {/* Locale switcher + Instagram */}
-                    <div className="poppins-regular text-lg text-isca-verde flex flex-col items-end gap-2">
+                    <div className="poppins-regular text-lg flex flex-col items-end gap-2">
                         <LocaleSwitcher current={locale} />
                         <a
                             href="https://www.instagram.com/_iscaisca/"
