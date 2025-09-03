@@ -247,7 +247,7 @@ export default function Page() {
     }
 
     const inputClasses =
-        'bg-transparent border-b border-isca-verde/40 outline-none ring-0 shadow-none py-2 w-full ' +
+        'bg-transparent border-b  outline-none ring-0 shadow-none py-2 w-full ' +
         'font-sans placeholder:opacity-40 ' +
         'focus:border-isca-laranja focus:outline-none focus:ring-0 '
 

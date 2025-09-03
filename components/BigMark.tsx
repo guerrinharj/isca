@@ -9,11 +9,14 @@ export default function BigMark({
     locale: string
     className?: string
 }) {
-    const baseClasses =
-        'font-burns-ultra leading-none'
+    const baseClasses = 'font-burns-ultra leading-none'
 
     return (
-        <Link href={`/${locale}`} className={`${baseClasses} ${className}`}>
+        <Link
+            href={`/${locale}`}
+            className={`${baseClasses} ${className}`}
+            style={{ color: 'var(--bigmark)' }}
+        >
             isca
         </Link>
     )
