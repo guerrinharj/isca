@@ -384,17 +384,14 @@ export default async function CardapioPage(props: CardapioPageProps) {
                 }
             `}</style>
 
-            <div
-                className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
-                style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
-            >
-                {loggedIn && (
+            {loggedIn && (
                     <Link
                         href={`/${safeLocale}/cardapio/new`}
                         className="
-                            hidden md:flex fixed left-6 z-40
+                        text
+                            hidden md:flex fixed left-8 top-5 z-40
                             h-14 w-14 items-center justify-center
-                            rounded-full border border-black/20 text-white
+                            rounded-full border border-white
                             text-3xl leading-none shadow-lg hover:scale-105 transition
                         "
                         aria-label="Criar Prato"
@@ -403,6 +400,12 @@ export default async function CardapioPage(props: CardapioPageProps) {
                         +
                     </Link>
                 )}
+
+            <div
+                className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
+                style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
+            >
+                
 
                 <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
                 <div className="space-y-10">
