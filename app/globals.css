@@ -32,83 +32,56 @@
     font-display: swap;
 }
 
-/* === Theme variables === */
+/* ==== Core theme variables ==== */
 :root,
-[data-theme="default"] {
-    /* Default: bg creme, text verde, links laranja, cirrus azul */
+[data-theme="creme"] {
+    /* Creme: bg creme, text verde, links laranja, cirrus azul */
     --bg: var(--color-isca-creme);
     --fg: var(--color-isca-verde);
     --accent: var(--color-isca-laranja);
     --cirrus: var(--color-isca-azul);
+    --border: var(--color-isca-verde);
+    --bigmark: var(--color-isca-verde);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
 }
 
+/* Verde */
 [data-theme="verde"] {
-    /* Verde theme: bg verde, text creme, links laranja, cirrus laranja */
     --bg: var(--color-isca-verde);
     --fg: var(--color-isca-creme);
     --accent: var(--color-isca-laranja);
     --cirrus: var(--color-isca-laranja);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-laranja);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
 }
 
+/* Azul */
 [data-theme="azul"] {
-    /* Azul theme: bg azul, text creme, links laranja, cirrus verde-claro */
     --bg: var(--color-isca-azul);
     --fg: var(--color-isca-creme);
     --accent: var(--color-isca-laranja);
     --cirrus: var(--color-isca-verde-claro);
+    --border: var(--color-isca-creme);
+    --bigmark: var(--color-isca-creme);
+    --footer-bg: var(--bg);
+    --nav-bg: var(--bg);
 }
 
+/* Laranja */
 [data-theme="laranja"] {
-    /* Laranja theme */
     --bg: var(--color-isca-laranja);
     --fg: var(--color-isca-verde);
     --accent: var(--color-isca-verde);
-    --cirrus: var(--color-isca-azul);
+    --cirrus: var(--color-isca-creme);
     --border: var(--color-isca-verde);
     --bigmark: var(--color-isca-azul);
-}
-
-:root,
-[data-theme="default"] {
     --footer-bg: var(--bg);
-    /* border uses the theme's text color, softened */
-    --border: rgba(16, 71, 48, 0.35);          /* verde (fg) @ 35% */
-    --border-strong: rgba(16, 71, 48, 0.55);
+    --nav-bg: var(--bg);
 }
 
-[data-theme="verde"] {
-    --footer-bg: var(--bg);
-    --border: var(--color-isca-laranja);       /* creme (fg) @ 25% */
-    --border-strong: var(--color-isca-laranja);
-}
-
-[data-theme="azul"] {
-    --footer-bg: var(--bg);
-    --border: rgba(255, 238, 207, 0.25);       /* creme (fg) @ 25% */
-    --border-strong: rgba(255, 238, 207, 0.45);
-}
-
-:root,
-[data-theme="default"] {
-    --bigmark: var(--color-isca-verde);       /* default theme → verde */
-}
-
-[data-theme="verde"] {
-    --bigmark: var(--color-isca-laranja);     /* verde theme → laranja */
-}
-
-[data-theme="azul"] {
-    --bigmark: var(--color-isca-creme);       /* azul theme → creme */
-}
-
-[data-theme="laranja"] {
-    --bigmark: var(--color-isca-verde);       /* azul theme → creme */
-}
-
-:root,
-[data-theme="default"] { --nav-bg: var(--bg); }
-[data-theme="verde"]   { --nav-bg: var(--bg); }
-[data-theme="azul"]    { --nav-bg: var(--bg); }
 
 
 
