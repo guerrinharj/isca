@@ -31,12 +31,13 @@ export default function ThemeSwitcher() {
 
     return (
         <div
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center gap-1"
             aria-label="Selecionar tema de cores"
         >
-            {(['default', 'verde', 'azul'] as ThemeKey[]).map((key) => {
+            {(['verde', 'azul', 'default'] as ThemeKey[]).map((key) => {
                 const active = theme === key
                 const { label, bg } = THEMES[key]
+
                 return (
                     <button
                         key={key}
@@ -45,9 +46,9 @@ export default function ThemeSwitcher() {
                         aria-label={label}
                         title={label}
                         className={[
-                            "relative h-7 w-7 rounded-full border transition",
+                            "relative h-4 w-4 border transition",
                             active
-                                ? "border-black/40 ring-2 ring-black/30"
+                                ? "border-black/50 ring-1 ring-black/40"
                                 : "border-black/20 hover:border-black/40"
                         ].join(' ')}
                         style={{ background: bg }}
