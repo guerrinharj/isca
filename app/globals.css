@@ -77,7 +77,7 @@
     --accent: var(--color-isca-verde);
     --cirrus: var(--color-isca-creme);
     --border: var(--color-isca-verde);
-    --bigmark: var(--color-isca-azul);
+    --bigmark: var(--color-isca-verde);
     --footer-bg: var(--bg);
     --nav-bg: var(--bg);
 }
@@ -85,7 +85,7 @@
 [data-theme="verdeclaro"] {
     --bg: var(--color-isca-verde-claro);
     --fg: var(--color-isca-azul);
-    --accent: var(--color-isca-azul); /* links follow text here */
+    --accent: var(--color-isca-azul);
     --cirrus: var(--color-isca-creme);
     --border: var(--color-isca-azul);
     --bigmark: var(--color-isca-azul);

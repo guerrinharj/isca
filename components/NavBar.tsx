@@ -95,10 +95,8 @@ export default function NavBar({ t, locale }: NavBarProps) {
                 pt-[env(safe-area-inset-top)]
                 transition-colors duration-300
                 bg-nav
-                border-b-theme
                 md:right-0 md:left-auto md:w-auto md:h-screen md:pt-0
                 md:bg-nav
-                md:border-b-0 md:border-l-theme
             `}
             style={{ backgroundColor: 'var(--nav-bg)' }}
             aria-label="Site navigation"
@@ -109,6 +107,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     <div className="absolute inset-0 origin-top-left overflow-visible transform-gpu">
                         <div
                             className="
+                                border-b-theme md:border-b-0 md:border-l-theme 
                                 origin-top-left h-full
                                 flex items-center gap-4
                                 overflow-x-auto no-scrollbar
