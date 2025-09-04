@@ -64,17 +64,18 @@ export async function requireAdmin() {
  * - If x-api-key matches API_SECRET, authorize immediately (no cookie/DB).
  * - Otherwise, require an ADMIN user session.
  */
-export async function requireApiKeyOrAdmin() {
-    const h = await nextHeaders()
-    const apiKey = h.get('x-api-key')
-    if (apiKey && process.env.API_SECRET && apiKey === process.env.API_SECRET) {
+export async function requireApiKeyOrAdmin(req?: Request) {
+    const H = req ? req.headers : await nextHeaders()
+    const apiKey = H.get('x-api-key') ?? ''
+    const secret = process.env.API_SECRET ?? ''
+
+    if (secret && apiKey && apiKey === secret) {
         return { source: 'api-key' } as const
     }
 
+    // Só cai aqui se NÃO tinha x-api-key válida → tenta sessão (usa Prisma)
     const user = await getSessionUser()
-    if (!user || user.role !== 'ADMIN') {
-        throw new Error('UNAUTHORIZED')
-    }
+    if (!user || user.role !== 'ADMIN') throw new Error('UNAUTHORIZED')
     return { source: 'session', user } as const
 }
 
