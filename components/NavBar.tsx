@@ -101,7 +101,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
             style={{ backgroundColor: 'var(--nav-bg)' }}
             aria-label="Site navigation"
         >
-            <div className="container mx-auto px-3 h-full flex items-center justify-between">
+            <div className="container mx-auto px-4 h-full flex items-center justify-between">
                 {/* MOBILE BAR (no logout here) */}
                 <div className="block md:hidden relative h-full w-full">
                     <div className="absolute inset-0 origin-top-left overflow-visible transform-gpu">
@@ -139,14 +139,9 @@ export default function NavBar({ t, locale }: NavBarProps) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Instagram"
-                                    className="hover:opacity-50"
+                                    className="hover:opacity-50 ml-2"
                                 >
-                                    <img
-                                        width="20"
-                                        height="20"
-                                        src="https://img.icons8.com/ios/50/instagram-new--v1.png"
-                                        alt="Instagram"
-                                    />
+                                    <img width="20" height="20" src="https://img.icons8.com/ios/50/instagram-new--v1.png" alt="instagram-new--v1"/>
                                 </a>
                             </div>
                         </div>
