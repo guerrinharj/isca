@@ -238,7 +238,7 @@ function ReservasIndex({ locale }: { locale: string }) {
             <Banner banner={banner} onClose={close} />
 
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Reservas (admin)</h2>
+                <h2 className="text-xl font-semibold">Reservas</h2>
                 <button
                     onClick={fetchAll}
                     className="text-sm underline underline-offset-4 hover:opacity-80"
