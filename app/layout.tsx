@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     title: 'isca | pintxos + bar',
     description: 'isca | pintxos + bar',
     icons: {
-        icon: '/favisca.png',
+        icon: '/favisca3.png',
     },
 }
 
