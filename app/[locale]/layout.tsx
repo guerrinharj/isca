@@ -30,63 +30,61 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <NavBar t={t} locale={safeLocale} />
             </aside>
 
-            <main className="py-8 md:py-0 animate-fadeIn">
+            {/* Add bottom padding so content doesn't sit under the fixed palette+footer */}
+            <main className="py-8 md:py-0 pb-40 md:pb-48 lg:pb-56 animate-fadeIn">
                 <div className="mx-auto w-full px-4 md:max-w-[480px] lg:max-w-none lg:px-8">
                     {children}
                 </div>
             </main>
 
-            {/* Overlay canvas (draw everywhere except NavBar/Footer which sit above it) */}
+            {/* Overlay scribble canvas (footer/palette sit above via z-index) */}
             <ScribbleCanvas />
 
-            {/* Unified footer across breakpoints */}
-            <footer
-                className="
-                    fixed bottom-0 left-0 right-0 z-30
-                    bg-theme
-                    py-2 px-3
-                    md:py-6 md:px-4
-                    lg:py-2
-                "
-            >
-                {/* Palette mobile floating, fixed above footer */}
-                <div
-                    className="
-                        fixed bottom-20 md:bottom-22 lg:bottom-25 left-1/2 -translate-x-1/2
-                        z-40 flex justify-center
-                        transform-gpu origin-bottom
-                        scale-[0.8] md:scale-[0.85] lg:scale-[0.9]
-                    "
-                >
-                    <ScribblePalette />
+            {/* === FIXED BOTTOM WRAPPER: Palette (on top) + Footer (below) === */}
+            <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
+                {/* Palette row (centered, full width, auto height) */}
+                <div className="mx-auto w-full max-w-3xl px-3 mb-3 pointer-events-auto">
+                    <div className="w-full flex justify-center">
+                        <ScribblePalette />
+                    </div>
                 </div>
 
-                {/* Top border on the footer row (theme-aware) */}
-                <div
+                {/* Footer bar */}
+                <footer
                     className="
-                        mx-auto w-full flex items-center
-                        justify-center
+                        bg-theme
+                        py-2 px-3
+                        md:py-6 md:px-4
+                        lg:py-2
                         border-t-theme
-                        pt-2
+                        pointer-events-auto
                     "
                 >
-                    <BigMark
-                        locale={safeLocale}
+                    <div
                         className="
-                            text-5xl leading-none
-                            md:text-[6vw]
-                            lg:text-[5vw]
-                            w-auto
-                            transform translate-y-[2px]
+                            mx-auto w-full flex items-center
+                            justify-center
+                            pt-2
                         "
-                    />
-                </div>
-            </footer>
+                    >
+                        <BigMark
+                            locale={safeLocale}
+                            className="
+                                text-5xl leading-none
+                                md:text-[6vw]
+                                lg:text-[5vw]
+                                w-auto
+                                transform translate-y-[2px]
+                            "
+                        />
+                    </div>
+                </footer>
+            </div>
 
-            {/* Theme switcher fixed bottom-right */}
+            {/* Theme switcher fixed bottom-right (above footer) */}
             <div
                 className="
-                    fixed bottom-3 right-3 z-40
+                    fixed bottom-3 right-3 z-50
                     scale-75 md:scale-90
                 "
             >
