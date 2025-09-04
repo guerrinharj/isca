@@ -9,13 +9,13 @@ const API_KEY = process.env.NEXT_PUBLIC_API_SECRET as string
 type AuthResponse =
     | { loggedIn: boolean }
     | {
-          user?: unknown
-          session?: unknown
-          id?: unknown
-          email?: string
-          isAdmin?: boolean
-          authenticated?: boolean
-      }
+            user?: unknown
+            session?: unknown
+            id?: unknown
+            email?: string
+            isAdmin?: boolean
+            authenticated?: boolean
+    }
 
 function useLoggedIn() {
     const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
@@ -187,15 +187,6 @@ function ReservasIndex({ locale }: { locale: string }) {
                                     </span>
                                     <span className="opacity-60">•</span>
                                     <span className="opacity-80">{formatWhen(r.data, locale)}</span>
-                                    {r.is_confirmed ? (
-                                        <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-green-600/40">
-                                            {locale === 'pt' ? 'Confirmada' : 'Confirmed'}
-                                        </span>
-                                    ) : (
-                                        <span className="ml-1 px-2 py-0.5 text-[11px] rounded-full border border-yellow-700/40">
-                                            {locale === 'pt' ? 'Pendente' : 'Pending'}
-                                        </span>
-                                    )}
                                 </div>
                                 <div className="opacity-80">
                                     {r.email} · {r.telefone}
