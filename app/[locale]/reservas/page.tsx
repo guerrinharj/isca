@@ -88,7 +88,6 @@ function Banner({ banner, onClose }: { banner: BannerState; onClose: () => void 
     )
 }
 
-/* pequeno hook para controlar o banner sem usar any */
 function useBannerAutoHide(timeoutMs = 4600) {
     const [banner, setBanner] = useState<BannerState>(null)
     const timerRef = useRef<number | null>(null)
