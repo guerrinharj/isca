@@ -18,7 +18,10 @@ export default function InfoText({ locale, className = '' }: InfoTextProps) {
                         Sunday:{' '}
                         <span className="poppins-regular">12:00PM - 10:00PM</span>
                     </p>
-                    <p>Rua do Russel, 724 - <span className="poppins-regular">Rio de Janeiro</span></p>
+                    <div className="mt-5">
+                        <p className="underline">Rua do Russel, 724</p>
+                        <p className="poppins-regular">Rio de Janeiro, Brazil</p>
+                    </div>
                 </>
             ) : (
                 <>
