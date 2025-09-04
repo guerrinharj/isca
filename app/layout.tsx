@@ -1,5 +1,14 @@
 // app/layout.tsx
+import type { Metadata } from 'next'
 import './globals.css'
+
+export const metadata: Metadata = {
+    title: 'isca | pintxos + bar',
+    description: 'isca | pintxos + bar',
+    icons: {
+        icon: '/favisca.png',
+    },
+}
 
 export default function RootLayout({
     children,
@@ -8,7 +17,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pt">
-            <body className="font-sans relative min-h-screen  animate-fadeIn">
+            <body className="font-sans relative min-h-screen animate-fadeIn">
                 {children}
             </body>
         </html>
