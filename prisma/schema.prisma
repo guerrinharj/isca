@@ -58,12 +58,14 @@ model Prato {
     is_drink          Boolean  @default(false)
     is_alcoolico      Boolean  @default(false)
     is_soft           Boolean  @default(false)
-    is_outro          Boolean  @default(true)
+    is_outro          Boolean  @default(false) 
     promo_description String?  @db.Text
+    is_sobremesa      Boolean? @default(false)
 }
 
+
 model Reserva {
-    id           String   @id @default(cuid())
+    id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     nome         String
     data         DateTime
     email        String
