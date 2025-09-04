@@ -56,12 +56,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                         py-2 px-3
                         md:py-6 md:px-4
                         lg:py-2
-                        border-t-theme
                         pointer-events-auto
                     "
                 >
                     <div
                         className="
+                            border-t-[0.1px]
                             mx-auto w-full flex items-center
                             justify-center
                             pt-2
