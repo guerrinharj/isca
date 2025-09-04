@@ -19,7 +19,6 @@ function isInternalProxy(req: Request) {
 }
 
 function resolveBaseUrl(req: Request) {
-    // Prioriza NEXT_PUBLIC_BASE_URL; fallback para host do request
     const configured = process.env.NEXT_PUBLIC_BASE_URL
     if (configured) return configured.replace(/\/$/, '')
     const host = req.headers.get('host') || 'localhost:3000'
@@ -32,7 +31,6 @@ async function proxyWithApiKey(method: 'PUT' | 'DELETE', req: Request, id: strin
     const base = resolveBaseUrl(req)
     const url = `${base}/api/pratos/${id}`
 
-    // lê o corpo exatamente uma vez
     const bodyText = method === 'PUT' ? await req.text() : undefined
 
     const headers: Record<string, string> = {
@@ -50,7 +48,6 @@ async function proxyWithApiKey(method: 'PUT' | 'DELETE', req: Request, id: strin
     })
 
     const text = await res.text()
-    // Repassa resposta preservando status e content-type
     return new NextResponse(text || null, {
         status: res.status,
         headers: { 'content-type': res.headers.get('content-type') || 'application/json' },
@@ -93,22 +90,46 @@ export async function PUT(req: Request, context: Ctx) {
     try {
         const { id } = await context.params
 
-        // 1) Se já veio x-api-key válida OU já somos a chamada interna, processa local
         if (hasValidApiKey(req) || isInternalProxy(req)) {
             const body = await req.json()
             const supabase = createClientService()
 
             const updates: Record<string, unknown> = {}
+
+            // escalares
             if (typeof body.nome === 'string') updates.nome = body.nome
-            if (typeof body.preco === 'string' || typeof body.preco === 'number') updates.preco = body.preco
+            if (typeof body.preco === 'string' || typeof body.preco === 'number') {
+                // mantém coerência com POST, coluna string no DB
+                updates.preco = String(body.preco)
+            }
             if (typeof body.descricao === 'string') updates.descricao = body.descricao
             if (typeof body.descricao_en === 'string') updates.descricao_en = body.descricao_en
             if (Array.isArray(body.imagens)) updates.imagens = body.imagens as string[]
             if (typeof body.isActive === 'boolean') updates.isActive = body.isActive
 
-            // Se seu schema tem NOT NULL em updatedAt
+            // booleans permitidos
+            const booleanKeys = [
+                'is_pintxo',
+                'is_outro',
+                'is_drink',
+                'is_alcoolico',
+                'is_soft',
+                'is_vegan',
+                'is_vegetariano',
+                'is_sobremesa', 
+            ] as const
+
+            for (const k of booleanKeys) {
+                const v = body[k as keyof typeof body]
+                if (typeof v === 'boolean') {
+                    updates[k] = v
+                }
+            }
+
+            // updatedAt (se existir NOT NULL no schema)
             updates.updatedAt = new Date().toISOString()
 
+            // nada pra atualizar além do updatedAt?
             if (Object.keys(updates).length === 1 && 'updatedAt' in updates) {
                 return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
             }
@@ -149,9 +170,8 @@ export async function PUT(req: Request, context: Ctx) {
             return NextResponse.json({ prato })
         }
 
-        // 2) Não tem x-api-key ⇒ faz auto-proxy interno com API_SECRET
+        // auto-proxy interno se não veio x-api-key
         if (!process.env.API_SECRET) {
-            // sem segredo configurado, melhor retornar 401 do que 500
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         return await proxyWithApiKey('PUT', req, id)
@@ -175,7 +195,6 @@ export async function DELETE(req: Request, context: Ctx) {
     try {
         const { id } = await context.params
 
-        // 1) Se já veio x-api-key válida OU já somos a chamada interna, processa local
         if (hasValidApiKey(req) || isInternalProxy(req)) {
             const supabase = createClientService()
 
@@ -210,7 +229,6 @@ export async function DELETE(req: Request, context: Ctx) {
             return new Response(null, { status: 204 })
         }
 
-        // 2) Não tem x-api-key ⇒ auto-proxy interno com API_SECRET
         if (!process.env.API_SECRET) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

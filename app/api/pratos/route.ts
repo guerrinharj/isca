@@ -17,6 +17,7 @@ type NovoPrato = {
     is_soft?: boolean;
     is_vegan?: boolean;
     is_vegetariano?: boolean;
+    is_sobremesa?: boolean;
 };
 
 export async function GET() {
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
             descricao: body.descricao,
             descricao_en: body.descricao_en,
             ...(Array.isArray(body.imagens) ? { imagens: body.imagens } : {}),
-            ...(typeof body.isActive === 'boolean' ? { isActive: body.isActive } : {})
+            ...(typeof body.isActive === 'boolean' ? { isActive: body.isActive } : {}),
         };
 
         // Include booleans only when the caller actually sent them
@@ -89,7 +90,8 @@ export async function POST(req: Request) {
             'is_alcoolico',
             'is_soft',
             'is_vegan',
-            'is_vegetariano'
+            'is_vegetariano',
+            'is_sobremesa',
         ];
         for (const k of booleanKeys) {
             const v = body[k];
