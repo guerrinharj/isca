@@ -213,6 +213,8 @@ function ReservasIndex({ locale }: { locale: string }) {
 /* ===== page (client) ===== */
 export default function Page() {
     const { locale } = useParams<{ locale: 'pt' | 'en' }>()
+    const router = useRouter()
+    const [submitting, setSubmitting] = useState(false)
     const [form, setForm] = useState({
         nome: '',
         email: '',
@@ -231,6 +233,9 @@ export default function Page() {
         qty: locale === 'pt' ? 'Quantidade de pessoas' : 'Party size',
         mensagem: locale === 'pt' ? 'Mensagem' : 'Message',
         submit: locale === 'pt' ? 'Fazer reserva' : 'Create reservation',
+        sending: locale === 'pt' ? 'Enviando…' : 'Sending…',
+        success: locale === 'pt' ? 'Reserva enviada com sucesso!' : 'Reservation submitted!',
+        fail: locale === 'pt' ? 'Não foi possível enviar sua reserva. Tente novamente.' : 'Could not submit your reservation. Please try again.',
     }
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,7 +248,54 @@ export default function Page() {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        alert('Reserva enviada (placeholder)')
+        if (submitting) return
+        setSubmitting(true)
+        try {
+            if (!form.nome || !form.email || !form.telefone || !form.data || !form.quantity) {
+                alert(locale === 'pt' ? 'Preencha todos os campos obrigatórios.' : 'Fill all required fields.')
+                return
+            }
+
+            // datetime-local -> ISO (UTC)
+            const iso = new Date(form.data).toISOString()
+
+            const payload = {
+                nome: form.nome.trim(),
+                email: form.email.trim().toLowerCase(),
+                telefone: form.telefone.trim(),
+                quantity: Number(form.quantity),
+                data: iso,
+                message: form.mensagem?.trim() || undefined,
+            }
+
+            const res = await fetch('/api/reservas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, // POST não precisa x-api-key
+                credentials: 'include',
+                body: JSON.stringify(payload),
+                cache: 'no-store',
+            })
+
+            const text = await res.text()
+            let json: any = null
+            try { json = JSON.parse(text) } catch {}
+
+            if (!res.ok) {
+                console.error('[Reserva] POST fail:', res.status, text)
+                const msg = json?.error || text || `HTTP ${res.status}`
+                alert(`${t.fail}\n${msg}`)
+                return
+            }
+
+            alert(t.success)
+            setForm({ nome: '', email: '', telefone: '', data: '', quantity: 2, mensagem: '' })
+            router.refresh()
+        } catch (err: any) {
+            console.error('[Reserva] exception:', err)
+            alert(t.fail)
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     const inputClasses =
@@ -268,15 +320,12 @@ export default function Page() {
                 className="pb-20 md:pb-5 md:py-5 lg:mb-20 font-sans relative will-change-[opacity,transform]"
                 style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
             >
-                
                 <div className="relative max-w-md mx-auto">
-
-                <h1
+                    <h1
                         className="absolute right-0 font-cirrus -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
-                        
                     >
                         {t.title}
-                </h1>
+                    </h1>
 
                     <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
                         <div>
@@ -349,19 +398,19 @@ export default function Page() {
                                 value={form.mensagem}
                                 onChange={onChange}
                                 placeholder="Quero uma mesa que nem a do Maradona"
-                                required
                                 className={inputClasses}
                             />
                         </div>
 
                         <button
                             type="submit"
+                            disabled={submitting}
                             className="
-                            mt-4 inline-flex items-center justify-center rounded-full
-                            px-4 py-2 font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto
-                            bg-accent text-theme"
+                                mt-4 inline-flex items-center justify-center rounded-full
+                                px-4 py-2 font-medium text-sm hover:opacity-90 active:opacity-80 transition mx-auto
+                                bg-accent text-theme disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {t.submit}
+                            {submitting ? t.sending : t.submit}
                         </button>
                     </form>
 
