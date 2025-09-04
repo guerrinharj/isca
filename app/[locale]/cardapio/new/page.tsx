@@ -12,6 +12,7 @@ type NewPratoForm = {
     is_pintxo: boolean
     is_vegan: boolean
     is_vegetariano: boolean
+    is_sobremesa: boolean 
     is_drink: boolean
     is_alcoolico: boolean
     is_soft: boolean
@@ -38,6 +39,7 @@ export default function NewPratoPage({
         is_pintxo: false,
         is_vegan: false,
         is_vegetariano: false,
+        is_sobremesa: false, 
         is_drink: false,
         is_alcoolico: false,
         is_soft: false,
@@ -146,6 +148,16 @@ export default function NewPratoPage({
                         onChange={onInputChange}
                     /> Vegetariano
                 </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        className="mx-2"
+                        name="is_sobremesa"
+                        checked={form.is_sobremesa}
+                        onChange={onInputChange}
+                    /> Sobremesa
+                </label>
+
                 <label>
                     <input
                         type="checkbox"

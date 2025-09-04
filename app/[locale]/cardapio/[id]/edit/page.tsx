@@ -12,6 +12,7 @@ type Prato = {
     is_pintxo: boolean
     is_vegan: boolean
     is_vegetariano: boolean
+    is_sobremesa: boolean    
     is_drink: boolean
     is_alcoolico: boolean
     is_soft: boolean
@@ -174,6 +175,15 @@ export default function EditPratoPage({
                         <input
                             type="checkbox"
                             className="mx-2 align-middle"
+                            name="is_sobremesa"
+                            checked={form.is_sobremesa}
+                            onChange={onInputChange}
+                        /> Sobremesa
+                    </label>
+                    <label className="block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
                             name="is_drink"
                             checked={form.is_drink}
                             onChange={onInputChange}
@@ -210,7 +220,7 @@ export default function EditPratoPage({
 
                 <button
                     disabled={saving}
-                    className="text-white px-4 py-2 rounded mt-4"
+                    className="bg-green-600 text-white px-4 py-2 rounded mt-4"
                 >
                     {saving ? 'Salvando...' : 'Atualizar'}
                 </button>
