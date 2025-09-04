@@ -9,13 +9,13 @@ const API_KEY = process.env.NEXT_PUBLIC_API_SECRET as string
 type AuthResponse =
     | { loggedIn: boolean }
     | {
-            user?: unknown
-            session?: unknown
-            id?: unknown
-            email?: string
-            isAdmin?: boolean
-            authenticated?: boolean
-        }
+          user?: unknown
+          session?: unknown
+          id?: unknown
+          email?: string
+          isAdmin?: boolean
+          authenticated?: boolean
+      }
 
 function useLoggedIn() {
     const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
@@ -79,6 +79,14 @@ function formatWhen(iso: string, locale: string) {
     }
 }
 
+function extractErrorMessage(u: unknown): string | null {
+    if (u && typeof u === 'object' && 'error' in u) {
+        const val = (u as { error?: unknown }).error
+        if (typeof val === 'string') return val
+    }
+    return null
+}
+
 /* ===== admin index (client) ===== */
 function ReservasIndex({ locale }: { locale: string }) {
     const [reservas, setReservas] = useState<Reserva[] | null>(null)
@@ -99,7 +107,7 @@ function ReservasIndex({ locale }: { locale: string }) {
             const d: { reservas?: Reserva[] } = await res.json()
             setReservas(Array.isArray(d?.reservas) ? d.reservas : [])
             setCanViewAdmin(true)
-        } catch (e) {
+        } catch (e: unknown) {
             console.error(e)
             setReservas([])
             setError(locale === 'pt' ? 'Não foi possível carregar as reservas.' : 'Could not load reservations.')
@@ -135,7 +143,7 @@ function ReservasIndex({ locale }: { locale: string }) {
             alert(locale === 'pt' ? 'Reserva deletada com sucesso!' : 'Reservation deleted!')
             await fetchAll()
             router.refresh()
-        } catch (e) {
+        } catch (e: unknown) {
             console.error(e)
             alert(locale === 'pt' ? 'Erro ao deletar reserva.' : 'Error deleting reservation.')
         }
@@ -235,7 +243,10 @@ export default function Page() {
         submit: locale === 'pt' ? 'Fazer reserva' : 'Create reservation',
         sending: locale === 'pt' ? 'Enviando…' : 'Sending…',
         success: locale === 'pt' ? 'Reserva enviada com sucesso!' : 'Reservation submitted!',
-        fail: locale === 'pt' ? 'Não foi possível enviar sua reserva. Tente novamente.' : 'Could not submit your reservation. Please try again.',
+        fail:
+            locale === 'pt'
+                ? 'Não foi possível enviar sua reserva. Tente novamente.'
+                : 'Could not submit your reservation. Please try again.',
     }
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -277,12 +288,17 @@ export default function Page() {
             })
 
             const text = await res.text()
-            let json: any = null
-            try { json = JSON.parse(text) } catch {}
+            let json: unknown = null
+            try {
+                json = JSON.parse(text)
+            } catch {
+                // mantém como string crua
+            }
 
             if (!res.ok) {
                 console.error('[Reserva] POST fail:', res.status, text)
-                const msg = json?.error || text || `HTTP ${res.status}`
+                const apiMsg = extractErrorMessage(json)
+                const msg = apiMsg ?? (text || `HTTP ${res.status}`)
                 alert(`${t.fail}\n${msg}`)
                 return
             }
@@ -290,7 +306,7 @@ export default function Page() {
             alert(t.success)
             setForm({ nome: '', email: '', telefone: '', data: '', quantity: 2, mensagem: '' })
             router.refresh()
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('[Reserva] exception:', err)
             alert(t.fail)
         } finally {
@@ -321,9 +337,7 @@ export default function Page() {
                 style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
             >
                 <div className="relative max-w-md mx-auto">
-                    <h1
-                        className="absolute right-0 font-cirrus -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest"
-                    >
+                    <h1 className="absolute right-0 font-cirrus -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest">
                         {t.title}
                     </h1>
 
