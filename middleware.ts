@@ -6,6 +6,13 @@ export function middleware(request: NextRequest) {
     const { pathname, origin } = request.nextUrl
     const method = request.method
 
+    // 🔀 Redirect /login -> /pt/login (antes de qualquer outra lógica)
+    if (pathname === '/login' || pathname === '/login/') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/pt/login'
+        return NextResponse.redirect(url)
+    }
+
     if (method === 'OPTIONS') return NextResponse.next()
 
     const reqOrigin = request.headers.get('origin') || ''
@@ -14,7 +21,8 @@ export function middleware(request: NextRequest) {
         (reqOrigin && reqOrigin === origin) ||
         (referer && referer.startsWith(origin))
 
-    // Public
+    // --- A PARTIR DAQUI: só rotas de API ---
+    // Público
     const isPublicPratosList =
         method === 'GET' && (pathname === '/api/pratos' || pathname === '/api/pratos/')
     const isPublicReservaCreate =
@@ -27,18 +35,18 @@ export function middleware(request: NextRequest) {
         (method === 'GET' && (pathname === '/api/auth/me' || pathname === '/api/auth/me/'))
     if (isAuth && isSameOrigin) return NextResponse.next()
 
-    // ✅ Allow same-origin calls that have a session cookie (your logged-in admin UI)
+    // ✅ Allow same-origin calls that have a session cookie (logged-in admin UI)
     if (isSameOrigin) {
         const session = request.cookies.get('isca_session')?.value
         if (session) return NextResponse.next()
     }
 
-    // (Optional) Whitelist GET for a single prato read without key
+    // (Opcional) Whitelist GET para leitura individual de prato sem chave
     // if (method === 'GET' && /^\/api\/pratos\/[^/]+$/.test(pathname)) {
     //     return NextResponse.next()
     // }
 
-    // Fallback: require API key
+    // Fallback: exige API key
     const apiKey = request.headers.get('x-api-key')
     if (apiKey !== process.env.API_SECRET) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
@@ -50,7 +58,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
 }
 
-
 export const config = {
-    matcher: ['/api/:path*'],
+    // 👇 Inclui /api/* e também /login (com e sem /)
+    matcher: ['/api/:path*', '/login', '/login/'],
 }
