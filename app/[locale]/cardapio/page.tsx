@@ -32,6 +32,7 @@ type Prato = {
     is_alcoolico?: boolean | null
     is_soft?: boolean | null
     is_outro?: boolean | null
+    is_sobremesa?: boolean | null    // ← NEW
 }
 
 type CSSVars = CSSProperties & { ['--i']?: number | string }
@@ -104,6 +105,7 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
     const is_alcoolico = pickBool(r, ['is_alcoolico', 'isAlcoolico', 'alcoolico'])
     const is_soft = pickBool(r, ['is_soft', 'isSoft', 'soft'])
     const is_outro = pickBool(r, ['is_outro', 'isOutro', 'outro'])
+    const is_sobremesa = pickBool(r, ['is_sobremesa', 'isSobremesa', 'sobremesa', 'dessert']) 
 
     return {
         id,
@@ -119,6 +121,7 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
         is_alcoolico: is_alcoolico ?? null,
         is_soft: is_soft ?? null,
         is_outro: is_outro ?? null,
+        is_sobremesa: is_sobremesa ?? null,
     }
 }
 
@@ -162,12 +165,11 @@ function ItemRow({
     const precoText =
         typeof item.preco === 'number' ? String(item.preco) : (item.preco ?? '')
 
-    let dietLabel: string | null = null
-    if (item.is_vegetariano) {
-        dietLabel = locale === 'en' ? 'Vegetarian' : 'Vegetariano'
-    } else if (item.is_vegan) {
-        dietLabel = locale === 'en' ? 'Vegan' : 'Vegano'
-    }
+    // Build tags (same look & feel as existing diet label)
+    const tags: string[] = []
+    if (item.is_vegetariano) tags.push(locale === 'en' ? 'Vegetarian' : 'Vegetariano')
+    if (item.is_vegan) tags.push(locale === 'en' ? 'Vegan' : 'Vegano')
+    if (item.is_sobremesa) tags.push(locale === 'en' ? 'Dessert' : 'Sobremesa')
 
     return (
         <li className="py-3">
@@ -198,20 +200,21 @@ function ItemRow({
                 </div>
             </div>
 
-            {(descricao || dietLabel) && (
+            {(descricao || tags.length > 0) && (
                 <p className="mt-1 font-poppins text-sm">
                     {descricao}
-                    {dietLabel && (
+                    {tags.map((label, i) => (
                         <span
+                            key={`${label}-${i}`}
                             className="
                                 ml-2 font-cirrus text-2xl
                                 text-isca-laranja
                                 inline-block transform -rotate-12
                             "
                         >
-                            {dietLabel}
+                            {label}
                         </span>
-                    )}
+                    ))}
                 </p>
             )}
             {item.promo_description && (
@@ -385,28 +388,26 @@ export default async function CardapioPage(props: CardapioPageProps) {
             `}</style>
 
             {loggedIn && (
-                    <Link
-                        href={`/${safeLocale}/cardapio/new`}
-                        className="
+                <Link
+                    href={`/${safeLocale}/cardapio/new`}
+                    className="
                         text
-                            hidden md:flex fixed left-8 top-5 z-40
-                            h-14 w-14 items-center justify-center
-                            rounded-full border border-white
-                            text-3xl leading-none shadow-lg hover:scale-105 transition
-                        "
-                        aria-label="Criar Prato"
-                        title="Criar Prato"
-                    >
-                        +
-                    </Link>
-                )}
+                        hidden md:flex fixed left-8 top-5 z-40
+                        h-14 w-14 items-center justify-center
+                        rounded-full border border-white
+                        text-3xl leading-none shadow-lg hover:scale-105 transition
+                    "
+                    aria-label="Criar Prato"
+                    title="Criar Prato"
+                >
+                    +
+                </Link>
+            )}
 
             <div
                 className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
                 style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
             >
-                
-
                 <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
                 <div className="space-y-10">
                     <Section
