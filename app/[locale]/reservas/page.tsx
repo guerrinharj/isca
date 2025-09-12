@@ -218,7 +218,7 @@ function ReservasIndex({ locale }: { locale: string }) {
             const raw = await res.text()
             if (!res.ok) {
                 const maybe = extractErrorMessage(safeJson(raw))
-                const msg = maybe ?? (raw || `HTTP ${res.status}`) // parênteses para evitar mixing
+                const msg = maybe ?? (raw || `HTTP ${res.status}`)
                 throw new Error(msg)
             }
             show('success', locale === 'pt' ? 'Reserva deletada com sucesso!' : 'Reservation deleted!')
@@ -369,7 +369,7 @@ export default function Page() {
             if (!res.ok) {
                 console.error('[Reserva] POST fail:', res.status, text)
                 const apiMsg = extractErrorMessage(json)
-                const msg = apiMsg ?? (text || `HTTP ${res.status}`) // parênteses para evitar mixing
+                const msg = apiMsg ?? (text || `HTTP ${res.status}`)
                 show('error', `${t.fail} ${msg}`)
                 return
             }
@@ -412,7 +412,7 @@ export default function Page() {
                     content: '';
                     position: absolute;
                     inset: -4px;
-                    border: 1px solid currentColor; /* usa a cor do texto (tema) */
+                    border: 1px solid currentColor;
                     opacity: 0;
                     transform: scale(0.98);
                     transition: opacity 220ms ease, transform 220ms ease;
@@ -432,13 +432,19 @@ export default function Page() {
                 {/* banner do formulário */}
                 <Banner banner={banner} onClose={close} />
 
-                <div className="relative max-w-md mx-auto">
+                {/* WIDTH MATCHES cardapio: container + max-w-3xl */}
+                <div className="container mx-auto max-w-3xl relative px-4 md:px-0">
                     <h1 className="absolute right-0 font-cirrus -rotate-12 text-4xl lg:text-5xl font-display tracking-tightest">
                         {t.title}
                     </h1>
 
-                    <form onSubmit={onSubmit} className="grid gap-6 w-full mt-24">
-                        <div>
+                    {/* 2-col layout on md+, with full-width items using col-span-2 */}
+                    <form
+                        onSubmit={onSubmit}
+                        className="grid w-full gap-6 mt-24 md:grid-cols-2"
+                    >
+                        {/* Nome (full width) */}
+                        <div className="md:col-span-2">
                             <label className={labelClasses}>{t.name}</label>
                             <input
                                 name="nome"
@@ -450,6 +456,7 @@ export default function Page() {
                             />
                         </div>
 
+                        {/* Email (1/2) */}
                         <div>
                             <label className={labelClasses}>{t.email}</label>
                             <input
@@ -463,6 +470,7 @@ export default function Page() {
                             />
                         </div>
 
+                        {/* Telefone (1/2) */}
                         <div>
                             <label className={labelClasses}>{t.phone}</label>
                             <input
@@ -475,6 +483,7 @@ export default function Page() {
                             />
                         </div>
 
+                        {/* Data e hora (1/2) */}
                         <div>
                             <label className={labelClasses}>{t.datetime}</label>
                             <input
@@ -487,6 +496,7 @@ export default function Page() {
                             />
                         </div>
 
+                        {/* Quantidade (1/2) */}
                         <div>
                             <label className={labelClasses}>{t.qty}</label>
                             <input
@@ -501,7 +511,8 @@ export default function Page() {
                             />
                         </div>
 
-                        <div>
+                        {/* Mensagem (full width) */}
+                        <div className="md:col-span-2">
                             <label className={labelClasses}>{t.mensagem}</label>
                             <input
                                 name="mensagem"
@@ -512,20 +523,23 @@ export default function Page() {
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="
-                                btn-reserva mt-4 inline-flex items-center justify-center
-                                px-4 py-2 font-medium text-sm transition mx-auto
-                                bg-accent text-theme border-2 border-theme hover:border-accent
-                                focus-visible:outline-none focus-visible:ring-0
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                rounded-none
-                            "
-                        >
-                            {submitting ? t.sending : t.submit}
-                        </button>
+                        {/* Botão (full width, centered) */}
+                        <div className="md:col-span-2 flex justify-center">
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="
+                                    btn-reserva mt-4 inline-flex items-center justify-center
+                                    px-4 py-2 font-medium text-sm transition
+                                    bg-accent text-theme border-2 border-theme hover:border-accent
+                                    focus-visible:outline-none focus-visible:ring-0
+                                    disabled:opacity-50 disabled:cursor-not-allowed
+                                    rounded-none
+                                "
+                            >
+                                {submitting ? t.sending : t.submit}
+                            </button>
+                        </div>
                     </form>
 
                     {/* índice de reservas (admin only) */}
