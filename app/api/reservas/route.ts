@@ -60,6 +60,16 @@ function sanitizeFrom(from: string | undefined, fallbackUser: string) {
     return f.includes('<') ? f : `"Isca Reserva" <${f}>`
 }
 
+/* opcional: normalização simples para E.164 (usa +55 como padrão se não vier com +) */
+function toE164(phoneRaw: string | undefined) {
+    const { WHATSAPP_DEFAULT_COUNTRY_CODE = '+55' } = process.env
+    const cleaned = (phoneRaw ?? '').replace(/[^\d+]/g, '')
+    if (!cleaned) return undefined
+    if (cleaned.startsWith('+')) return cleaned
+    const trimmed = cleaned.replace(/^0+/, '')
+    return `${WHATSAPP_DEFAULT_COUNTRY_CODE}${trimmed}`
+}
+
 /* ========== EMAIL (Gmail via SMTP) ========== */
 async function sendEmail({
     subject,
@@ -78,7 +88,7 @@ async function sendEmail({
     } = process.env
 
     if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !RESERVA_NOTIFY_TO) {
-        return { ok: false, error: 'Missing SMTP envs' as const }
+        return { ok: false as const, error: 'Missing SMTP envs' }
     }
 
     const port = Number(SMTP_PORT)
@@ -108,6 +118,68 @@ async function sendEmail({
     } catch (err) {
         const cause = extractError(err)
         console.error('EMAIL_SEND_ERROR', cause)
+        return { ok: false as const, error: cause.message }
+    }
+}
+
+/* ========== WHATSApp (Meta Cloud API) ========== */
+/**
+ * Requer:
+ *   WHATSAPP_TOKEN=EAAXXXXX...
+ *   WHATSAPP_PHONE_ID=123456789012345
+ *   RESERVA_NOTIFY_WHATSAPP=+55219XXXXYYYY (destino interno)
+ *   WHATSAPP_DEFAULT_COUNTRY_CODE=+55 (opcional, para normalizar telefones)
+ */
+async function sendWhatsAppMeta({
+    to,
+    text,
+}: {
+    to: string
+    text: string
+}) {
+    const { WHATSAPP_TOKEN, WHATSAPP_PHONE_ID } = process.env
+    if (!WHATSAPP_TOKEN || !WHATSAPP_PHONE_ID) {
+        return { ok: false as const, error: 'Missing WhatsApp envs' }
+    }
+
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 12_000)
+
+    try {
+        const url = `https://graph.facebook.com/v20.0/${encodeURIComponent(WHATSAPP_PHONE_ID)}/messages`
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                to, // E.164
+                type: 'text',
+                text: { preview_url: false, body: text },
+            }),
+            signal: controller.signal,
+        })
+
+        clearTimeout(timeout)
+
+        if (!res.ok) {
+            let errorPayload: unknown
+            try {
+                errorPayload = await res.json()
+            } catch {
+                errorPayload = await res.text()
+            }
+            console.error('WHATSAPP_SEND_ERROR', { status: res.status, errorPayload })
+            return { ok: false as const, error: `Meta API ${res.status}` }
+        }
+
+        return { ok: true as const }
+    } catch (err) {
+        clearTimeout(timeout)
+        const cause = extractError(err)
+        console.error('WHATSAPP_SEND_UNHANDLED', cause)
         return { ok: false as const, error: cause.message }
     }
 }
@@ -175,8 +247,31 @@ export async function POST(req: Request) {
 
         const emailResult = await sendEmail({ subject, html })
 
+        // ===== Notificação por WhatsApp (Meta Cloud API) =====
+        const notifyTo = process.env.RESERVA_NOTIFY_WHATSAPP
+        const waTo = toE164(notifyTo ?? '')
+        let whatsappResult: { ok: boolean; error?: string } = { ok: false, error: 'No destination' }
+
+        if (waTo) {
+            const waText = [
+                `📌 Nova Reserva:`,
+                `👤 Nome: ${reserva.nome}`,
+                `📧 Email: ${reserva.email}`,
+                `📱 Telefone: ${reserva.telefone}`,
+                `👥 Pessoas: ${reserva.quantity}`,
+                `🗓 Quando: ${fmtWhen(reserva.data)}`,
+                reserva.message ? `💬 Mensagem: ${reserva.message}` : '',
+                `🆔 ID: ${reserva.id}`,
+            ]
+                .filter(Boolean)
+                .join('\n')
+
+            const waRes = await sendWhatsAppMeta({ to: waTo, text: waText })
+            whatsappResult = waRes
+        }
+
         return NextResponse.json(
-            { reserva, notifications: { email: emailResult } },
+            { reserva, notifications: { email: emailResult, whatsapp: whatsappResult } },
             { status: 201 }
         )
     } catch (err: unknown) {
