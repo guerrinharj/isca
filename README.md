@@ -217,8 +217,10 @@ Para adicionar campo sem termos problema de drift entre Prisma e Supabase
         ALTER TABLE "EXEMPLO" ADD COLUMN "LALALA" BOOLEAN NOT NULL DEFAULT false;
     ```
 
-
-
+3. **Aplicar a migração no banco**
+    ```bash
+    npx prisma migrate deploy
+    ```
 
 
 ## Notas de segurança

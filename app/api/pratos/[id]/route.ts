@@ -117,6 +117,7 @@ export async function PUT(req: Request, context: Ctx) {
                 'is_vegan',
                 'is_vegetariano',
                 'is_sobremesa', 
+                'is_vinho'
             ] as const
 
             for (const k of booleanKeys) {
