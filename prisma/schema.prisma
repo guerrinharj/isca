@@ -61,6 +61,7 @@ model Prato {
     is_outro          Boolean  @default(false) 
     promo_description String?  @db.Text
     is_sobremesa      Boolean? @default(false)
+    is_vinho          Boolean  @default(false)
 }
 
 

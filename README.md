@@ -1,4 +1,4 @@
-# 📖 Isca CRM
+# Isca CRM
 
 
 ## O que é o Isca CRM?
@@ -196,6 +196,29 @@ RESERVA_NOTIFY_TO=seu.email@gmail.com
 ```
 
 - No retorno da API, a chave ``notifications.email.ok`` indica se o envio foi bem-sucedido.
+
+
+## Instruções de Migração
+
+Para adicionar campo sem termos problema de drift entre Prisma e Supabase
+
+### Passos
+
+1. **Gerar a pasta de migração**
+    - Use o script utilitário para criar uma pasta timestamped com um `migration.sql`:
+    ```bash
+    ./scripts/create_migration.sh nome-da-migracao
+    ```
+
+   - Isso criará algo como:
+
+2. **Editar o arquivo migration.sql**
+    ```sql
+        ALTER TABLE "EXEMPLO" ADD COLUMN "LALALA" BOOLEAN NOT NULL DEFAULT false;
+    ```
+
+
+
 
 
 ## Notas de segurança

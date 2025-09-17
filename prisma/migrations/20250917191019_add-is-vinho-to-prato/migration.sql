@@ -1,0 +1,1 @@
+ALTER TABLE "Prato" ADD COLUMN "is_vinho" BOOLEAN NOT NULL DEFAULT false;
