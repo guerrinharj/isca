@@ -18,6 +18,7 @@ type NewPratoForm = {
     is_soft: boolean
     is_outro: boolean
     promo_description: string
+    is_vinho: boolean
 }
 
 export default function NewPratoPage({
@@ -45,6 +46,7 @@ export default function NewPratoPage({
         is_soft: false,
         is_outro: true,
         promo_description: '',
+        is_vinho: false
     })
 
     const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -166,6 +168,15 @@ export default function NewPratoPage({
                         checked={form.is_drink}
                         onChange={onInputChange}
                     /> Drink
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        className="mx-2"
+                        name="is_vinho"
+                        checked={form.is_vinho}
+                        onChange={onInputChange}
+                    /> Vinho
                 </label>
                 <label>
                     <input

@@ -99,7 +99,6 @@ export async function PUT(req: Request, context: Ctx) {
             // escalares
             if (typeof body.nome === 'string') updates.nome = body.nome
             if (typeof body.preco === 'string' || typeof body.preco === 'number') {
-                // mantém coerência com POST, coluna string no DB
                 updates.preco = String(body.preco)
             }
             if (typeof body.descricao === 'string') updates.descricao = body.descricao
@@ -117,6 +116,7 @@ export async function PUT(req: Request, context: Ctx) {
                 'is_vegan',
                 'is_vegetariano',
                 'is_sobremesa', 
+                'is_vinho'
             ] as const
 
             for (const k of booleanKeys) {
