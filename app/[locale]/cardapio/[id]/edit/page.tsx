@@ -17,6 +17,7 @@ type Prato = {
     is_alcoolico: boolean
     is_soft: boolean
     is_outro: boolean
+    is_vinho: boolean
 }
 
 export default function EditPratoPage({
@@ -215,6 +216,15 @@ export default function EditPratoPage({
                             checked={form.is_outro}
                             onChange={onInputChange}
                         /> Outro
+                    </label>
+                    <label className="block">
+                        <input
+                            type="checkbox"
+                            className="mx-2 align-middle"
+                            name="is_vinho"
+                            checked={form.is_vinho}
+                            onChange={onInputChange}
+                        /> Vinho
                     </label>
                 </div>
 
