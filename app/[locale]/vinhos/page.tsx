@@ -353,10 +353,18 @@ export default async function VinhosPage(props: { params: ParamLike; searchParam
                 </div>
             </div>
 
-            <div className="mt-8 text-center font-poppins text-sm text-neutral-400">
-                {safeLocale === 'en'
-                    ? 'All wines on this list are natural, organic, or biodynamic.'
-                    : 'Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.'}
+            <div className="mt-8 text-center font-poppins text-sm text-neutral-400 space-y-1">
+                {safeLocale === 'en' ? (
+                    <>
+                        <p>All wines on this list are natural, organic, or biodynamic.</p>
+                        <p>Check availability.</p>
+                    </>
+                ) : (
+                    <>
+                        <p>Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.</p>
+                        <p>Consulte a disponibilidade.</p>
+                    </>
+                )}
             </div>
         </>
     )
