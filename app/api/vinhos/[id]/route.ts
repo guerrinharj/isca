@@ -34,9 +34,10 @@ function normalizeTipo(input: unknown): string | null {
     return null
 }
 
+// GET /api/vinhos/:id  (PÚBLICO)
 export async function GET(
     _req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Record<string, string> }
 ) {
     try {
         const supabase = createClientService()
@@ -47,7 +48,7 @@ export async function GET(
             .single()
 
         if (error) {
-            console.error('GET /vinhos/:id error:', error)
+            // Quando não encontra, o Supabase retorna erro; trate como 404
             return NextResponse.json(
                 { error: 'Not found', details: error.message },
                 { status: 404 }
@@ -64,9 +65,10 @@ export async function GET(
     }
 }
 
+// PUT /api/vinhos/:id  (PROTEGIDO via middleware)
 export async function PUT(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Record<string, string> }
 ) {
     try {
         const body = (await req.json()) as UpdateVinho
@@ -99,7 +101,6 @@ export async function PUT(
             .single()
 
         if (error) {
-            console.error('PUT /vinhos/:id error:', error, { updateData })
             return NextResponse.json(
                 { error: 'DB error', details: error.message },
                 { status: 500 }
@@ -107,10 +108,7 @@ export async function PUT(
         }
 
         if (!data) {
-            return NextResponse.json(
-                { error: 'Not found' },
-                { status: 404 }
-            )
+            return NextResponse.json({ error: 'Not found' }, { status: 404 })
         }
 
         return NextResponse.json({ vinho: data })
@@ -123,9 +121,10 @@ export async function PUT(
     }
 }
 
+// DELETE /api/vinhos/:id  (PROTEGIDO via middleware)
 export async function DELETE(
     _req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Record<string, string> }
 ) {
     try {
         const supabase = createClientService()
@@ -135,7 +134,6 @@ export async function DELETE(
             .eq('id', params.id)
 
         if (error) {
-            console.error('DELETE /vinhos/:id error:', error)
             return NextResponse.json(
                 { error: 'DB error', details: error.message },
                 { status: 500 }
