@@ -201,7 +201,7 @@ function ItemRow({
             </div>
 
             {(descricao || tags.length > 0) && (
-                <p className="mt-1 font-poppins text-sm">
+                <p className="mt-1 poppins-medium-italic text-sm">
                     {descricao}
                     {tags.map((label, i) => (
                         <span
