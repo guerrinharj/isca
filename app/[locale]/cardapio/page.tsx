@@ -33,7 +33,6 @@ type Prato = {
     is_soft?: boolean | null
     is_outro?: boolean | null
     is_sobremesa?: boolean | null  
-    is_vinho?: boolean | null
 }
 
 type CSSVars = CSSProperties & { ['--i']?: number | string }
@@ -107,7 +106,6 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
     const is_soft = pickBool(r, ['is_soft', 'isSoft', 'soft'])
     const is_outro = pickBool(r, ['is_outro', 'isOutro', 'outro'])
     const is_sobremesa = pickBool(r, ['is_sobremesa', 'isSobremesa', 'sobremesa', 'dessert']) 
-    const is_vinho = pickBool(r, ['is_vinho', 'isVinho', 'vinho'])
 
     return {
         id,
@@ -124,7 +122,6 @@ function coercePrato(r: Record<string, unknown>): Prato | null {
         is_soft: is_soft ?? null,
         is_outro: is_outro ?? null,
         is_sobremesa: is_sobremesa ?? null,
-        is_vinho: is_vinho ?? null,
     }
 }
 
@@ -339,7 +336,6 @@ export default async function CardapioPage(props: CardapioPageProps) {
     const alcoolicos = pratos.filter(p => Boolean(p.is_alcoolico))
     const softs = pratos.filter(p => Boolean(p.is_soft))
     const outros = pratos.filter(p => Boolean(p.is_outro))
-    const vinhos = pratos.filter(p => Boolean(p.is_vinho))
 
     const rawF = sp.f
     const activeFilter = Array.isArray(rawF) ? (rawF[0] ?? '') : (rawF ?? '')
@@ -457,15 +453,6 @@ export default async function CardapioPage(props: CardapioPageProps) {
                         items={outros}
                         locale={safeLocale}
                         hidden={isHidden('outros')}
-                        loggedIn={loggedIn}
-                        deleteActionFor={deleteActionFor}
-                    />
-                    <Section
-                        id="vinhos"
-                        title={safeLocale === 'en' ? 'Wines' : 'Vinhos'}
-                        items={vinhos}
-                        locale={safeLocale}
-                        hidden={isHidden('vinhos')}
                         loggedIn={loggedIn}
                         deleteActionFor={deleteActionFor}
                     />

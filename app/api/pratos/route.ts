@@ -18,7 +18,6 @@ type NovoPrato = {
     is_vegan?: boolean;
     is_vegetariano?: boolean;
     is_sobremesa?: boolean;
-    is_vinho?: boolean;
 };
 
 export async function GET() {
@@ -93,7 +92,6 @@ export async function POST(req: Request) {
             'is_vegan',
             'is_vegetariano',
             'is_sobremesa',
-            'is_vinho'
         ];
         for (const k of booleanKeys) {
             const v = body[k];
