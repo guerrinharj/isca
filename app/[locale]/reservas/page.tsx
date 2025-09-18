@@ -411,7 +411,7 @@ export default function Page() {
 
         // Fora da janela
         if (!isWithinWindow(d)) {
-            show('error', friendlyWindowFor(d))
+            show('error', friendlyWindowFor(d, locale))
             return
         }
 
