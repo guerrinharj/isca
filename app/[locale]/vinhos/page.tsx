@@ -1,3 +1,4 @@
+// app/[locale]/vinhos/page.tsx
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import Link from 'next/link'
@@ -86,7 +87,17 @@ async function fetchVinhos(): Promise<Vinho[]> {
 }
 
 /* UI */
-function ItemRow({ item, locale }: { item: Vinho; locale: Locale }) {
+function ItemRow({
+    item,
+    locale,
+    loggedIn,
+    deleteActionFor,
+}: {
+    item: Vinho
+    locale: Locale
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
+}) {
     const descricao =
         locale === 'en'
             ? (item.descricao_en?.trim() || item.descricao?.trim() || '')
@@ -100,20 +111,41 @@ function ItemRow({ item, locale }: { item: Vinho; locale: Locale }) {
         <li className="py-3">
             <div className="flex items-baseline justify-between gap-4">
                 <span className="font-burns-ultra text-base md-text-xl">
-                    {item.nome} 
-                    <span className="poppins-bold text-sm"> {item.quantidade && ` · ${item.quantidade}`} </span> 
+                    {item.nome}
+                    <span className="poppins-bold text-sm"> {item.quantidade && ` · ${item.quantidade}`} </span>
                 </span>
 
-                {precoLine && (
-                    <span className="font-burns-ultra text-base md-text-xl">
-                        {precoLine}
-                    </span>
-                )}
+                <div className="flex items-center gap-3">
+                    {precoLine && (
+                        <span className="font-burns-ultra text-base md-text-xl">
+                            {precoLine}
+                        </span>
+                    )}
+
+                    {loggedIn && (
+                        <>
+                            <Link
+                                href={`/${locale}/vinhos/${item.id}/edit`}
+                                className="text-sm underline underline-offset-4 hover:opacity-80"
+                            >
+                                edit
+                            </Link>
+                            <form action={deleteActionFor(item.id)}>
+                                <button
+                                    type="submit"
+                                    className="text-red-600 text-sm underline underline-offset-4 hover:opacity-80"
+                                >
+                                    delete
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
             </div>
 
             {(descricao || item.ano) && (
                 <p className="mt-1 text-sm font-poppins">
-                    <span className="poppins-bold">{item.ano && `${item.ano} ·    `}</span> 
+                    <span className="poppins-bold">{item.ano && `${item.ano} ·    `}</span>
                     <span className="poppins-medium-italic">{descricao}</span>
                 </p>
             )}
@@ -121,13 +153,22 @@ function ItemRow({ item, locale }: { item: Vinho; locale: Locale }) {
     )
 }
 
-
-function Section({ id, title, items, locale, hidden }: {
+function Section({
+    id,
+    title,
+    items,
+    locale,
+    hidden,
+    loggedIn,
+    deleteActionFor,
+}: {
     id: string
     title: string
     items: Vinho[]
     locale: Locale
     hidden?: boolean
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
 }) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
@@ -136,10 +177,16 @@ function Section({ id, title, items, locale, hidden }: {
                     {title}
                 </h2>
             </div>
-            <ul className="mt-4 divide-y divide-current/20">
+            <ul className="mt-8 divide-y divide-current/20">
                 {items.length > 0 ? (
                     items.map(item => (
-                        <ItemRow key={item.id} item={item} locale={locale} />
+                        <ItemRow
+                            key={item.id}
+                            item={item}
+                            locale={locale}
+                            loggedIn={loggedIn}
+                            deleteActionFor={deleteActionFor}
+                        />
                     ))
                 ) : (
                     <li className="py-3 font-poppins">
@@ -216,50 +263,101 @@ export default async function VinhosPage(props: { params: ParamLike; searchParam
     const jar = await cookies()
     const loggedIn = Boolean(jar.get('isca_session')?.value)
 
-    return (
-        <div
-            className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
-            style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
-        >
-            <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
+    const deleteActionFor = (id: string) => {
+        return async (_formData: FormData) => {
+            'use server'
+            try {
+                await fetch(`https://isca-omega.vercel.app/api/vinhos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': process.env.API_SECRET || '',
+                    },
+                })
+            } finally {
+                revalidatePath(`/${safeLocale}/vinhos`)
+            }
+        }
+    }
 
-            <div className="space-y-10">
-                <Section
-                    id="bolhas"
-                    title={safeLocale === 'en' ? 'Sparkling' : 'Bolhas'}
-                    items={vinhos.filter(v => v.tipo === 'Bolhas')}
-                    locale={safeLocale}
-                    hidden={isHidden('Bolhas')}
-                />
-                <Section
-                    id="branco"
-                    title={safeLocale === 'en' ? 'White' : 'Branco'}
-                    items={vinhos.filter(v => v.tipo === 'Branco')}
-                    locale={safeLocale}
-                    hidden={isHidden('Branco')}
-                />
-                <Section
-                    id="rose"
-                    title="Rosé"
-                    items={vinhos.filter(v => v.tipo === 'Rosé')}
-                    locale={safeLocale}
-                    hidden={isHidden('Rosé')}
-                />
-                <Section
-                    id="laranja"
-                    title={safeLocale === 'en' ? 'Orange' : 'Laranja'}
-                    items={vinhos.filter(v => v.tipo === 'Laranja')}
-                    locale={safeLocale}
-                    hidden={isHidden('Laranja')}
-                />
-                <Section
-                    id="tinto"
-                    title={safeLocale === 'en' ? 'Red' : 'Tinto'}
-                    items={vinhos.filter(v => v.tipo === 'Tinto')}
-                    locale={safeLocale}
-                    hidden={isHidden('Tinto')}
-                />
+    return (
+        <>
+            {loggedIn && (
+                <Link
+                    href={`/${safeLocale}/vinhos/new`}
+                    className="
+                        text
+                        hidden md:flex fixed left-8 top-5 z-40
+                        h-14 w-14 items-center justify-center
+                        rounded-full border border-white
+                        text-3xl leading-none shadow-lg hover:scale-105 transition
+                    "
+                    aria-label={safeLocale === 'en' ? 'Create Wine' : 'Criar Vinho'}
+                    title={safeLocale === 'en' ? 'Create Wine' : 'Criar Vinho'}
+                >
+                    +
+                </Link>
+            )}
+
+            <div
+                className="container mx-auto max-w-3xl pb-20 pt-20 md:pt-6 relative will-change-[opacity,transform]"
+                style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
+            >
+                <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
+
+                <div className="space-y-10">
+                    <Section
+                        id="bolhas"
+                        title={safeLocale === 'en' ? 'Sparkling' : 'Bolhas'}
+                        items={vinhos.filter(v => v.tipo === 'Bolhas')}
+                        locale={safeLocale}
+                        hidden={isHidden('Bolhas')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="branco"
+                        title={safeLocale === 'en' ? 'White' : 'Branco'}
+                        items={vinhos.filter(v => v.tipo === 'Branco')}
+                        locale={safeLocale}
+                        hidden={isHidden('Branco')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="rose"
+                        title="Rosé"
+                        items={vinhos.filter(v => v.tipo === 'Rosé')}
+                        locale={safeLocale}
+                        hidden={isHidden('Rosé')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="laranja"
+                        title={safeLocale === 'en' ? 'Orange' : 'Laranja'}
+                        items={vinhos.filter(v => v.tipo === 'Laranja')}
+                        locale={safeLocale}
+                        hidden={isHidden('Laranja')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="tinto"
+                        title={safeLocale === 'en' ? 'Red' : 'Tinto'}
+                        items={vinhos.filter(v => v.tipo === 'Tinto')}
+                        locale={safeLocale}
+                        hidden={isHidden('Tinto')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                </div>
             </div>
-        </div>
+
+            <div className="mt-8 text-center font-poppins text-sm text-neutral-400">
+                {safeLocale === 'en'
+                    ? 'All wines on this list are natural, organic, or biodynamic.'
+                    : 'Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.'}
+            </div>
+        </>
     )
 }
