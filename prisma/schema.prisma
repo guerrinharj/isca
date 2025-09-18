@@ -80,3 +80,28 @@ model Reserva {
     userId String?
     user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
+
+
+enum TipoVinho {
+  BOLHAS   @map("Bolhas")
+  BRANCO   @map("Branco")
+  LARANJA  @map("Laranja")
+  ROSE     @map("Rosé")
+  TINTO    @map("Tinto")
+
+  @@map("TipoVinho")
+}
+
+model Vinho {
+  id           String   @id @default(cuid())
+  nome         String
+  tipo         TipoVinho
+  ano          String?
+  quantidade   String?
+  descricao    String?
+  descricao_en String?
+  preco_grf    String?
+  preco_125ml  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+}
