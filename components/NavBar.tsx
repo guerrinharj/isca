@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import LocaleSwitcher from './locale-switcher'
+import SocialLinks from './SocialLinks'
 import { type Locale } from '@/lib/i18n/locales'
 
 type Messages = Readonly<{
@@ -116,7 +117,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         >
                             <Link
                                 href={`/${locale}/cardapio`}
-                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.menu}
                             </Link>
@@ -124,34 +125,25 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             {/* Vinhos / Wines (MOBILE) */}
                             <Link
                                 href={`/${locale}/vinhos`}
-                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.vinhos}
                             </Link>
 
                             <Link
                                 href={`/${locale}/reservas`}
-                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.reservas}
                             </Link>
                             <Link
                                 href={`/${locale}/sobre`}
-                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.sobre}
                             </Link>
                             <div className="shrink-0 poppins-regular text-sm flex items-center gap-2">
                                 <LocaleSwitcher current={locale} />
-                                <a
-                                    href="https://www.instagram.com/_iscaisca/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label="Instagram"
-                                    className="hover:opacity-50 text-sm"
-                                >
-                                    <img width="20" height="20" src="https://img.icons8.com/ios/50/instagram-new--v1.png" alt="instagram-new--v1"/>
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -209,20 +201,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     {/* Locale switcher + Instagram */}
                     <div className="poppins-regular text-lg flex flex-col items-end gap-2">
                         <LocaleSwitcher current={locale} />
-                        <a
-                            href="https://www.instagram.com/_iscaisca/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label="Instagram"
-                            className="hover:opacity-50"
-                        >
-                            <img
-                                width="24"
-                                height="24"
-                                src="https://img.icons8.com/ios/50/instagram-new--v1.png"
-                                alt="Instagram"
-                            />
-                        </a>
+                        <SocialLinks size={20} />
                     </div>
 
                     {/* LOGOUT (desktop only) */}
