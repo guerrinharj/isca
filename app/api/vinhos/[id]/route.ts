@@ -35,10 +35,7 @@ function normalizeTipo(input: unknown): string | null {
 }
 
 // GET /api/vinhos/:id  (PÚBLICO)
-export async function GET(
-    _req: Request,
-    { params }: { params: Record<string, string> }
-) {
+export async function GET(_req: Request, { params }: any) {
     try {
         const supabase = createClientService()
         const { data, error } = await supabase
@@ -48,7 +45,6 @@ export async function GET(
             .single()
 
         if (error) {
-            // Quando não encontra, o Supabase retorna erro; trate como 404
             return NextResponse.json(
                 { error: 'Not found', details: error.message },
                 { status: 404 }
@@ -66,10 +62,7 @@ export async function GET(
 }
 
 // PUT /api/vinhos/:id  (PROTEGIDO via middleware)
-export async function PUT(
-    req: Request,
-    { params }: { params: Record<string, string> }
-) {
+export async function PUT(req: Request, { params }: any) {
     try {
         const body = (await req.json()) as UpdateVinho
         const supabase = createClientService()
@@ -122,10 +115,7 @@ export async function PUT(
 }
 
 // DELETE /api/vinhos/:id  (PROTEGIDO via middleware)
-export async function DELETE(
-    _req: Request,
-    { params }: { params: Record<string, string> }
-) {
+export async function DELETE(_req: Request, { params }: any) {
     try {
         const supabase = createClientService()
         const { error } = await supabase
