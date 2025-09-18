@@ -282,7 +282,6 @@ function Tabs({ baseHref, active, locale }: { baseHref: string; active: string; 
         { key: 'drinks',     label: 'Drinks' },
         { key: 'alcoolicos', label: locale === 'en' ? 'Beverages'  : 'Alcoólicos' },
         { key: 'softs',      label: 'Softs' },
-        { key: 'vinhos', label: locale === 'en' ? 'Wines'  : 'Vinhos' },
     ]
 
     return (
