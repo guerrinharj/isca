@@ -201,10 +201,18 @@ function isWithinWindow(d: Date): boolean {
     return minutes >= minMin && minutes <= maxMin
 }
 
-function friendlyWindowFor(date: Date) {
+function friendlyWindowFor(date: Date, locale: 'pt' | 'en' = 'pt') {
     const win = getDailyWindow(date)
-    if (!win) return 'Reservas apenas de Quarta a Sábado (17:30–19:30) e Domingo (12:00–17:00).'
-    return `Para este dia, o horário permitido é entre ${win.start} e ${win.end}.`
+
+    if (!win) {
+        return locale === 'pt'
+            ? 'Reservas apenas de Quarta a Sábado (17:30–19:30) e Domingo (12:00–17:00).'
+            : 'Reservations are only available from Wednesday to Saturday (5:30 PM–7:30 PM) and Sunday (12:00 PM–5:00 PM).'
+    }
+
+    return locale === 'pt'
+        ? `Para este dia, o horário permitido é entre ${win.start} e ${win.end}.`
+        : `For this day, reservations are allowed between ${win.start} and ${win.end}.`
 }
 
 /* ===== admin index (client) ===== */
