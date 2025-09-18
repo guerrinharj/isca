@@ -1,6 +1,7 @@
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import InfoText from '../../../components/InfoText'
+import SocialLinks from '../../../components/SocialLinks'
 
 type SobrePageProps = {
     params: Promise<{ locale: Locale }>
@@ -76,6 +77,10 @@ export default async function SobrePage({ params }: SobrePageProps) {
                                 md:text-2xl
                             "
                         />
+
+                        <div className="md:hidden py-5">
+                            <SocialLinks size={30} />
+                        </div>
                     </div>
                 </section>
             </div>
