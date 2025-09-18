@@ -164,6 +164,57 @@ function safeJson(text: string): unknown {
     }
 }
 
+/* ===== time/window utils ===== */
+function pad2(n: number) {
+    return String(n).padStart(2, '0')
+}
+
+// Janela por dia da semana (local):
+// 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sab
+function getDailyWindow(d: Date): { start: string; end: string } | null {
+    const wd = d.getDay()
+    if (wd === 0) return { start: '12:00', end: '17:00' } // Domingo
+    if (wd >= 3 && wd <= 6) return { start: '17:30', end: '19:30' } // Quarta–Sábado
+    return null // Segunda/Terça: sem janela
+}
+
+function boundsForDate(d: Date): { min: string | null; max: string | null } {
+    const win = getDailyWindow(d)
+    if (!win) return { min: null, max: null }
+    const y = d.getFullYear()
+    const m = pad2(d.getMonth() + 1)
+    const day = pad2(d.getDate())
+    return {
+        min: `${y}-${m}-${day}T${win.start}`,
+        max: `${y}-${m}-${day}T${win.end}`,
+    }
+}
+
+function isWithinWindow(d: Date): boolean {
+    const win = getDailyWindow(d)
+    if (!win) return false
+    const minutes = d.getHours() * 60 + d.getMinutes()
+    const [sH, sM] = win.start.split(':').map(Number)
+    const [eH, eM] = win.end.split(':').map(Number)
+    const minMin = sH * 60 + sM
+    const maxMin = eH * 60 + eM
+    return minutes >= minMin && minutes <= maxMin
+}
+
+function friendlyWindowFor(date: Date, locale: 'pt' | 'en' = 'pt') {
+    const win = getDailyWindow(date)
+
+    if (!win) {
+        return locale === 'pt'
+            ? 'Reservas apenas de Quarta a Sábado (17:30–19:30) e Domingo (12:00–17:00).'
+            : 'Reservations are only available from Wednesday to Saturday (5:30 PM–7:30 PM) and Sunday (12:00 PM–5:00 PM).'
+    }
+
+    return locale === 'pt'
+        ? `Para este dia, o horário permitido é entre ${win.start} e ${win.end}.`
+        : `For this day, reservations are allowed between ${win.start} and ${win.end}.`
+}
+
 /* ===== admin index (client) ===== */
 function ReservasIndex({ locale }: { locale: string }) {
     const [reservas, setReservas] = useState<Reserva[] | null>(null)
@@ -306,6 +357,7 @@ export default function Page() {
         quantity: 2,
         mensagem: '',
     })
+    const [bounds, setBounds] = useState<{ min: string | null; max: string | null }>({ min: null, max: null })
 
     const t = {
         title: locale === 'pt' ? 'Reservas' : 'Reservations',
@@ -327,10 +379,44 @@ export default function Page() {
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setForm((f) => ({
-            ...f,
-            [name]: name === 'quantity' ? Number(value) : value,
-        }))
+
+        // Campos não relacionados a data mantêm o comportamento atual
+        if (name !== 'data') {
+            setForm((f) => ({
+                ...f,
+                [name]: name === 'quantity' ? Number(value) : value,
+            }))
+            return
+        }
+
+        // name === 'data'
+        const d = new Date(value)
+
+        // Valor parcialmente digitado/ inválido -> apenas mantém texto e limpa bounds
+        if (isNaN(d.getTime())) {
+            setForm((f) => ({ ...f, data: value }))
+            setBounds({ min: null, max: null })
+            return
+        }
+
+        // Define min/max para o dia selecionado
+        const b = boundsForDate(d)
+        setBounds(b)
+
+        // Sem janela (Seg/Ter)
+        if (!getDailyWindow(d)) {
+            show('error', 'Neste dia não aceitamos reservas. ' + friendlyWindowFor(d))
+            return
+        }
+
+        // Fora da janela
+        if (!isWithinWindow(d)) {
+            show('error', friendlyWindowFor(d))
+            return
+        }
+
+        // OK
+        setForm((f) => ({ ...f, data: value }))
     }
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -376,6 +462,7 @@ export default function Page() {
 
             show('success', t.success)
             setForm({ nome: '', email: '', telefone: '', data: '', quantity: 2, mensagem: '' })
+            setBounds({ min: null, max: null })
             router.refresh()
         } catch (err: unknown) {
             console.error('[Reserva] exception:', err)
@@ -493,6 +580,8 @@ export default function Page() {
                                 onChange={onChange}
                                 required
                                 className={inputClasses}
+                                min={bounds.min ?? undefined}
+                                max={bounds.max ?? undefined}
                             />
                         </div>
 
@@ -503,6 +592,7 @@ export default function Page() {
                                 name="quantity"
                                 type="number"
                                 min={1}
+                                max={30}
                                 value={form.quantity}
                                 onChange={onChange}
                                 placeholder={t.qty}
