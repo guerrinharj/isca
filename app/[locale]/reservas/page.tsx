@@ -65,8 +65,8 @@ function Banner({ banner, onClose }: { banner: BannerState; onClose: () => void 
         'pointer-events-auto px-3 py-2 text-sm rounded border shadow-sm ' +
         'backdrop-blur-md will-change-[opacity,transform]'
     const tone = isSuccess
-        ? 'bg-green-900/20 text-green-300 border-green-500/40'
-        : 'bg-red-900/20 text-red-300 border-red-500/40'
+        ? 'bg-green-900 text-green-300 border-green-500/40'
+        : 'bg-red-900 text-red-300 border-red-500/20'
     return (
         <div
             className={`fixed top-4 left-1/2 -translate-x-1/2 z-[60] ${base} ${tone}`}
