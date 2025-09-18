@@ -109,14 +109,14 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             className="
                                 border-b-theme md:border-b-0 md:border-l-theme 
                                 origin-top-left h-full
-                                flex items-center gap-4
+                                flex items-center gap-3
                                 overflow-x-auto no-scrollbar
                                 pointer-events-auto will-change-transform
                             "
                         >
                             <Link
                                 href={`/${locale}/cardapio`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.menu}
                             </Link>
@@ -124,31 +124,31 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             {/* Vinhos / Wines (MOBILE) */}
                             <Link
                                 href={`/${locale}/vinhos`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.vinhos}
                             </Link>
 
                             <Link
                                 href={`/${locale}/reservas`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.reservas}
                             </Link>
                             <Link
                                 href={`/${locale}/sobre`}
-                                className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
+                                className="shrink-0 text-base font-burns-ultra py-1 hover-accent"
                             >
                                 {t.nav.sobre}
                             </Link>
-                            <div className="shrink-0 poppins-regular text-base flex items-center gap-2">
+                            <div className="shrink-0 poppins-regular text-sm flex items-center gap-2">
                                 <LocaleSwitcher current={locale} />
                                 <a
                                     href="https://www.instagram.com/_iscaisca/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Instagram"
-                                    className="hover:opacity-50 ml-2"
+                                    className="hover:opacity-50 text-sm"
                                 >
                                     <img width="20" height="20" src="https://img.icons8.com/ios/50/instagram-new--v1.png" alt="instagram-new--v1"/>
                                 </a>
