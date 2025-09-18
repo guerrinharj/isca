@@ -3,6 +3,7 @@ import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 import type { CSSProperties } from 'react'
 
 export const dynamic = 'force-dynamic'
@@ -56,7 +57,7 @@ function coerceVinho(r: Record<string, unknown>): Vinho | null {
         tipo,
         ano: pickString(r, ['ano', 'year']),
         quantidade: pickString(r, ['quantidade', 'amount']),
-        descricao: pickString(r, ['descricao', 'description']),
+        descricao: pickString(r, ['descricao, description']) ?? pickString(r, ['descricao', 'description']),
         descricao_en: pickString(r, ['descricao_en', 'description_en']),
         preco_grf: pickString(r, ['preco_grf']),
         preco_125ml: pickString(r, ['preco_125ml']),
@@ -84,7 +85,17 @@ async function fetchVinhos(): Promise<Vinho[]> {
 }
 
 /* UI */
-function ItemRow({ item, locale }: { item: Vinho; locale: Locale }) {
+function ItemRow({
+    item,
+    locale,
+    loggedIn,
+    deleteActionFor,
+}: {
+    item: Vinho
+    locale: Locale
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
+}) {
     const descricao =
         locale === 'en'
             ? (item.descricao_en?.trim() || item.descricao?.trim() || '')
@@ -104,11 +115,33 @@ function ItemRow({ item, locale }: { item: Vinho; locale: Locale }) {
                     </span>
                 </span>
 
-                {precoLine && (
-                    <span className="font-burns-ultra text-base md-text-xl">
-                        {precoLine}
-                    </span>
-                )}
+                <div className="flex items-center gap-3">
+                    {precoLine && (
+                        <span className="font-burns-ultra text-base md-text-xl">
+                            {precoLine}
+                        </span>
+                    )}
+
+                    {loggedIn && (
+                        <>
+                            <Link
+                                href={`/${locale}/vinhos/${item.id}/edit`}
+                                className="text-sm underline underline-offset-4 hover:opacity-80"
+                            >
+                                edit
+                            </Link>
+
+                            <form action={deleteActionFor(item.id)}>
+                                <button
+                                    type="submit"
+                                    className="text-red-600 text-sm underline underline-offset-4 hover:opacity-80"
+                                >
+                                    delete
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
             </div>
 
             {(descricao || item.ano) && (
@@ -129,12 +162,16 @@ function Section({
     items,
     locale,
     hidden,
+    loggedIn,
+    deleteActionFor,
 }: {
     id: string
     title: string
     items: Vinho[]
     locale: Locale
     hidden?: boolean
+    loggedIn: boolean
+    deleteActionFor: (id: string) => (formData: FormData) => Promise<void>
 }) {
     return (
         <section id={id} className={hidden ? 'hidden' : ''}>
@@ -146,7 +183,13 @@ function Section({
             <ul className="mt-4 divide-y divide-current/20">
                 {items.length > 0 ? (
                     items.map((item) => (
-                        <ItemRow key={item.id} item={item} locale={locale} />
+                        <ItemRow
+                            key={item.id}
+                            item={item}
+                            locale={locale}
+                            loggedIn={loggedIn}
+                            deleteActionFor={deleteActionFor}
+                        />
                     ))
                 ) : (
                     <li className="py-3 font-poppins">
@@ -238,66 +281,110 @@ export default async function VinhosPage({ params, searchParams }: VinhosPagePro
 
     const jar = await cookies()
     const loggedIn = Boolean(jar.get('isca_session')?.value)
-    void loggedIn // (mantido caso você use no futuro; evita warning de variável não usada)
+
+    const deleteActionFor = (id: string) => {
+        return async (_formData: FormData) => {
+            'use server'
+            try {
+                await fetch(`https://isca-omega.vercel.app/api/vinhos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': process.env.API_SECRET || '',
+                    },
+                })
+            } finally {
+                revalidatePath(`/${safeLocale}/vinhos`)
+            }
+        }
+    }
 
     return (
-        <div
-            className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
-            style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
-        >
-            <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
+        <>
+            {loggedIn && (
+                <Link
+                    href={`/${safeLocale}/vinhos/new`}
+                    className="
+                        text
+                        hidden md:flex fixed left-8 top-5 z-40
+                        h-14 w-14 items-center justify-center
+                        rounded-full border border-white
+                        text-3xl leading-none shadow-lg hover:scale-105 transition
+                    "
+                    aria-label="Criar Vinho"
+                    title="Criar Vinho"
+                >
+                    +
+                </Link>
+            )}
 
-            <div className="space-y-10">
-                <Section
-                    id="bolhas"
-                    title={safeLocale === 'en' ? 'Sparkling' : 'Bolhas'}
-                    items={vinhos.filter((v) => v.tipo === 'Bolhas')}
-                    locale={safeLocale}
-                    hidden={isHidden('Bolhas')}
-                />
-                <Section
-                    id="branco"
-                    title={safeLocale === 'en' ? 'White' : 'Branco'}
-                    items={vinhos.filter((v) => v.tipo === 'Branco')}
-                    locale={safeLocale}
-                    hidden={isHidden('Branco')}
-                />
-                <Section
-                    id="rose"
-                    title="Rosé"
-                    items={vinhos.filter((v) => v.tipo === 'Rosé')}
-                    locale={safeLocale}
-                    hidden={isHidden('Rosé')}
-                />
-                <Section
-                    id="laranja"
-                    title={safeLocale === 'en' ? 'Orange' : 'Laranja'}
-                    items={vinhos.filter((v) => v.tipo === 'Laranja')}
-                    locale={safeLocale}
-                    hidden={isHidden('Laranja')}
-                />
-                <Section
-                    id="tinto"
-                    title={safeLocale === 'en' ? 'Red' : 'Tinto'}
-                    items={vinhos.filter((v) => v.tipo === 'Tinto')}
-                    locale={safeLocale}
-                    hidden={isHidden('Tinto')}
-                />
-            </div>
+            <div
+                className="container mx-auto max-w-3xl pb-40 pt-20 md:pt-6 relative will-change-[opacity,transform]"
+                style={{ animation: 'fadeInUpMini 220ms ease-out both' }}
+            >
+                <Tabs baseHref={baseHref} active={activeFilter} locale={safeLocale} />
 
-            <div className="mt-8 text-center font-poppins text-sm text-neutral-400">
-                {safeLocale === 'en' ? (
-                    <>
-                        <p>All wines on this list are natural, organic, or biodynamic.</p>
-                        <p>Check availability.</p>
-                    </>
-                ) : (
-                    <>
-                        <p>Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.</p>
-                        <p>Consulte a disponibilidade.</p>
-                    </>
-                )}
+                <div className="space-y-10">
+                    <Section
+                        id="bolhas"
+                        title={safeLocale === 'en' ? 'Sparkling' : 'Bolhas'}
+                        items={vinhos.filter((v) => v.tipo === 'Bolhas')}
+                        locale={safeLocale}
+                        hidden={isHidden('Bolhas')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="branco"
+                        title={safeLocale === 'en' ? 'White' : 'Branco'}
+                        items={vinhos.filter((v) => v.tipo === 'Branco')}
+                        locale={safeLocale}
+                        hidden={isHidden('Branco')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="rose"
+                        title="Rosé"
+                        items={vinhos.filter((v) => v.tipo === 'Rosé')}
+                        locale={safeLocale}
+                        hidden={isHidden('Rosé')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="laranja"
+                        title={safeLocale === 'en' ? 'Orange' : 'Laranja'}
+                        items={vinhos.filter((v) => v.tipo === 'Laranja')}
+                        locale={safeLocale}
+                        hidden={isHidden('Laranja')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                    <Section
+                        id="tinto"
+                        title={safeLocale === 'en' ? 'Red' : 'Tinto'}
+                        items={vinhos.filter((v) => v.tipo === 'Tinto')}
+                        locale={safeLocale}
+                        hidden={isHidden('Tinto')}
+                        loggedIn={loggedIn}
+                        deleteActionFor={deleteActionFor}
+                    />
+                </div>
+
+                <div className="mt-8 text-center font-poppins text-sm text-neutral-400">
+                    {safeLocale === 'en' ? (
+                        <>
+                            <p>All wines on this list are natural, organic, or biodynamic.</p>
+                            <p>Check availability.</p>
+                        </>
+                    ) : (
+                        <>
+                            <p>Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.</p>
+                            <p>Consulte a disponibilidade.</p>
+                        </>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     )
 }
