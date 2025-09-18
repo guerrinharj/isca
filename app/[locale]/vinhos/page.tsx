@@ -212,15 +212,14 @@ function Tabs({
     )
 }
 
-export default async function VinhosPage({
-    params,
-    searchParams,
-}: {
-    params: { locale: string }
-    searchParams?: SearchParams
-}) {
-    const { locale: localeParam } = params
-    const sp = searchParams ?? {}
+type VinhosPageProps = {
+    params: Promise<{ locale: string }>
+    searchParams?: Promise<SearchParams>
+}
+
+export default async function VinhosPage({ params, searchParams }: VinhosPageProps) {
+    const { locale: localeParam } = await params
+    const sp = (searchParams ? await searchParams : {}) as SearchParams
 
     const safeLocale: Locale = locales.includes(localeParam as Locale)
         ? (localeParam as Locale)
@@ -239,6 +238,7 @@ export default async function VinhosPage({
 
     const jar = await cookies()
     const loggedIn = Boolean(jar.get('isca_session')?.value)
+    void loggedIn // (mantido caso você use no futuro; evita warning de variável não usada)
 
     return (
         <div
@@ -288,17 +288,12 @@ export default async function VinhosPage({
             <div className="mt-8 text-center font-poppins text-sm text-neutral-400">
                 {safeLocale === 'en' ? (
                     <>
-                        <p>
-                            All wines on this list are natural, organic, or biodynamic.
-                        </p>
+                        <p>All wines on this list are natural, organic, or biodynamic.</p>
                         <p>Check availability.</p>
                     </>
                 ) : (
                     <>
-                        <p>
-                            Todos os vinhos dessa carta são naturais, orgânicos ou
-                            biodinâmicos.
-                        </p>
+                        <p>Todos os vinhos dessa carta são naturais, orgânicos ou biodinâmicos.</p>
                         <p>Consulte a disponibilidade.</p>
                     </>
                 )}
@@ -306,4 +301,3 @@ export default async function VinhosPage({
         </div>
     )
 }
-
