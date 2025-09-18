@@ -503,6 +503,7 @@ export default function Page() {
                                 name="quantity"
                                 type="number"
                                 min={1}
+                                max={30}
                                 value={form.quantity}
                                 onChange={onChange}
                                 placeholder={t.qty}
