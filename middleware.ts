@@ -21,13 +21,19 @@ export function middleware(request: NextRequest) {
         (reqOrigin && reqOrigin === origin) ||
         (referer && referer.startsWith(origin))
 
-    // --- A PARTIR DAQUI: só rotas de API ---
-    // Público
+    // PÚBLICAS
     const isPublicPratosList =
         method === 'GET' && (pathname === '/api/pratos' || pathname === '/api/pratos/')
+
+    const isPublicVinhos =
+        method === 'GET' && /^\/api\/vinhos(\/[^/]+)?\/?$/.test(pathname)
+
     const isPublicReservaCreate =
         method === 'POST' && (pathname === '/api/reservas' || pathname === '/api/reservas/')
-    if (isPublicPratosList || isPublicReservaCreate) return NextResponse.next()
+
+    if (isPublicPratosList || isPublicVinhos || isPublicReservaCreate) {
+        return NextResponse.next()
+    }
 
     // Auth endpoints (same-origin)
     const isAuth =
@@ -40,11 +46,6 @@ export function middleware(request: NextRequest) {
         const session = request.cookies.get('isca_session')?.value
         if (session) return NextResponse.next()
     }
-
-    // (Opcional) Whitelist GET para leitura individual de prato sem chave
-    // if (method === 'GET' && /^\/api\/pratos\/[^/]+$/.test(pathname)) {
-    //     return NextResponse.next()
-    // }
 
     // Fallback: exige API key
     const apiKey = request.headers.get('x-api-key')
