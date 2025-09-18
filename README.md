@@ -10,6 +10,8 @@ Ele expõe uma pequena API REST para:
 
 🍽️ CRUD de itens do cardápio (``Prato``)
 
+🍽️ CRUD da carta de vinhos (``Vinho``)
+
 📅 Criação e gestão de reservas (``Reserva``), com notificação automática por e-mail
 
 
@@ -63,6 +65,11 @@ O comando ``postinstall`` executa ``prisma generate``.
 • data (datetime ISO da reserva)
 • is_confirmed (booleano)
 • message (texto opcional)
+• createdAt, updatedAt
+
+### Vinho
+• id (texto ou UUID)
+• nome, tipo, ano, quantidade, preco_grf, preco_125ml descricao, descricao_en
 • createdAt, updatedAt
 
 (Os tipos exatos podem variar conforme o schema.prisma / DDL, mas esses são os campos usados nas rotas.)
@@ -122,12 +129,15 @@ O arquivo ``middleware.ts`` define quais rotas exigem ``x-api-key`` e quais são
 
 **PÚBLICAS**
 • ``GET /api/pratos`` (listar pratos ativos)
+• ``GET /api/vinhos`` (listar vinhos ativos)
 • ``POST /api/reservas`` (criar reserva)
 
 **PROTEGIDAS** (``x-api-key``)
 • Outras rotas de ``/api/reservas``
 • ``/api/pratos/[id]`` PUT e DELETE
+• ``/api/vinhos/[id]`` PUT e DELETE
 • ``POST /api/pratos``
+• ``POST /api/vinhos``
 • Demais endpoints não explicitamente liberados
 
 
@@ -165,6 +175,18 @@ O arquivo ``middleware.ts`` define quais rotas exigem ``x-api-key`` e quais são
 ``PUT /api/reservas/[id]`` (PROTEGIDA) → atualiza reserva.
 
 ``DELETE /api/reservas/[id]`` (PROTEGIDA) → deleta reserva.
+
+### Vinhos
+
+```GET /api/vinhos``` (PÚBLICA) → retorna lista de vinhos ativos.
+
+``POST /api/vinhos`` (PROTEGIDA) → insere vinho (valida campos obrigatórios).
+
+``GET /api/vinhos/[id]`` (PÚBLICA) → retorna vinho pelo id.
+
+``PUT /api/vinhos/[id]`` (PROTEGIDA) → atualiza parcialmente vinho.
+
+``DELETE /api/vinhos/[id]`` (PROTEGIDA) → remove vinho.
 
 
 ## Padrões de tratamento de erros
