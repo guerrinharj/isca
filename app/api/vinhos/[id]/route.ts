@@ -34,14 +34,21 @@ function normalizeTipo(input: unknown): string | null {
     return null
 }
 
+// Helper para extrair params com tipagem
+function getParams(ctx: unknown): { id: string } {
+    const safe = ctx as { params: { id: string } }
+    return safe.params
+}
+
 // GET /api/vinhos/:id  (PÚBLICO)
-export async function GET(_req: Request, { params }: any) {
+export async function GET(_req: Request, ctx: unknown) {
+    const { id } = getParams(ctx)
     try {
         const supabase = createClientService()
         const { data, error } = await supabase
             .from('Vinho')
             .select('*')
-            .eq('id', params.id)
+            .eq('id', id)
             .single()
 
         if (error) {
@@ -62,7 +69,8 @@ export async function GET(_req: Request, { params }: any) {
 }
 
 // PUT /api/vinhos/:id  (PROTEGIDO via middleware)
-export async function PUT(req: Request, { params }: any) {
+export async function PUT(req: Request, ctx: unknown) {
+    const { id } = getParams(ctx)
     try {
         const body = (await req.json()) as UpdateVinho
         const supabase = createClientService()
@@ -89,7 +97,7 @@ export async function PUT(req: Request, { params }: any) {
         const { data, error } = await supabase
             .from('Vinho')
             .update(updateData)
-            .eq('id', params.id)
+            .eq('id', id)
             .select('*')
             .single()
 
@@ -115,13 +123,14 @@ export async function PUT(req: Request, { params }: any) {
 }
 
 // DELETE /api/vinhos/:id  (PROTEGIDO via middleware)
-export async function DELETE(_req: Request, { params }: any) {
+export async function DELETE(_req: Request, ctx: unknown) {
+    const { id } = getParams(ctx)
     try {
         const supabase = createClientService()
         const { error } = await supabase
             .from('Vinho')
             .delete()
-            .eq('id', params.id)
+            .eq('id', id)
 
         if (error) {
             return NextResponse.json(
