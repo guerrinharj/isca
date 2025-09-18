@@ -6,6 +6,7 @@ const en = {
     nav: {
         home: 'Home',
         menu: 'Menu',
+        vinhos: 'Wines',
         reservas: 'Bookings',
         sobre: 'About',
         info: 'Info',

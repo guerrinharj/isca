@@ -6,7 +6,7 @@ import LocaleSwitcher from './locale-switcher'
 import { type Locale } from '@/lib/i18n/locales'
 
 type Messages = Readonly<{
-    nav: { menu: string; reservas: string; sobre: string }
+    nav: { menu: string; vinhos: string; reservas: string; sobre: string }
 }>
 
 type NavBarProps = {
@@ -16,14 +16,14 @@ type NavBarProps = {
 
 type MeResponse =
     | { user: null }
-    | {
-          user: {
-              id: string
-              name: string
-              email: string
-              role: 'ADMIN' | 'USER'
-          }
-      }
+    |   {
+        user: {
+            id: string
+            name: string
+            email: string
+            role: 'ADMIN' | 'USER'
+        }
+    }
 
 export default function NavBar({ t, locale }: NavBarProps) {
     const [scrolled, setScrolled] = useState(false)
@@ -120,6 +120,15 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             >
                                 {t.nav.menu}
                             </Link>
+
+                            {/* Vinhos / Wines (MOBILE) */}
+                            <Link
+                                href={`/${locale}/vinhos`}
+                                className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
+                            >
+                                {t.nav.vinhos}
+                            </Link>
+
                             <Link
                                 href={`/${locale}/reservas`}
                                 className="shrink-0 text-xl font-burns-ultra py-1 hover-accent"
@@ -165,6 +174,16 @@ export default function NavBar({ t, locale }: NavBarProps) {
                     >
                         <span className="sr-only">{t.nav.menu}</span>
                         <span className="wave-hover" data-wave data-text={t.nav.menu} />
+                    </Link>
+
+                    {/* Vinhos / Wines (DESKTOP) */}
+                    <Link
+                        href={`/${locale}/vinhos`}
+                        className="hover-accent block text-4xl md:text-3xl lg:text-5xl origin-left"
+                        aria-label={t.nav.vinhos}
+                    >
+                        <span className="sr-only">{t.nav.vinhos}</span>
+                        <span className="wave-hover" data-wave data-text={t.nav.vinhos} />
                     </Link>
 
                     {/* Reservas */}

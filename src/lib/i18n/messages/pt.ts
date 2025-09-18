@@ -6,6 +6,7 @@ const pt = {
     nav: {
         home: 'Início',
         menu: 'Cardápio',
+        vinhos: 'Vinhos', 
         reservas: 'Reservas',
         sobre: 'Sobre',
         info: 'Info',
