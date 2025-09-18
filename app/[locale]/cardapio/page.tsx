@@ -176,7 +176,7 @@ function ItemRow({
             <div className="flex items-baseline justify-between gap-4">
                 <span className="font-burns-ultra text-base md-text-xl">{item.nome}</span>
                 <div className="flex items-center gap-3">
-                    <span className="font-burns-ultra text-base md-text-xl">{precoText}</span>
+                    <span className="hidden font-burns-ultra text-base md-text-xl">{precoText}</span>
 
                     {loggedIn && (
                         <>

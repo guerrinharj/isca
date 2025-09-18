@@ -117,7 +117,7 @@ function ItemRow({
 
                 <div className="flex items-center gap-3">
                     {precoLine && (
-                        <span className="font-burns-ultra text-base md-text-xl">
+                        <span className="hidden font-burns-ultra text-base md-text-xl">
                             {precoLine}
                         </span>
                     )}
