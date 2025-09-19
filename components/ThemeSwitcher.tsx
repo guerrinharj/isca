@@ -22,11 +22,11 @@ export default function ThemeSwitcher() {
             ? localStorage.getItem(STORAGE_KEY)
             : null
 
-        let initial: ThemeKey = 'verde'
+        let initial: ThemeKey = 'creme'
 
         if (savedRaw === 'default') {
             try { localStorage.setItem(STORAGE_KEY, 'verde') } catch {}
-            initial = 'verde'
+            initial = 'creme'
         } else if (savedRaw && ['creme', 'verde', 'azul', 'laranja', 'verdeclaro', 'preto'].includes(savedRaw)) {
             initial = savedRaw as ThemeKey
         }
