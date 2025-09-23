@@ -4,7 +4,6 @@ import NavBar from '../../components/NavBar'
 import { getMessages } from '@/lib/i18n'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import BigMark from '../../components/BigMark'
-import InfoText from '../../components/InfoText'
 import ThemeSwitcher from '../../components/ThemeSwitcher'
 import { ScribbleCanvas, ScribblePalette } from '../../components/Scribble'
 
