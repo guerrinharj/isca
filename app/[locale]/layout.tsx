@@ -7,14 +7,16 @@ import BigMark from '../../components/BigMark'
 import ThemeSwitcher from '../../components/ThemeSwitcher'
 import { ScribbleCanvas, ScribblePalette } from '../../components/Scribble'
 
-type LayoutProps = {
-    children: React.ReactNode
-    params: Promise<{ locale: Locale }>
+function isValidLocale(value: string): value is Locale {
+    return locales.includes(value as Locale)
 }
 
-export default async function LocaleLayout({ children, params }: LayoutProps) {
+export default async function LocaleLayout({
+    children,
+    params,
+}: LayoutProps<'/[locale]'>) {
     const { locale } = await params
-    const safeLocale = locales.includes(locale) ? locale : 'pt'
+    const safeLocale = isValidLocale(locale) ? locale : 'pt'
     const t = await getMessages(safeLocale)
 
     return (
@@ -29,26 +31,21 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <NavBar t={t} locale={safeLocale} />
             </aside>
 
-            {/* Add bottom padding so content doesn't sit under the fixed palette+footer */}
             <main className="py-8 md:py-0 pb-40 md:pb-48 lg:pb-56 animate-fadeIn">
                 <div className="mx-auto w-full px-4 md:max-w-[480px] lg:max-w-none lg:px-8">
                     {children}
                 </div>
             </main>
 
-            {/* Overlay scribble canvas (footer/palette sit above via z-index) */}
             <ScribbleCanvas />
 
-            {/* === FIXED BOTTOM WRAPPER: Palette (on top) + Footer (below) === */}
             <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
-                {/* Palette row (centered, full width, auto height) */}
                 <div className="mx-auto w-full max-w-3xl px-3 mb-3 pointer-events-auto">
                     <div className="w-full flex justify-center">
                         <ScribblePalette />
                     </div>
                 </div>
 
-                {/* Footer bar */}
                 <footer
                     className="
                         bg-theme
@@ -80,7 +77,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 </footer>
             </div>
 
-            {/* Theme switcher fixed bottom-right (above footer) */}
             <div
                 className="
                     fixed bottom-3 right-3 z-50
