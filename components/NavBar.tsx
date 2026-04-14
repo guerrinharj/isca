@@ -131,12 +131,6 @@ export default function NavBar({ t, locale }: NavBarProps) {
                             </Link>
 
                             <Link
-                                href={`/${locale}/reservas`}
-                                className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
-                            >
-                                {t.nav.reservas}
-                            </Link>
-                            <Link
                                 href={`/${locale}/sobre`}
                                 className="shrink-0 text-lg font-burns-ultra py-1 hover-accent"
                             >
@@ -178,15 +172,7 @@ export default function NavBar({ t, locale }: NavBarProps) {
                         <span className="wave-hover" data-wave data-text={t.nav.vinhos} />
                     </Link>
 
-                    {/* Reservas */}
-                    <Link
-                        href={`/${locale}/reservas`}
-                        className="hover-accent block text-4xl md:text-3xl lg:text-5xl origin-left"
-                        aria-label={t.nav.reservas}
-                    >
-                        <span className="sr-only">{t.nav.reservas}</span>
-                        <span className="wave-hover" data-wave data-text={t.nav.reservas} />
-                    </Link>
+
 
                     {/* Sobre */}
                     <Link
